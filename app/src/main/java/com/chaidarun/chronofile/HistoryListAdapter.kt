@@ -6,17 +6,26 @@ import android.widget.TextView
 import java.text.SimpleDateFormat
 import java.util.*
 
-class HistoryListAdapter(private val items: List<Entry>) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
+class HistoryListAdapter(private val items: List<Entry>, private val itemClick: (Entry) -> Unit) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(TextView(parent.context))
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(TextView(parent.context), itemClick, this)
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    val (startTime, activity) = items[position]
-    val date = SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(Date(startTime * 1000))
-    holder.textView.text = "$date $activity"
+    holder.bindEntry(items[position])
   }
 
   override fun getItemCount() = items.size
 
-  class ViewHolder(val textView: TextView) : RecyclerView.ViewHolder(textView)
+  class ViewHolder(private val textView: TextView, private val itemClick: (Entry) -> Unit, private val adapter: HistoryListAdapter) : RecyclerView.ViewHolder(textView) {
+    fun bindEntry(entry: Entry) {
+      with(entry) {
+        val date = SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(Date(startTime * 1000))
+        textView.text = "$date $activity"
+        textView.setOnClickListener {
+          itemClick(this)
+          adapter.notifyDataSetChanged()
+        }
+      }
+    }
+  }
 }

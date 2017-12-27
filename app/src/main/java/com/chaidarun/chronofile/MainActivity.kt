@@ -61,7 +61,10 @@ class MainActivity : AppCompatActivity() {
   private fun setHistory() {
     val mHistory = History()
     history_list.layoutManager = LinearLayoutManager(this)
-    val mAdapter = HistoryListAdapter(mHistory.entries)
+    val mAdapter = HistoryListAdapter(mHistory.entries) {
+      mHistory.addEntry(it.activity)
+      longSnackbar(fab, "Recorded ${it.activity}")
+    }
     history_list.adapter = mAdapter
     fab.setOnClickListener {
       val builder = AlertDialog.Builder(this)
