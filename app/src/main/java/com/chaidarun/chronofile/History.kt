@@ -1,12 +1,12 @@
 package com.chaidarun.chronofile
 
 import java.io.File
-import java.util.*
 
 class History {
 
   val entries = mutableListOf<Entry>()
-  private var nextStartTime = getTimestamp()
+  var currentActivityStartTime = getEpochSeconds()
+    private set
   private val mFile = File("/storage/emulated/0/Sync/chronofile.csv")
 
   init {
@@ -14,14 +14,14 @@ class History {
   }
 
   fun addEntry(activity: String) {
-    entries.add(Entry(nextStartTime, activity))
+    entries += Entry(currentActivityStartTime, activity)
     normalizeEntries()
-    nextStartTime = getTimestamp()
+    currentActivityStartTime = getEpochSeconds()
     saveHistoryToDisk()
   }
 
   fun getFuzzyTimeSinceLastEntry(): String {
-    val elapsedSeconds = getTimestamp() - nextStartTime
+    val elapsedSeconds = getEpochSeconds() - currentActivityStartTime
     val elapsedMinutes = elapsedSeconds / 60
     val elapsedHours = elapsedMinutes / 60
     return when {
@@ -32,17 +32,17 @@ class History {
   }
 
   private fun loadHistoryFromFile() {
-    nextStartTime = getTimestamp()
+    currentActivityStartTime = getEpochSeconds()
     if (!mFile.exists()) {
-      mFile.writeText("$nextStartTime")
+      mFile.writeText("$currentActivityStartTime")
     }
     entries.clear()
     mFile.readLines().forEach {
       val pieces = it.split(',')
       val startTime = pieces[0].toLong()
       when (pieces.size) {
-        1 -> nextStartTime = startTime
-        else -> entries.add(Entry(startTime, pieces[1]))
+        1 -> currentActivityStartTime = startTime
+        else -> entries += Entry(startTime, pieces[1])
       }
     }
     normalizeEntries()
@@ -51,26 +51,20 @@ class History {
 
   private fun saveHistoryToDisk() {
     val lines = mutableListOf<String>()
-    entries.forEach { lines.add("${it.startTime},${it.activity}") }
-    lines.add(nextStartTime.toString())
+    entries.forEach { lines += "${it.startTime},${it.activity}" }
+    lines += currentActivityStartTime.toString()
     mFile.writeText(lines.joinToString("\n"))
   }
 
   private fun normalizeEntries() {
     entries.sortBy { it.startTime }
-    val duplicateIndices = Stack<Int>()
     var lastSeenActivity: String? = null
-    entries.forEachIndexed { index, entry ->
-      if (entry.activity == lastSeenActivity) {
-        duplicateIndices.push(index)
-      } else {
-        lastSeenActivity = entry.activity
-      }
-    }
-    while (!duplicateIndices.isEmpty()) {
-      entries.removeAt(duplicateIndices.pop())
+    entries.removeAll {
+      val shouldRemove = it.activity == lastSeenActivity
+      lastSeenActivity = it.activity
+      shouldRemove
     }
   }
 
-  private fun getTimestamp() = System.currentTimeMillis() / 1000
+  private fun getEpochSeconds() = System.currentTimeMillis() / 1000
 }
