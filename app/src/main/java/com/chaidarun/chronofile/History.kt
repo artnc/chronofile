@@ -12,7 +12,8 @@ class History {
 
   val entries = mutableListOf<Entry>()
   private val gson by lazy { GsonBuilder().disableHtmlEscaping().create() }
-  private var currentActivityStartTime = getEpochSeconds()
+  var currentActivityStartTime = getEpochSeconds()
+    private set
   private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
 
   init {

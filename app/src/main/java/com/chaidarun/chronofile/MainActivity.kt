@@ -1,6 +1,7 @@
 package com.chaidarun.chronofile
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -41,7 +42,11 @@ class MainActivity : AppCompatActivity() {
     // automatically handle clicks on the Home/Up button, so long
     // as you specify a parent activity in AndroidManifest.xml.
     return when (item.itemId) {
-      R.id.action_settings -> true
+      R.id.action_settings -> {
+        val intent = Intent(this, PieActivity::class.java)
+        startActivity(intent)
+        true
+      }
       else -> super.onOptionsItemSelected(item)
     }
   }
@@ -64,6 +69,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun setHistory() {
     val history = History()
+    (application as App).history = history
     val llm = LinearLayoutManager(this)
     llm.reverseLayout = true
     llm.stackFromEnd = true
