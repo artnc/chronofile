@@ -1,6 +1,7 @@
 package com.chaidarun.chronofile
 
 import android.util.Log
+import com.google.android.gms.location.LocationServices
 import com.google.gson.GsonBuilder
 import java.io.File
 
@@ -15,15 +16,22 @@ class History {
   var currentActivityStartTime = getEpochSeconds()
     private set
   private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
+  private val mFusedLocationClient by lazy {
+    LocationServices.getFusedLocationProviderClient(App.instance.applicationContext)
+  }
 
   init {
     loadHistoryFromFile()
   }
 
-  fun addEntry(activity: String) {
-    entries += Entry(currentActivityStartTime, activity)
-    currentActivityStartTime = getEpochSeconds()
-    normalizeEntriesAndSaveHistoryToDisk()
+  fun addEntry(activity: String, callback: (Entry) -> Any) {
+    getLocation {
+      val entry = Entry(currentActivityStartTime, activity, it?.toList())
+      entries += entry
+      currentActivityStartTime = getEpochSeconds()
+      normalizeEntriesAndSaveHistoryToDisk()
+      callback(entry)
+    }
   }
 
   fun removeEntries(startTimes: Collection<Long>) {
@@ -40,6 +48,22 @@ class History {
       elapsedMinutes > 0 -> "$elapsedMinutes minutes"
       else -> "$elapsedSeconds seconds"
     }
+  }
+
+  private fun getLocation(callback: (Pair<Double, Double>?) -> Unit) {
+    try {
+      mFusedLocationClient.lastLocation.addOnCompleteListener {
+        if (it.isSuccessful && it.result != null) {
+          callback(Pair(it.result.latitude, it.result.longitude))
+        } else {
+          callback(null)
+        }
+      }
+      return
+    } catch (e: SecurityException) {
+      Log.i(TAG, "Failed to get location")
+    }
+    callback(null)
   }
 
   private fun loadHistoryFromFile() {
