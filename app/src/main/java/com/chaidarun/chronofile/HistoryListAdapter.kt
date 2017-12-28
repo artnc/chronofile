@@ -56,6 +56,10 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
     fun bindEntry(entry: Entry) {
       with(entry) {
         itemView.entryActivity.text = activity
+        if (note != null) {
+          itemView.entryNote.text = note
+          itemView.entryNote.visibility = View.VISIBLE
+        }
         itemView.entryStartTime.text = SimpleDateFormat("MMM dd HH:mm").format(Date(startTime * 1000))
         itemView.setOnClickListener {
           itemClick(this)
