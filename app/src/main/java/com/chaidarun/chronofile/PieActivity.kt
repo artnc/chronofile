@@ -41,7 +41,7 @@ class PieActivity : BaseActivity() {
 
     // Show data
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
-      colors = ColorTemplate.VORDIPLOM_COLORS.toList() + ColorTemplate.JOYFUL_COLORS.toList()
+      colors = ColorTemplate.MATERIAL_COLORS.toList()
       valueTextSize = 12f
       valueFormatter = IValueFormatter { value, _, _, _ -> formatTime(value.toLong()) }
     }
