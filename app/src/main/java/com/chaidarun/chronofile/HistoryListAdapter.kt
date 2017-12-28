@@ -3,7 +3,7 @@ package com.chaidarun.chronofile
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.*
-import kotlinx.android.synthetic.main.history_entry.view.*
+import kotlinx.android.synthetic.main.entry_history.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -39,7 +39,7 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
   override fun onCreateViewHolder(
     parent: ViewGroup,
     viewType: Int
-  ) = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.history_entry, parent, false), itemClick, this)
+  ) = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.entry_history, parent, false), itemClick, this)
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     holder.bindEntry(history.entries[position])

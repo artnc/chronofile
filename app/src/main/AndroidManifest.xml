@@ -24,7 +24,7 @@
     </activity>
     <activity
       android:name=".PieActivity"
-      android:parentActivityName=".MainActivity"></activity>
+      android:parentActivityName=".MainActivity" />
   </application>
 
 </manifest>
