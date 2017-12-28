@@ -1,14 +1,18 @@
 package com.chaidarun.chronofile
 
+import android.util.Log
 import com.google.gson.Gson
 import java.io.File
 
 class History {
 
+  companion object {
+    private val TAG = "History"
+  }
+
   val entries = mutableListOf<Entry>()
   val gson = Gson()
-  var currentActivityStartTime = getEpochSeconds()
-    private set
+  private var currentActivityStartTime = getEpochSeconds()
   private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
 
   init {
@@ -54,7 +58,12 @@ class History {
     val lines = mutableListOf<String>()
     entries.forEach { lines += gson.toJson(it) }
     lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
-    mFile.writeText(lines.joinToString("") { "$it\n" })
+    val textToWrite = lines.joinToString("") { "$it\n" }
+    if (mFile.readText() == textToWrite) {
+      Log.d(TAG, "File unchanged; skipping write")
+    } else {
+      mFile.writeText(textToWrite)
+    }
   }
 
   private fun normalizeEntries() {
