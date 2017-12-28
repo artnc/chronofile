@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.text.InputType
 import android.view.Menu
@@ -18,7 +17,7 @@ import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.design.longSnackbar
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

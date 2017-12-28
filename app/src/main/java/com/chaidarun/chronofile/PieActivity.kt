@@ -1,7 +1,6 @@
 package com.chaidarun.chronofile
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -10,7 +9,7 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import kotlinx.android.synthetic.main.activity_pie.*
 import org.jetbrains.anko.collections.forEachReversedByIndex
 
-class PieActivity : AppCompatActivity() {
+class PieActivity : BaseActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
