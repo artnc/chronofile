@@ -24,7 +24,7 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
       }
 
       override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        mode?.menuInflater?.inflate(R.menu.entry_menu, menu)
+        mode?.menuInflater?.inflate(R.menu.menu_entry, menu)
         return true
       }
 
