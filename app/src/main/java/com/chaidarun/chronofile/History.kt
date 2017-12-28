@@ -24,10 +24,11 @@ class History {
     loadHistoryFromFile()
   }
 
-  fun addEntry(activity: String, callback: (Entry) -> Any) {
+  fun addEntry(activity: String, note: String?, callback: (Entry) -> Any) {
     val sanitizedActivity = activity.trim()
+    val sanitizedNote = if (note.isNullOrBlank()) null else note!!.trim()
     getLocation {
-      val entry = Entry(currentActivityStartTime, sanitizedActivity, it?.toList())
+      val entry = Entry(currentActivityStartTime, sanitizedActivity, it?.toList(), sanitizedNote)
       entries += entry
       currentActivityStartTime = getEpochSeconds()
       normalizeEntriesAndSaveHistoryToDisk()
@@ -86,10 +87,11 @@ class History {
   private fun normalizeEntriesAndSaveHistoryToDisk() {
     // Normalize
     entries.sortBy { it.startTime }
-    var lastSeenActivity: String? = null
+    var lastSeenActivityAndNote: Pair<String, String?>? = null
     entries.removeAll {
-      val shouldRemove = it.activity == lastSeenActivity
-      lastSeenActivity = it.activity
+      val activityAndNote = Pair(it.activity, it.note)
+      val shouldRemove = activityAndNote == lastSeenActivityAndNote
+      lastSeenActivityAndNote = activityAndNote
       shouldRemove
     }
 

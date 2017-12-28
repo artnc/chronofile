@@ -8,12 +8,11 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
-import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.EditText
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.form_entry.view.*
 import org.jetbrains.anko.design.longSnackbar
 
 
@@ -90,17 +89,16 @@ class MainActivity : BaseActivity() {
       stackFromEnd = true
     }
     historyList.adapter = HistoryListAdapter(history, {
-      history.addEntry(it.activity, addEntryCallback)
+      history.addEntry(it.activity, it.note, addEntryCallback)
     })
 
     fab.setOnClickListener {
-      val input = EditText(this)
+      val view = layoutInflater.inflate(R.layout.form_entry, null)
       with(AlertDialog.Builder(this)) {
         setTitle("Last ${history.getFuzzyTimeSinceLastEntry()}")
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        setView(input)
+        setView(view)
         setPositiveButton("OK", { _, _ ->
-          history.addEntry(input.text.toString(), addEntryCallback)
+          history.addEntry(view.formEntryActivity.text.toString(), view.formEntryNote.text.toString(), addEntryCallback)
         })
         setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
         show()
