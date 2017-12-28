@@ -26,28 +26,35 @@ class PieActivity : BaseActivity() {
 
   private fun setData() {
     // Get data
-    val seconds = mutableMapOf<String, Long>()
+    val categories = mutableMapOf<String, Long>()
+    var totalSeconds = 0L
     with(App.instance.history) {
       var endTime = currentActivityStartTime
       entries.forEachReversedByIndex {
-        seconds[it.activity] = seconds.getOrDefault(it.activity, 0) + endTime - it.startTime
+        val seconds = endTime - it.startTime
+        categories[it.activity] = categories.getOrDefault(it.activity, 0) + seconds
+        totalSeconds += seconds
         endTime = it.startTime
       }
     }
-    val pieEntries = seconds.entries.sortedByDescending { it.value }.map { PieEntry(it.value.toFloat(), it.key) }
+    val pieEntries = categories.entries.sortedByDescending { it.value }.map { PieEntry(it.value.toFloat(), it.key) }
 
     // Show data
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
       colors = ColorTemplate.VORDIPLOM_COLORS.toList() + ColorTemplate.JOYFUL_COLORS.toList()
       valueTextSize = 12f
-      valueFormatter = IValueFormatter { value, _, _, _ -> formatSeconds(value.toLong()) }
+      valueFormatter = IValueFormatter { value, _, _, _ -> formatTime(value.toLong()) }
     }
-    chart.data = PieData(pieDataSet)
-    chart.invalidate()
+
+    with(chart) {
+      centerText = "${formatTime(totalSeconds)}\nTotal"
+      data = PieData(pieDataSet)
+      invalidate()
+    }
   }
 
-  /** Pretty-prints time in seconds, e.g. 86461 -> "1d 1m" */
-  private fun formatSeconds(seconds: Long): String {
+  /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
+  private fun formatTime(seconds: Long): String {
     val pieces = mutableListOf<String>()
     val totalMinutes = seconds / 60
     val minutes = totalMinutes % 60
