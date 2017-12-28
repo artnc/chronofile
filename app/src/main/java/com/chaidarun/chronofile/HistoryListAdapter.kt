@@ -14,10 +14,10 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
 
   private val mActionModeCallback by lazy {
     object : ActionMode.Callback {
-      override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?) = when (item?.itemId) {
+      override fun onActionItemClicked(mode: ActionMode, item: MenuItem?) = when (item?.itemId) {
         R.id.delete -> {
           history.removeEntries(startTimesToRemove)
-          notifyDataSetChanged()
+          mode.finish()
           true
         }
         else -> false
