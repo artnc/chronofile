@@ -1,6 +1,8 @@
 package com.chaidarun.chronofile
 
 import android.os.Bundle
+import android.view.View
+import android.widget.RadioButton
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -10,6 +12,10 @@ import kotlinx.android.synthetic.main.activity_pie.*
 import org.jetbrains.anko.collections.forEachReversedByIndex
 
 class PieActivity : BaseActivity() {
+
+  private enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
+
+  private var metric = Metric.TOTAL
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -24,6 +30,20 @@ class PieActivity : BaseActivity() {
       setTransparentCircleAlpha(0)
     }
     setData()
+  }
+
+  fun onRadioButtonClicked(view: View) {
+    with(view as RadioButton) {
+      if (!isChecked) {
+        return
+      }
+      metric = when (id) {
+        R.id.radioAverage -> Metric.AVERAGE
+        R.id.radioPercentage -> Metric.PERCENTAGE
+        else -> Metric.TOTAL
+      }
+      setData()
+    }
   }
 
   private fun setData() {
@@ -46,12 +66,17 @@ class PieActivity : BaseActivity() {
       colors = ColorTemplate.MATERIAL_COLORS.toList()
       valueTextSize = 10f
       valueFormatter = IValueFormatter { value, entry, _, _ ->
-        "${(entry as PieEntry).label} ${formatTime(value.toLong())}"
+        val num: String = when (metric) {
+          Metric.AVERAGE -> formatTime(value.toLong() * 86400 / totalSeconds)
+          Metric.PERCENTAGE -> "${value.toLong() * 100 / totalSeconds}%"
+          Metric.TOTAL -> formatTime(value.toLong())
+        }
+        "${(entry as PieEntry).label}: $num"
       }
     }
 
     with(chart) {
-      centerText = "Total\n${formatTime(totalSeconds)}"
+      centerText = "Total:\n${formatTime(totalSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
     }
