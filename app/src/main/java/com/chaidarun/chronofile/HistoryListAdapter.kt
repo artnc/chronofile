@@ -55,8 +55,8 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
 
     fun bindEntry(entry: Entry) {
       with(entry) {
-        val date = SimpleDateFormat("MMM dd HH:mm").format(Date(startTime * 1000))
-        itemView.activity.text = "$date $activity"
+        itemView.entryActivity.text = activity
+        itemView.entryStartTime.text = SimpleDateFormat("MMM dd HH:mm").format(Date(startTime * 1000))
         itemView.setOnClickListener {
           itemClick(this)
           adapter.notifyDataSetChanged()
