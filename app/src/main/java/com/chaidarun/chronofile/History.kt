@@ -11,7 +11,7 @@ class History {
   }
 
   val entries = mutableListOf<Entry>()
-  val gson = Gson()
+  private val gson = Gson()
   private var currentActivityStartTime = getEpochSeconds()
   private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
 
@@ -23,6 +23,12 @@ class History {
     entries += Entry(currentActivityStartTime, activity)
     normalizeEntries()
     currentActivityStartTime = getEpochSeconds()
+    saveHistoryToDisk()
+  }
+
+  fun removeEntries(startTimes: Collection<Long>) {
+    entries.removeAll { it.startTime in startTimes }
+    normalizeEntries()
     saveHistoryToDisk()
   }
 
