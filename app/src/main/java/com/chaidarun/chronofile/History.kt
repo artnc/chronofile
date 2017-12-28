@@ -1,7 +1,7 @@
 package com.chaidarun.chronofile
 
 import android.util.Log
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import java.io.File
 
 class History {
@@ -11,7 +11,7 @@ class History {
   }
 
   val entries = mutableListOf<Entry>()
-  private val gson = Gson()
+  private val gson by lazy { GsonBuilder().disableHtmlEscaping().create() }
   private var currentActivityStartTime = getEpochSeconds()
   private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
 
