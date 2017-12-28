@@ -13,7 +13,7 @@ import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.form_entry.view.*
-import org.jetbrains.anko.design.longSnackbar
+import org.jetbrains.anko.toast
 
 
 class MainActivity : BaseActivity() {
@@ -69,7 +69,7 @@ class MainActivity : BaseActivity() {
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
           setHistory()
         } else {
-          longSnackbar(fab, "Permission denied :(")
+          toast("Permission denied :(")
         }
       }
     }
@@ -81,7 +81,7 @@ class MainActivity : BaseActivity() {
 
     val addEntryCallback = { entry: Entry ->
       historyList.adapter.notifyDataSetChanged()
-      longSnackbar(fab, "Recorded ${entry.activity}")
+      toast("Recorded ${entry.activity}")
     }
 
     historyList.layoutManager = LinearLayoutManager(this).apply {
@@ -103,6 +103,12 @@ class MainActivity : BaseActivity() {
         setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
         show()
       }
+    }
+
+    swipeRefresh.setOnRefreshListener {
+      history.loadHistoryFromFile()
+      toast("Reloaded history from disk")
+      swipeRefresh.isRefreshing = false
     }
   }
 }

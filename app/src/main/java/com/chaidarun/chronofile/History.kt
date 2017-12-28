@@ -68,7 +68,7 @@ class History {
     callback(null)
   }
 
-  private fun loadHistoryFromFile() {
+  fun loadHistoryFromFile() {
     currentActivityStartTime = getEpochSeconds()
     if (!mFile.exists()) {
       mFile.writeText(gson.toJson(PlaceholderEntry(currentActivityStartTime)))

@@ -32,7 +32,6 @@ dependencies {
   implementation 'com.google.android.gms:play-services-location:11.8.0'
   implementation 'com.google.code.gson:gson:2.8.2'
   implementation "org.jetbrains.anko:anko-commons:$anko_version"
-  implementation "org.jetbrains.anko:anko-design:$anko_version"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
   testImplementation 'junit:junit:4.12'
   androidTestImplementation 'com.android.support.test:runner:1.0.1'
