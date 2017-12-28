@@ -60,7 +60,10 @@ class MainActivity : AppCompatActivity() {
 
   private fun setHistory() {
     val mHistory = History()
-    history_list.layoutManager = LinearLayoutManager(this)
+    val llm = LinearLayoutManager(this)
+    llm.reverseLayout = true
+    llm.stackFromEnd = true
+    history_list.layoutManager = llm
     val mAdapter = HistoryListAdapter(mHistory.entries) {
       mHistory.addEntry(it.activity)
       longSnackbar(fab, "Recorded ${it.activity}")
