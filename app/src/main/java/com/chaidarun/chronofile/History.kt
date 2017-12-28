@@ -21,15 +21,13 @@ class History {
 
   fun addEntry(activity: String) {
     entries += Entry(currentActivityStartTime, activity)
-    normalizeEntries()
     currentActivityStartTime = getEpochSeconds()
-    saveHistoryToDisk()
+    normalizeEntriesAndSaveHistoryToDisk()
   }
 
   fun removeEntries(startTimes: Collection<Long>) {
     entries.removeAll { it.startTime in startTimes }
-    normalizeEntries()
-    saveHistoryToDisk()
+    normalizeEntriesAndSaveHistoryToDisk()
   }
 
   fun getFuzzyTimeSinceLastEntry(): String {
@@ -56,11 +54,20 @@ class History {
         currentActivityStartTime = gson.fromJson(it, PlaceholderEntry::class.java).startTime
       }
     }
-    normalizeEntries()
-    saveHistoryToDisk()
+    normalizeEntriesAndSaveHistoryToDisk()
   }
 
-  private fun saveHistoryToDisk() {
+  private fun normalizeEntriesAndSaveHistoryToDisk() {
+    // Normalize
+    entries.sortBy { it.startTime }
+    var lastSeenActivity: String? = null
+    entries.removeAll {
+      val shouldRemove = it.activity == lastSeenActivity
+      lastSeenActivity = it.activity
+      shouldRemove
+    }
+
+    // Save
     val lines = mutableListOf<String>()
     entries.forEach { lines += gson.toJson(it) }
     lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
@@ -69,16 +76,6 @@ class History {
       Log.d(TAG, "File unchanged; skipping write")
     } else {
       mFile.writeText(textToWrite)
-    }
-  }
-
-  private fun normalizeEntries() {
-    entries.sortBy { it.startTime }
-    var lastSeenActivity: String? = null
-    entries.removeAll {
-      val shouldRemove = it.activity == lastSeenActivity
-      lastSeenActivity = it.activity
-      shouldRemove
     }
   }
 
