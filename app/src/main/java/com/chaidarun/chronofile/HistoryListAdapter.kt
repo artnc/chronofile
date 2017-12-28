@@ -7,7 +7,8 @@ import kotlinx.android.synthetic.main.history_entry.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class HistoryListAdapter(private val history: History, private val itemClick: (Entry) -> Unit) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
+class HistoryListAdapter(private val history: History, private val itemClick: (Entry) -> Unit) :
+  RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
   private val startTimesToRemove = mutableSetOf<Long>()
 
@@ -35,7 +36,10 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
     }
   }
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.history_entry, parent, false), itemClick, this)
+  override fun onCreateViewHolder(
+    parent: ViewGroup,
+    viewType: Int
+  ) = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.history_entry, parent, false), itemClick, this)
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     holder.bindEntry(history.entries[position])
@@ -43,7 +47,11 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
 
   override fun getItemCount() = history.entries.size
 
-  inner class ViewHolder(private val view: View, private val itemClick: (Entry) -> Unit, private val adapter: HistoryListAdapter) : RecyclerView.ViewHolder(view) {
+  inner class ViewHolder(
+    private val view: View,
+    private val itemClick: (Entry) -> Unit,
+    private val adapter: HistoryListAdapter
+  ) : RecyclerView.ViewHolder(view) {
 
     fun bindEntry(entry: Entry) {
       with(entry) {
