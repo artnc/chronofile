@@ -9,7 +9,6 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import kotlinx.android.synthetic.main.activity_pie.*
-import org.jetbrains.anko.collections.forEachReversedByIndex
 
 class PieActivity : BaseActivity() {
 
@@ -49,15 +48,29 @@ class PieActivity : BaseActivity() {
   private fun setData() {
     // Get data
     val categories = mutableMapOf<String, Long>()
-    var totalSeconds = 0L
-    with(App.instance.history) {
-      var endTime = currentActivityStartTime
-      entries.forEachReversedByIndex {
-        val seconds = endTime - it.startTime
-        categories[it.activity] = categories.getOrDefault(it.activity, 0) + seconds
-        totalSeconds += seconds
-        endTime = it.startTime
+    val totalSeconds = with(App.instance.history) {
+      var totalSeconds = currentActivityStartTime - entries[0].startTime
+
+      // For daily metrics, we restrict the timeframe to as many whole days as possible
+      val minStartTime = when (metric) {
+        Metric.AVERAGE -> {
+          totalSeconds = totalSeconds / 86400 * 86400
+          currentActivityStartTime - totalSeconds
+        }
+        else -> 0
       }
+
+      var endTime = currentActivityStartTime
+      for (entry in entries.reversed()) {
+        val startTime = Math.max(entry.startTime, minStartTime)
+        val seconds = endTime - startTime
+        categories[entry.activity] = categories.getOrDefault(entry.activity, 0) + seconds
+        if (startTime == minStartTime) {
+          break
+        }
+        endTime = startTime
+      }
+      totalSeconds
     }
     val pieEntries = categories.entries.sortedByDescending { it.value }.map { PieEntry(it.value.toFloat(), it.key) }
 
