@@ -1,3 +1,10 @@
 package com.chaidarun.chronofile
 
-data class Entry(val startTime: Long, val activity: String)
+import com.google.gson.annotations.SerializedName
+
+data class Entry(
+  @SerializedName("t") val startTime: Long,
+  @SerializedName("a") val activity: String,
+  @SerializedName("l") val latLong: Pair<Double, Double>? = null,
+  @SerializedName("m") val metadata: String? = null
+)

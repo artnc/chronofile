@@ -1,13 +1,15 @@
 package com.chaidarun.chronofile
 
+import com.google.gson.Gson
 import java.io.File
 
 class History {
 
   val entries = mutableListOf<Entry>()
+  val gson = Gson()
   var currentActivityStartTime = getEpochSeconds()
     private set
-  private val mFile = File("/storage/emulated/0/Sync/chronofile.csv")
+  private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
 
   init {
     loadHistoryFromFile()
@@ -34,15 +36,14 @@ class History {
   private fun loadHistoryFromFile() {
     currentActivityStartTime = getEpochSeconds()
     if (!mFile.exists()) {
-      mFile.writeText("$currentActivityStartTime")
+      mFile.writeText(gson.toJson(PlaceholderEntry(currentActivityStartTime)))
     }
     entries.clear()
     mFile.readLines().forEach {
-      val pieces = it.split(',')
-      val startTime = pieces[0].toLong()
-      when (pieces.size) {
-        1 -> currentActivityStartTime = startTime
-        else -> entries += Entry(startTime, pieces[1])
+      if (',' in it) {
+        entries += gson.fromJson(it, Entry::class.java)
+      } else if (it.trim().isNotEmpty()) {
+        currentActivityStartTime = gson.fromJson(it, PlaceholderEntry::class.java).startTime
       }
     }
     normalizeEntries()
@@ -51,9 +52,9 @@ class History {
 
   private fun saveHistoryToDisk() {
     val lines = mutableListOf<String>()
-    entries.forEach { lines += "${it.startTime},${it.activity}" }
-    lines += currentActivityStartTime.toString()
-    mFile.writeText(lines.joinToString("\n"))
+    entries.forEach { lines += gson.toJson(it) }
+    lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
+    mFile.writeText(lines.joinToString("") { "$it\n" })
   }
 
   private fun normalizeEntries() {
