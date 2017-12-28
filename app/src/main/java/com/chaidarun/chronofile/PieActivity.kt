@@ -16,10 +16,12 @@ class PieActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_pie)
 
-    chart.description.isEnabled = false
-    chart.legend.isEnabled = false
-    chart.setTransparentCircleAlpha(0)
-    chart.setDrawEntryLabels(true)
+    with(chart) {
+      description.isEnabled = false
+      legend.isEnabled = false
+      setTransparentCircleAlpha(0)
+      setDrawEntryLabels(true)
+    }
     setData()
   }
 
@@ -36,10 +38,11 @@ class PieActivity : AppCompatActivity() {
     val pieEntries = seconds.entries.sortedByDescending { it.value }.map { PieEntry(it.value.toFloat(), it.key) }
 
     // Show data
-    val pieDataSet = PieDataSet(pieEntries, "Time")
-    pieDataSet.colors = ColorTemplate.VORDIPLOM_COLORS.toList() + ColorTemplate.JOYFUL_COLORS.toList()
-    pieDataSet.valueTextSize = 12f
-    pieDataSet.valueFormatter = IValueFormatter { value, _, _, _ -> formatSeconds(value.toLong()) }
+    val pieDataSet = PieDataSet(pieEntries, "Time").apply {
+      colors = ColorTemplate.VORDIPLOM_COLORS.toList() + ColorTemplate.JOYFUL_COLORS.toList()
+      valueTextSize = 12f
+      valueFormatter = IValueFormatter { value, _, _, _ -> formatSeconds(value.toLong()) }
+    }
     chart.data = PieData(pieDataSet)
     chart.invalidate()
   }

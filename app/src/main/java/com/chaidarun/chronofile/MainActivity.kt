@@ -70,27 +70,29 @@ class MainActivity : AppCompatActivity() {
   private fun setHistory() {
     val history = History()
     (application as App).history = history
-    val llm = LinearLayoutManager(this)
-    llm.reverseLayout = true
-    llm.stackFromEnd = true
-    historyList.layoutManager = llm
-    val mAdapter = HistoryListAdapter(history, {
+
+    historyList.layoutManager = LinearLayoutManager(this).apply {
+      reverseLayout = true
+      stackFromEnd = true
+    }
+    historyList.adapter = HistoryListAdapter(history, {
       history.addEntry(it.activity)
       longSnackbar(fab, "Recorded ${it.activity}")
     })
-    historyList.adapter = mAdapter
+
     fab.setOnClickListener {
-      val builder = AlertDialog.Builder(this)
-      builder.setTitle("Last ${history.getFuzzyTimeSinceLastEntry()}")
       val input = EditText(this)
-      input.inputType = InputType.TYPE_CLASS_TEXT
-      builder.setView(input)
-      builder.setPositiveButton("OK", { _, _ ->
-        history.addEntry(input.text.toString())
-        mAdapter.notifyDataSetChanged()
-      })
-      builder.setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
-      builder.show()
+      with(AlertDialog.Builder(this)) {
+        setTitle("Last ${history.getFuzzyTimeSinceLastEntry()}")
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        setView(input)
+        setPositiveButton("OK", { _, _ ->
+          history.addEntry(input.text.toString())
+          historyList.adapter.notifyDataSetChanged()
+        })
+        setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
+        show()
+      }
     }
   }
 }
