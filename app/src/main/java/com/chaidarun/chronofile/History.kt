@@ -25,8 +25,9 @@ class History {
   }
 
   fun addEntry(activity: String, callback: (Entry) -> Any) {
+    val sanitizedActivity = activity.trim()
     getLocation {
-      val entry = Entry(currentActivityStartTime, activity, it?.toList())
+      val entry = Entry(currentActivityStartTime, sanitizedActivity, it?.toList())
       entries += entry
       currentActivityStartTime = getEpochSeconds()
       normalizeEntriesAndSaveHistoryToDisk()
