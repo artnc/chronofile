@@ -4,8 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import org.jetbrains.anko.find
+import kotlinx.android.synthetic.main.history_entry.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,13 +20,11 @@ class HistoryListAdapter(private val items: List<Entry>, private val itemClick: 
 
   class ViewHolder(view: View, private val itemClick: (Entry) -> Unit, private val adapter: HistoryListAdapter) : RecyclerView.ViewHolder(view) {
 
-    private val textView = view.find<TextView>(R.id.activity)
-
     fun bindEntry(entry: Entry) {
       with(entry) {
         val date = SimpleDateFormat("MMM dd HH:mm").format(Date(startTime * 1000))
-        textView.text = "$date $activity"
-        textView.setOnClickListener {
+        itemView.activity.text = "$date $activity"
+        itemView.setOnClickListener {
           itemClick(this)
           adapter.notifyDataSetChanged()
         }

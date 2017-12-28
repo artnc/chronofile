@@ -63,12 +63,12 @@ class MainActivity : AppCompatActivity() {
     val llm = LinearLayoutManager(this)
     llm.reverseLayout = true
     llm.stackFromEnd = true
-    history_list.layoutManager = llm
+    historyList.layoutManager = llm
     val mAdapter = HistoryListAdapter(mHistory.entries) {
       mHistory.addEntry(it.activity)
       longSnackbar(fab, "Recorded ${it.activity}")
     }
-    history_list.adapter = mAdapter
+    historyList.adapter = mAdapter
     fab.setOnClickListener {
       val builder = AlertDialog.Builder(this)
       builder.setTitle("Last ${mHistory.getFuzzyTimeSinceLastEntry()}")
