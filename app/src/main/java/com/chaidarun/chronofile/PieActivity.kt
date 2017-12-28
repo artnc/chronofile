@@ -17,9 +17,11 @@ class PieActivity : BaseActivity() {
 
     with(chart) {
       description.isEnabled = false
+      holeRadius = 25f
       legend.isEnabled = false
+      rotationAngle = 195f
+      setDrawEntryLabels(false)
       setTransparentCircleAlpha(0)
-      setDrawEntryLabels(true)
     }
     setData()
   }
@@ -42,12 +44,14 @@ class PieActivity : BaseActivity() {
     // Show data
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
       colors = ColorTemplate.MATERIAL_COLORS.toList()
-      valueTextSize = 12f
-      valueFormatter = IValueFormatter { value, _, _, _ -> formatTime(value.toLong()) }
+      valueTextSize = 10f
+      valueFormatter = IValueFormatter { value, entry, _, _ ->
+        "${(entry as PieEntry).label} ${formatTime(value.toLong())}"
+      }
     }
 
     with(chart) {
-      centerText = "${formatTime(totalSeconds)}\nTotal"
+      centerText = "Total\n${formatTime(totalSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
     }
