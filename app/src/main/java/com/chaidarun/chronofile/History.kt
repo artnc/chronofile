@@ -22,9 +22,13 @@ class History {
     loadHistoryFromFile()
   }
 
+  private fun sanitizeActivityAndNote(
+    activity: String,
+    note: String?
+  ) = Pair(activity.trim(), if (note.isNullOrBlank()) null else note!!.trim())
+
   fun addEntry(activity: String, note: String?, callback: (Entry) -> Any) {
-    val sanitizedActivity = activity.trim()
-    val sanitizedNote = if (note.isNullOrBlank()) null else note!!.trim()
+    val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
     getLocation {
       val entry = Entry(currentActivityStartTime, sanitizedActivity, it?.toList(), sanitizedNote)
       entries += entry
@@ -32,6 +36,19 @@ class History {
       normalizeEntriesAndSaveHistoryToDisk()
       callback(entry)
     }
+  }
+
+  fun editEntry(oldStartTime: Long, newStartTime: String, activity: String, note: String?) {
+    val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
+    val entryIndex = entries.indexOfFirst { it.startTime == oldStartTime }
+    val oldEntry = entries[entryIndex]
+    val newStartTime = try {
+      newStartTime.trim().toLong()
+    } catch (e: Exception) {
+      oldStartTime
+    }
+    entries[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLong, sanitizedNote)
+    normalizeEntriesAndSaveHistoryToDisk()
   }
 
   fun removeEntries(startTimes: Collection<Long>) {

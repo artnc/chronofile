@@ -83,7 +83,7 @@ class MainActivity : BaseActivity() {
     }
 
     historyList.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
-    historyList.adapter = HistoryListAdapter(historyList, history, {
+    historyList.adapter = HistoryListAdapter(this, historyList, history, {
       history.addEntry(it.activity, it.note, addEntryCallback)
     })
 

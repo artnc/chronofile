@@ -5,9 +5,11 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.ResultReceiver
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.*
+import kotlinx.android.synthetic.main.form_entry.view.*
 import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
 import org.jetbrains.anko.toast
@@ -20,6 +22,7 @@ private class DateItem(val date: Date) : ListItem(ViewType.DATE.id)
 private class EntryItem(val entry: Entry) : ListItem(ViewType.ENTRY.id)
 
 class HistoryListAdapter(
+  private val appActivity: AppCompatActivity,
   private val recyclerView: RecyclerView,
   private val history: History,
   private val itemClick: (Entry) -> Unit
@@ -41,6 +44,24 @@ class HistoryListAdapter(
       override fun onActionItemClicked(mode: ActionMode, item: MenuItem?): Boolean {
         when (item?.itemId) {
           R.id.delete -> history.removeEntries(selectedEntries.map { it.startTime })
+          R.id.edit -> {
+            val entry = selectedEntries[0]
+            val view = LayoutInflater.from(appActivity).inflate(R.layout.form_entry, null)
+            with(AlertDialog.Builder(appActivity)) {
+              setTitle("Edit entry")
+              view.formEntryStartTime.setText(entry.startTime.toString())
+              view.formEntryActivity.setText(entry.activity)
+              view.formEntryNote.setText(entry.note ?: "")
+              setView(view)
+              setPositiveButton("OK", { _, _ ->
+                history.editEntry(entry.startTime, view.formEntryStartTime.text.toString(), view.formEntryActivity.text.toString(), view.formEntryNote.text.toString())
+                refreshAdapter()
+                appActivity.toast("Updated ${entry.activity}")
+              })
+              setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
+              show()
+            }
+          }
           R.id.location -> {
             val entry = selectedEntries.getOrNull(0)
             if (entry?.latLong == null) {
@@ -63,7 +84,7 @@ class HistoryListAdapter(
       }
 
       override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
-        mode?.menuInflater?.inflate(R.menu.menu_entry, menu)
+        mode?.menuInflater?.inflate(R.menu.menu_edit, menu)
         return true
       }
 
