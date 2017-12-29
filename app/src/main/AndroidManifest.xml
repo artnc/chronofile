@@ -28,6 +28,10 @@
     <activity
       android:name=".PieActivity"
       android:parentActivityName=".MainActivity" />
+
+    <service
+      android:name=".FetchAddressIntentService"
+      android:exported="false" />
   </application>
 
 </manifest>
