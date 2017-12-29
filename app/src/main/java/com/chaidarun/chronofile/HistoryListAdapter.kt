@@ -32,7 +32,7 @@ class HistoryListAdapter(
 
   private val itemList = mutableListOf<ListItem>()
   private val selectedEntries = mutableListOf<Entry>()
-  private val mResultReceiver by lazy {
+  private val receiver by lazy {
     object : ResultReceiver(Handler()) {
       override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
         if (resultCode == FetchAddressIntentService.SUCCESS_CODE) {
@@ -41,25 +41,7 @@ class HistoryListAdapter(
       }
     }
   }
-
-  init {
-    refreshItemList()
-  }
-
-  private fun refreshItemList() {
-    itemList.clear()
-    var currentDate = Date(0)
-    history.entries.forEach {
-      val entryDate = Date(it.startTime * 1000)
-      if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
-        currentDate = entryDate
-        itemList.add(DateItem(entryDate))
-      }
-      itemList.add(EntryItem(it))
-    }
-  }
-
-  private val mActionModeCallback by lazy {
+  private val actionModeCallback by lazy {
     object : ActionMode.Callback {
       override fun onActionItemClicked(mode: ActionMode, item: MenuItem?): Boolean {
         when (item?.itemId) {
@@ -74,7 +56,7 @@ class HistoryListAdapter(
                 longitude = entry.latLong[1]
               }
               val intent = Intent(App.ctx, FetchAddressIntentService::class.java)
-              intent.putExtra(FetchAddressIntentService.RECEIVER, mResultReceiver)
+              intent.putExtra(FetchAddressIntentService.RECEIVER, receiver)
               intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location)
               App.ctx.startService(intent)
             }
@@ -92,6 +74,23 @@ class HistoryListAdapter(
 
       override fun onPrepareActionMode(p0: ActionMode?, p1: Menu?) = false
       override fun onDestroyActionMode(mode: ActionMode?) = refreshAdapter()
+    }
+  }
+
+  init {
+    refreshItemList()
+  }
+
+  private fun refreshItemList() {
+    itemList.clear()
+    var currentDate = Date(0)
+    history.entries.forEach {
+      val entryDate = Date(it.startTime * 1000)
+      if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
+        currentDate = entryDate
+        itemList.add(DateItem(entryDate))
+      }
+      itemList.add(EntryItem(it))
     }
   }
 
@@ -137,7 +136,7 @@ class HistoryListAdapter(
           adapter.refreshAdapter()
         }
         itemView.setOnLongClickListener {
-          (itemView.context as AppCompatActivity).startActionMode(mActionModeCallback)
+          (itemView.context as AppCompatActivity).startActionMode(actionModeCallback)
           selectedEntries.clear()
           selectedEntries.add(this)
           true

@@ -32,11 +32,11 @@ class Config(
     private val gson by lazy {
       GsonBuilder().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create()
     }
-    private val mFile = File("/storage/emulated/0/Sync/chronofile.json")
+    private val file = File("/storage/emulated/0/Sync/chronofile.json")
 
     fun loadConfigFromDisk(): Config {
-      val config = if (mFile.exists()) {
-        gson.fromJson(mFile.readText(), Config::class.java)
+      val config = if (file.exists()) {
+        gson.fromJson(file.readText(), Config::class.java)
       } else {
         Config()
       }
@@ -57,10 +57,10 @@ class Config(
 
   fun saveConfigToDisk() {
     val textToWrite = gson.toJson(this)
-    if (mFile.exists() && mFile.readText() == textToWrite) {
+    if (file.exists() && file.readText() == textToWrite) {
       Log.d(TAG, "File unchanged; skipping write")
     } else {
-      mFile.writeText(textToWrite)
+      file.writeText(textToWrite)
     }
   }
 }

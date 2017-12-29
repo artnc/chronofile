@@ -17,8 +17,8 @@ class History {
   }
   var currentActivityStartTime = getEpochSeconds()
     private set
-  private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
-  private val mFusedLocationClient by lazy {
+  private val file = File("/storage/emulated/0/Sync/chronofile.jsonl")
+  private val locationClient by lazy {
     LocationServices.getFusedLocationProviderClient(App.ctx)
   }
 
@@ -56,7 +56,7 @@ class History {
 
   private fun getLocation(callback: (Pair<Double, Double>?) -> Unit) {
     try {
-      mFusedLocationClient.lastLocation.addOnCompleteListener {
+      locationClient.lastLocation.addOnCompleteListener {
         if (it.isSuccessful && it.result != null) {
           callback(Pair(it.result.latitude, it.result.longitude))
         } else {
@@ -72,11 +72,11 @@ class History {
 
   fun loadHistoryFromFile() {
     currentActivityStartTime = getEpochSeconds()
-    if (!mFile.exists()) {
-      mFile.writeText(gson.toJson(PlaceholderEntry(currentActivityStartTime)))
+    if (!file.exists()) {
+      file.writeText(gson.toJson(PlaceholderEntry(currentActivityStartTime)))
     }
     entries.clear()
-    mFile.readLines().forEach {
+    file.readLines().forEach {
       if (',' in it) {
         entries += gson.fromJson(it, Entry::class.java)
       } else if (it.trim().isNotEmpty()) {
@@ -103,10 +103,10 @@ class History {
     entries.forEach { lines += gson.toJson(it) }
     lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
     val textToWrite = lines.joinToString("") { "$it\n" }
-    if (mFile.exists() && mFile.readText() == textToWrite) {
+    if (file.exists() && file.readText() == textToWrite) {
       Log.d(TAG, "File unchanged; skipping write")
     } else {
-      mFile.writeText(textToWrite)
+      file.writeText(textToWrite)
     }
   }
 

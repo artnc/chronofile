@@ -21,18 +21,16 @@ class FetchAddressIntentService : IntentService(TAG) {
     val LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA"
   }
 
-  private lateinit var mReceiver: ResultReceiver
-
   override fun onHandleIntent(intent: Intent) {
+    val receiver = intent.getParcelableExtra(RECEIVER) as ResultReceiver
     try {
-      mReceiver = intent.getParcelableExtra(RECEIVER)
       val location = intent.getParcelableExtra<Location>(LOCATION_DATA_EXTRA)
       val geocoder = Geocoder(this, Locale.US)
       val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)[0]
       val text = address.getAddressLine(0)
-      mReceiver.send(SUCCESS_CODE, Bundle().apply { putString(RESULT_DATA_KEY, text) })
+      receiver.send(SUCCESS_CODE, Bundle().apply { putString(RESULT_DATA_KEY, text) })
     } catch (e: Exception) {
-      mReceiver.send(FAILURE_CODE, Bundle())
+      receiver.send(FAILURE_CODE, Bundle())
     }
   }
 }
