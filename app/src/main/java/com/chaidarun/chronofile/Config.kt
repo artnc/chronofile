@@ -8,16 +8,16 @@ import java.io.File
 
 class Config(
   /**
-   * Map of arbitrary categories to lists of activities and/or other categories.
+   * Map of arbitrary group names to lists of activities and/or other groups.
    *
    * This is used to create buckets of activities to show in graphs.
    *
-   * A category name may be an activity name, in which case that activity will be considered a
-   * member of the category.
+   * A group name may be an activity name, in which case that activity will be considered a
+   * member of the group.
    */
   @Expose
-  @SerializedName("categories")
-  private val categories: Map<String, List<String>>? = null,
+  @SerializedName("activityGroups")
+  private val unnormalizedActivityGroups: Map<String, List<String>>? = null,
   /**
    * Known coordinates to which nearby locations should snap.
    *
@@ -51,8 +51,8 @@ class Config(
   /** TODO: Support nested groups */
   private val activityGroups by lazy {
     val activitiesToTopLevelGroups = mutableMapOf<String, String>()
-    if (categories != null) {
-      val groupsToActivities = categories.toMutableMap()
+    if (unnormalizedActivityGroups != null) {
+      val groupsToActivities = unnormalizedActivityGroups.toMutableMap()
       while (!groupsToActivities.isEmpty()) {
         val groupName = groupsToActivities.keys.take(1)[0]
         val groupMembers = groupsToActivities.remove(groupName)!!
