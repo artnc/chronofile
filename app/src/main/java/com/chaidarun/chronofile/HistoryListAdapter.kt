@@ -14,7 +14,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-class HistoryListAdapter(private val history: History, private val itemClick: (Entry) -> Unit) :
+class HistoryListAdapter(
+  private val recyclerView: RecyclerView,
+  private val history: History,
+  private val itemClick: (Entry) -> Unit
+) :
   RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
   private val selectedEntries = mutableListOf<Entry>()
@@ -62,7 +66,7 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
       override fun onPrepareActionMode(p0: ActionMode?, p1: Menu?) = false
 
       override fun onDestroyActionMode(mode: ActionMode?) {
-        notifyDataSetChanged()
+        refresh()
       }
     }
   }
@@ -78,6 +82,11 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
 
   override fun getItemCount() = history.entries.size
 
+  fun refresh() {
+    notifyDataSetChanged()
+    recyclerView.scrollToPosition(history.entries.size - 1)
+  }
+
   inner class ViewHolder(
     private val view: View,
     private val itemClick: (Entry) -> Unit,
@@ -92,7 +101,7 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
         itemView.entryStartTime.text = SimpleDateFormat("MMM dd HH:mm").format(Date(startTime * 1000))
         itemView.setOnClickListener {
           itemClick(this)
-          adapter.notifyDataSetChanged()
+          adapter.refresh()
         }
         itemView.setOnLongClickListener {
           (view.context as AppCompatActivity).startActionMode(mActionModeCallback)
