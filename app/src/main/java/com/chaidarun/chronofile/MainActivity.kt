@@ -88,7 +88,7 @@ class MainActivity : BaseActivity() {
     val history = History().apply { (application as App).history = this }
 
     val addEntryCallback = { entry: Entry ->
-      (historyList.adapter as HistoryListAdapter).refresh()
+      (historyList.adapter as HistoryListAdapter).refreshAdapter()
       toast("Recorded ${entry.activity}")
     }
 

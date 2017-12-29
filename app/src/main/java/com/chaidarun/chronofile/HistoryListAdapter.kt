@@ -8,19 +8,29 @@ import android.os.ResultReceiver
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.*
-import kotlinx.android.synthetic.main.entry_history.view.*
+import kotlinx.android.synthetic.main.item_date.view.*
+import kotlinx.android.synthetic.main.item_entry.view.*
 import org.jetbrains.anko.toast
 import java.text.SimpleDateFormat
 import java.util.*
 
+private enum class ViewType(val id: Int) { DATE(0), ENTRY(1) }
+sealed class ListItem(val typeCode: Int)
+private class DateItem(val date: Date) : ListItem(ViewType.DATE.id)
+private class EntryItem(val entry: Entry) : ListItem(ViewType.ENTRY.id)
 
 class HistoryListAdapter(
   private val recyclerView: RecyclerView,
   private val history: History,
   private val itemClick: (Entry) -> Unit
-) :
-  RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
+  companion object {
+    private val DATE_FORMAT = SimpleDateFormat("EEEE, dd MMMM YYYY", Locale.getDefault())
+    private val TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.getDefault())
+  }
+
+  private val itemList = mutableListOf<ListItem>()
   private val selectedEntries = mutableListOf<Entry>()
   private val mResultReceiver by lazy {
     object : ResultReceiver(Handler()) {
@@ -29,6 +39,23 @@ class HistoryListAdapter(
           App.ctx.toast(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY))
         }
       }
+    }
+  }
+
+  init {
+    refreshItemList()
+  }
+
+  private fun refreshItemList() {
+    itemList.clear()
+    var currentDate = Date(0)
+    history.entries.forEach {
+      val entryDate = Date(it.startTime * 1000)
+      if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
+        currentDate = entryDate
+        itemList.add(DateItem(entryDate))
+      }
+      itemList.add(EntryItem(it))
     }
   }
 
@@ -64,52 +91,64 @@ class HistoryListAdapter(
       }
 
       override fun onPrepareActionMode(p0: ActionMode?, p1: Menu?) = false
-
-      override fun onDestroyActionMode(mode: ActionMode?) {
-        refresh()
-      }
+      override fun onDestroyActionMode(mode: ActionMode?) = refreshAdapter()
     }
   }
+
+  override fun getItemCount() = itemList.size
+  override fun getItemViewType(position: Int) = itemList[position].typeCode
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
     viewType: Int
-  ) = ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.entry_history, parent, false), itemClick, this)
+  ) = when (viewType) {
+    ViewType.DATE.id -> DateViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false))
+    ViewType.ENTRY.id -> EntryViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false), itemClick, this)
+    else -> null
+  }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-    holder.bindEntry(history.entries[position])
+    holder.bindItem(itemList[position])
   }
 
-  override fun getItemCount() = history.entries.size
-
-  fun refresh() {
+  fun refreshAdapter() {
+    refreshItemList()
     notifyDataSetChanged()
-    recyclerView.scrollToPosition(history.entries.size - 1)
+    recyclerView.scrollToPosition(itemList.size - 1)
   }
 
-  inner class ViewHolder(
-    private val view: View,
+  abstract class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    abstract fun bindItem(listItem: ListItem): Any
+  }
+
+  inner class EntryViewHolder(
+    view: View,
     private val itemClick: (Entry) -> Unit,
     private val adapter: HistoryListAdapter
-  ) : RecyclerView.ViewHolder(view) {
-
-    fun bindEntry(entry: Entry) {
-      with(entry) {
+  ) : ViewHolder(view) {
+    override fun bindItem(listItem: ListItem) {
+      with((listItem as EntryItem).entry) {
         itemView.entryActivity.text = activity
         itemView.entryNote.text = note
         itemView.entryNote.visibility = if (note == null) View.GONE else View.VISIBLE
-        itemView.entryStartTime.text = SimpleDateFormat("MMM dd HH:mm").format(Date(startTime * 1000))
+        itemView.entryStartTime.text = TIME_FORMAT.format(Date(startTime * 1000))
         itemView.setOnClickListener {
           itemClick(this)
-          adapter.refresh()
+          adapter.refreshAdapter()
         }
         itemView.setOnLongClickListener {
-          (view.context as AppCompatActivity).startActionMode(mActionModeCallback)
+          (itemView.context as AppCompatActivity).startActionMode(mActionModeCallback)
           selectedEntries.clear()
           selectedEntries.add(this)
           true
         }
       }
+    }
+  }
+
+  class DateViewHolder(view: View) : ViewHolder(view) {
+    override fun bindItem(listItem: ListItem) {
+      with((listItem as DateItem).date) { itemView.date.text = DATE_FORMAT.format(this) }
     }
   }
 }
