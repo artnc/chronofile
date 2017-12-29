@@ -23,7 +23,7 @@ class Config(
    */
   @Expose
   @SerializedName("locations")
-  val locations: List<List<Double>>? = null
+  val locations: Map<String, List<Double>>? = null
 ) {
   private val activityGroups by lazy {
     mutableMapOf<String, String>().apply {

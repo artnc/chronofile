@@ -28,15 +28,15 @@ data class Entry(
 
     // Snap to known location if in range
     val (x1, y1) = latLong
-    for (snapLocation in snapLocations) {
-      val (x2, y2) = snapLocation
+    for ((snapName, snapLatLong) in snapLocations) {
+      val (x2, y2) = snapLatLong
       val distanceSquared = Math.pow(x2 - x1, 2.0) + Math.pow(y2 - y1, 2.0)
       if (distanceSquared == 0.0) {
         return this
       }
       if (distanceSquared < Config.LOCATION_SNAP_RADIUS_SQUARED) {
-        Log.d(TAG, "Snapping ($x1. $y1) to ($x2. $y2)")
-        return Entry(startTime, activity, snapLocation, note)
+        Log.d(TAG, "Snapping ($x1. $y1) to $snapName")
+        return Entry(startTime, activity, snapLatLong, note)
       }
     }
     return this
