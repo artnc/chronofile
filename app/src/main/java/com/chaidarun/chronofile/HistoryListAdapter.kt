@@ -32,13 +32,11 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
     object : ActionMode.Callback {
       override fun onActionItemClicked(mode: ActionMode, item: MenuItem?): Boolean {
         when (item?.itemId) {
-          R.id.delete -> {
-            history.removeEntries(selectedEntries.map { it.startTime })
-          }
+          R.id.delete -> history.removeEntries(selectedEntries.map { it.startTime })
           R.id.location -> {
             val entry = selectedEntries.getOrNull(0)
             if (entry?.latLong == null) {
-              false
+              App.ctx.toast("No location data available")
             } else {
               val location = Location("dummyprovider").apply {
                 latitude = entry.latLong[0]
