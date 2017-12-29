@@ -14,6 +14,7 @@ class PieActivity : BaseActivity() {
 
   private enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
 
+  private var grouped = true
   private var metric = Metric.TOTAL
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,10 +37,12 @@ class PieActivity : BaseActivity() {
       if (!isChecked) {
         return
       }
-      metric = when (id) {
-        R.id.radioAverage -> Metric.AVERAGE
-        R.id.radioPercentage -> Metric.PERCENTAGE
-        else -> Metric.TOTAL
+      when (id) {
+        R.id.radioAverage -> metric = Metric.AVERAGE
+        R.id.radioGrouped -> grouped = true
+        R.id.radioIndividual -> grouped = false
+        R.id.radioPercentage -> metric = Metric.PERCENTAGE
+        R.id.radioTotal -> metric = Metric.TOTAL
       }
       setData()
     }
@@ -47,7 +50,7 @@ class PieActivity : BaseActivity() {
 
   private fun setData() {
     // Get data
-    val categories = mutableMapOf<String, Long>()
+    val slices = mutableMapOf<String, Long>()
     val totalSeconds = with(App.instance.history) {
       var totalSeconds = currentActivityStartTime - entries[0].startTime
 
@@ -61,10 +64,12 @@ class PieActivity : BaseActivity() {
       }
 
       var endTime = currentActivityStartTime
+      val config = App.instance.config
       for (entry in entries.reversed()) {
         val startTime = Math.max(entry.startTime, minStartTime)
         val seconds = endTime - startTime
-        categories[entry.activity] = categories.getOrDefault(entry.activity, 0) + seconds
+        val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
+        slices[slice] = slices.getOrDefault(slice, 0) + seconds
         if (startTime == minStartTime) {
           break
         }
@@ -72,7 +77,7 @@ class PieActivity : BaseActivity() {
       }
       totalSeconds
     }
-    val pieEntries = categories.entries.sortedByDescending { it.value }.map { PieEntry(it.value.toFloat(), it.key) }
+    val pieEntries = slices.entries.sortedByDescending { it.value }.map { PieEntry(it.value.toFloat(), it.key) }
 
     // Show data
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {

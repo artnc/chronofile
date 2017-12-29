@@ -1,17 +1,26 @@
 package com.chaidarun.chronofile
 
 import android.util.Log
+import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 data class Entry(
   /** The Unix timestamp in seconds of when this activity began */
-  @SerializedName("t") val startTime: Long,
+  @Expose
+  @SerializedName("t")
+  val startTime: Long,
   /** Life activity, e.g. "Sleep" */
-  @SerializedName("a") val activity: String,
+  @Expose
+  @SerializedName("a")
+  val activity: String,
   /** 2-tuple of [latitude, longitude] */
-  @SerializedName("l") val latLong: List<Double>? = null,
+  @Expose
+  @SerializedName("l")
+  val latLong: List<Double>? = null,
   /** Free-form metadata */
-  @SerializedName("n") val note: String? = null
+  @Expose
+  @SerializedName("n")
+  val note: String? = null
 ) {
   companion object {
     private val TAG = "Entry"
