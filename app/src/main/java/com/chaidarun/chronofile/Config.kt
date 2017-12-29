@@ -8,12 +8,9 @@ import java.io.File
 
 class Config(
   /**
-   * Map of arbitrary group names to lists of activities and/or other groups.
+   * Map of arbitrary group names to (mutually exclusive) lists of activities.
    *
    * This is used to create buckets of activities to show in graphs.
-   *
-   * A group name may be an activity name, in which case that activity will be considered a
-   * member of the group.
    */
   @Expose
   @SerializedName("activityGroups")
@@ -48,20 +45,12 @@ class Config(
     }
   }
 
-  /** TODO: Support nested groups */
   private val activityGroups by lazy {
-    val activitiesToTopLevelGroups = mutableMapOf<String, String>()
-    if (unnormalizedActivityGroups != null) {
-      val groupsToActivities = unnormalizedActivityGroups.toMutableMap()
-      while (!groupsToActivities.isEmpty()) {
-        val groupName = groupsToActivities.keys.take(1)[0]
-        val groupMembers = groupsToActivities.remove(groupName)!!
-        groupMembers.forEach {
-          activitiesToTopLevelGroups[it] = groupName
-        }
+    mutableMapOf<String, String>().apply {
+      unnormalizedActivityGroups?.entries?.forEach { (groupName, groupMembers) ->
+        groupMembers.forEach { this[it] = groupName }
       }
     }
-    activitiesToTopLevelGroups
   }
 
   fun getActivityGroup(activity: String) = activityGroups.getOrDefault(activity, activity)
