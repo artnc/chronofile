@@ -100,7 +100,7 @@ class History {
     entries.forEach { lines += gson.toJson(it) }
     lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
     val textToWrite = lines.joinToString("") { "$it\n" }
-    if (mFile.readText() == textToWrite) {
+    if (mFile.exists() && mFile.readText() == textToWrite) {
       Log.d(TAG, "File unchanged; skipping write")
     } else {
       mFile.writeText(textToWrite)

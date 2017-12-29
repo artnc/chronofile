@@ -76,8 +76,8 @@ class MainActivity : BaseActivity() {
   }
 
   private fun setHistory() {
-    val history = History()
-    (application as App).history = history
+    (application as App).config = Config.loadConfigFromDisk()
+    val history = History().apply { (application as App).history = this }
 
     val addEntryCallback = { entry: Entry ->
       historyList.adapter.notifyDataSetChanged()

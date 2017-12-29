@@ -12,6 +12,7 @@ class App : Application() {
       private set
   }
 
+  lateinit var config: Config
   lateinit var history: History
 
   override fun onCreate() {
