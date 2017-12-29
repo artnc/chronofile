@@ -5,13 +5,6 @@ import android.content.Context
 
 class App : Application() {
 
-  companion object {
-    lateinit var instance: App
-      private set
-    lateinit var ctx: Context
-      private set
-  }
-
   lateinit var config: Config
   lateinit var history: History
 
@@ -19,5 +12,12 @@ class App : Application() {
     super.onCreate()
     instance = this
     ctx = this.applicationContext
+  }
+
+  companion object {
+    lateinit var instance: App
+      private set
+    lateinit var ctx: Context
+      private set
   }
 }

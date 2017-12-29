@@ -18,16 +18,6 @@ import org.jetbrains.anko.toast
 
 class MainActivity : BaseActivity() {
 
-  companion object {
-    val APP_PERMISSIONS = arrayOf(
-      Manifest.permission.ACCESS_COARSE_LOCATION,
-      Manifest.permission.ACCESS_FINE_LOCATION,
-      Manifest.permission.READ_EXTERNAL_STORAGE,
-      Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
-    val PERMISSION_REQUEST_CODE = 1
-  }
-
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
@@ -111,5 +101,15 @@ class MainActivity : BaseActivity() {
       override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
       override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
     })
+  }
+
+  companion object {
+    val APP_PERMISSIONS = arrayOf(
+      Manifest.permission.ACCESS_COARSE_LOCATION,
+      Manifest.permission.ACCESS_FINE_LOCATION,
+      Manifest.permission.READ_EXTERNAL_STORAGE,
+      Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
+    val PERMISSION_REQUEST_CODE = 1
   }
 }

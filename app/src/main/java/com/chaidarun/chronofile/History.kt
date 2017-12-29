@@ -7,10 +7,6 @@ import java.io.File
 
 class History {
 
-  companion object {
-    private val TAG = "History"
-  }
-
   val entries = mutableListOf<Entry>()
   private val gson by lazy {
     GsonBuilder().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation().create()
@@ -111,4 +107,8 @@ class History {
   }
 
   private fun getEpochSeconds() = System.currentTimeMillis() / 1000
+
+  companion object {
+    private val TAG = "History"
+  }
 }

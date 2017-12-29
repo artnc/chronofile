@@ -11,16 +11,6 @@ import java.util.*
 /** https://developer.android.com/training/location/display-address.html */
 class FetchAddressIntentService : IntentService(TAG) {
 
-  companion object {
-    private val TAG = "FetchAddressIS"
-    private val PACKAGE_NAME = "com.google.android.gms.location.sample.locationaddress"
-    val SUCCESS_CODE = 1
-    val FAILURE_CODE = 0
-    val RECEIVER = PACKAGE_NAME + ".RECEIVER"
-    val RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY"
-    val LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA"
-  }
-
   override fun onHandleIntent(intent: Intent) {
     val receiver = intent.getParcelableExtra(RECEIVER) as ResultReceiver
     try {
@@ -32,5 +22,15 @@ class FetchAddressIntentService : IntentService(TAG) {
     } catch (e: Exception) {
       receiver.send(FAILURE_CODE, Bundle())
     }
+  }
+
+  companion object {
+    private val TAG = "FetchAddressIS"
+    private val PACKAGE_NAME = "com.google.android.gms.location.sample.locationaddress"
+    val SUCCESS_CODE = 1
+    val FAILURE_CODE = 0
+    val RECEIVER = PACKAGE_NAME + ".RECEIVER"
+    val RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY"
+    val LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA"
   }
 }

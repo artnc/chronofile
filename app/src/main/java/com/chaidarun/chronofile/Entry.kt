@@ -22,10 +22,6 @@ data class Entry(
   @SerializedName("n")
   val note: String? = null
 ) {
-  companion object {
-    private val TAG = "Entry"
-  }
-
   fun snapToKnownLocation(): Entry {
     latLong ?: return this
     val snapLocations = App.instance.config.locations ?: return this
@@ -44,5 +40,9 @@ data class Entry(
       }
     }
     return this
+  }
+
+  companion object {
+    private val TAG = "Entry"
   }
 }

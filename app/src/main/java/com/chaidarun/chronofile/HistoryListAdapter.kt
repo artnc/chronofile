@@ -25,11 +25,6 @@ class HistoryListAdapter(
   private val itemClick: (Entry) -> Unit
 ) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
-  companion object {
-    private val DATE_FORMAT = SimpleDateFormat("EEEE, dd MMMM YYYY", Locale.getDefault())
-    private val TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.getDefault())
-  }
-
   private val itemList = mutableListOf<ListItem>()
   private val selectedEntries = mutableListOf<Entry>()
   private val receiver by lazy {
@@ -149,5 +144,10 @@ class HistoryListAdapter(
     override fun bindItem(listItem: ListItem) {
       with((listItem as DateItem).date) { itemView.date.text = DATE_FORMAT.format(this) }
     }
+  }
+
+  companion object {
+    private val DATE_FORMAT = SimpleDateFormat("EEEE, dd MMMM YYYY", Locale.getDefault())
+    private val TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.getDefault())
   }
 }

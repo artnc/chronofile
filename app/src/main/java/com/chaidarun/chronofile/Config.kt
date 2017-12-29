@@ -25,6 +25,25 @@ class Config(
   @SerializedName("locations")
   val locations: List<List<Double>>? = null
 ) {
+  private val activityGroups by lazy {
+    mutableMapOf<String, String>().apply {
+      unnormalizedActivityGroups?.entries?.forEach { (groupName, groupMembers) ->
+        groupMembers.forEach { this[it] = groupName }
+      }
+    }
+  }
+
+  fun getActivityGroup(activity: String) = activityGroups.getOrDefault(activity, activity)
+
+  fun saveConfigToDisk() {
+    val textToWrite = gson.toJson(this)
+    if (file.exists() && file.readText() == textToWrite) {
+      Log.d(TAG, "File unchanged; skipping write")
+    } else {
+      file.writeText(textToWrite)
+    }
+  }
+
   companion object {
     /** 0.0005 degrees latitude is roughly 182 ft */
     val LOCATION_SNAP_RADIUS_SQUARED = Math.pow(0.0005, 2.0)
@@ -42,25 +61,6 @@ class Config(
       }
       config.saveConfigToDisk()
       return config
-    }
-  }
-
-  private val activityGroups by lazy {
-    mutableMapOf<String, String>().apply {
-      unnormalizedActivityGroups?.entries?.forEach { (groupName, groupMembers) ->
-        groupMembers.forEach { this[it] = groupName }
-      }
-    }
-  }
-
-  fun getActivityGroup(activity: String) = activityGroups.getOrDefault(activity, activity)
-
-  fun saveConfigToDisk() {
-    val textToWrite = gson.toJson(this)
-    if (file.exists() && file.readText() == textToWrite) {
-      Log.d(TAG, "File unchanged; skipping write")
-    } else {
-      file.writeText(textToWrite)
     }
   }
 }
