@@ -22,7 +22,7 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
     object : ResultReceiver(Handler()) {
       override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
         if (resultCode == FetchAddressIntentService.SUCCESS_CODE) {
-          App.instance.applicationContext.toast(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY))
+          App.ctx.toast(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY))
         }
       }
     }
@@ -44,13 +44,13 @@ class HistoryListAdapter(private val history: History, private val itemClick: (E
                 latitude = entry.latLong[0]
                 longitude = entry.latLong[1]
               }
-              val intent = Intent(App.instance.applicationContext, FetchAddressIntentService::class.java)
+              val intent = Intent(App.ctx, FetchAddressIntentService::class.java)
               intent.putExtra(FetchAddressIntentService.RECEIVER, mResultReceiver)
               intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location)
-              App.instance.applicationContext.startService(intent)
+              App.ctx.startService(intent)
             }
           }
-          else -> App.instance.applicationContext.toast("Unknown action!")
+          else -> App.ctx.toast("Unknown action!")
         }
         mode.finish()
         return true

@@ -17,7 +17,7 @@ class History {
     private set
   private val mFile = File("/storage/emulated/0/Sync/chronofile.jsonl")
   private val mFusedLocationClient by lazy {
-    LocationServices.getFusedLocationProviderClient(App.instance.applicationContext)
+    LocationServices.getFusedLocationProviderClient(App.ctx)
   }
 
   init {
