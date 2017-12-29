@@ -10,7 +10,8 @@
     android:layout_height="wrap_content"
     android:textAlignment="center"
     card_view:cardBackgroundColor="@color/cardview_dark_background"
-    card_view:cardCornerRadius="12dp">
+    card_view:cardCornerRadius="12dp"
+    card_view:cardElevation="0dp">
 
     <TextView
       android:id="@+id/date"
