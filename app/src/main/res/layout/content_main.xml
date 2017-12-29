@@ -34,7 +34,7 @@
       android:layout_height="wrap_content"
       android:layout_marginHorizontal="8dp"
       android:layout_weight="1"
-      android:hint="Note (optional)" />
+      android:hint="Note" />
 
     <Button
       android:id="@+id/addEntry"

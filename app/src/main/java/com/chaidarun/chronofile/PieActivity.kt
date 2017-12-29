@@ -26,6 +26,7 @@ class PieActivity : BaseActivity() {
       holeRadius = 25f
       legend.isEnabled = false
       rotationAngle = 195f
+      setCenterTextTypeface(App.instance.typeface)
       setDrawEntryLabels(false)
       setTransparentCircleAlpha(0)
     }
@@ -83,6 +84,7 @@ class PieActivity : BaseActivity() {
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
       colors = ColorTemplate.MATERIAL_COLORS.toList()
       valueTextSize = 10f
+      valueTypeface = App.instance.typeface
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {
           Metric.AVERAGE -> formatTime(value.toLong() * 86400 / totalSeconds)
