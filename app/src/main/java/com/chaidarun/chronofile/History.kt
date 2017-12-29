@@ -86,6 +86,7 @@ class History {
 
   private fun normalizeEntriesAndSaveHistoryToDisk() {
     // Normalize
+    entries.replaceAll { it.snapToKnownLocation() }
     entries.sortBy { it.startTime }
     var lastSeenActivityAndNote: Pair<String, String?>? = null
     entries.removeAll {

@@ -24,14 +24,20 @@ class Config(
   @SerializedName("locations") val locations: List<List<Double>>? = null
 ) {
   companion object {
+    /** 0.0005 degrees latitude is roughly 182 ft */
+    val LOCATION_SNAP_RADIUS_SQUARED = Math.pow(0.0005, 2.0)
     private val TAG = "Config"
     private val gson by lazy { GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create() }
     private val mFile = File("/storage/emulated/0/Sync/chronofile.json")
 
-    fun loadConfigFromDisk(): Config = if (mFile.exists()) {
-      gson.fromJson(mFile.readText(), Config::class.java)
-    } else {
-      Config().apply { saveConfigToDisk() }
+    fun loadConfigFromDisk(): Config {
+      val config = if (mFile.exists()) {
+        gson.fromJson(mFile.readText(), Config::class.java)
+      } else {
+        Config()
+      }
+      config.saveConfigToDisk()
+      return config
     }
   }
 

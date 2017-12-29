@@ -106,8 +106,9 @@ class MainActivity : BaseActivity() {
     }
 
     swipeRefresh.setOnRefreshListener {
+      (application as App).config = Config.loadConfigFromDisk()
       history.loadHistoryFromFile()
-      toast("Reloaded history from disk")
+      toast("Reloaded history and config from disk")
       swipeRefresh.isRefreshing = false
     }
   }
