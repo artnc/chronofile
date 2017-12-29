@@ -6,13 +6,13 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.form_entry.view.*
 import org.jetbrains.anko.toast
 
 
@@ -97,17 +97,19 @@ class MainActivity : BaseActivity() {
       history.addEntry(it.activity, it.note, addEntryCallback)
     })
 
-    fab.setOnClickListener {
-      val view = layoutInflater.inflate(R.layout.form_entry, null)
-      with(AlertDialog.Builder(this)) {
-        setTitle("Last ${history.getFuzzyTimeSinceLastEntry()}")
-        setView(view)
-        setPositiveButton("OK", { _, _ ->
-          history.addEntry(view.formEntryActivity.text.toString(), view.formEntryNote.text.toString(), addEntryCallback)
-        })
-        setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
-        show()
-      }
+    // Set up form
+    addEntry.setOnClickListener {
+      history.addEntry(addEntryActivity.text.toString(), addEntryNote.text.toString(), addEntryCallback)
+      addEntryActivity.text.clear()
+      addEntryNote.text.clear()
+      currentFocus?.clearFocus()
     }
+    val validate = { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() }
+    validate()
+    addEntryActivity.addTextChangedListener(object : TextWatcher {
+      override fun afterTextChanged(s: Editable) = validate()
+      override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+      override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+    })
   }
 }
