@@ -15,7 +15,7 @@ class PieActivity : BaseActivity() {
   private enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
 
   private var grouped = true
-  private var metric = Metric.TOTAL
+  private var metric = Metric.AVERAGE
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

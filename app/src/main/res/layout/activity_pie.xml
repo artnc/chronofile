@@ -38,12 +38,12 @@
     app:layout_constraintBottom_toBottomOf="parent">
 
     <RadioButton
-      android:id="@+id/radioTotal"
+      android:id="@+id/radioAverage"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:checked="true"
       android:onClick="onRadioButtonClicked"
-      android:text="Total recorded" />
+      android:text="Average daily" />
 
     <RadioButton
       android:id="@+id/radioPercentage"
@@ -53,10 +53,11 @@
       android:text="Percent recorded" />
 
     <RadioButton
-      android:id="@+id/radioAverage"
+      android:id="@+id/radioTotal"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:onClick="onRadioButtonClicked"
-      android:text="Average daily" />
+      android:text="Total recorded" />
+
   </RadioGroup>
 </android.support.constraint.ConstraintLayout>
