@@ -55,6 +55,14 @@ class MainActivity : BaseActivity() {
         startActivity(intent)
         true
       }
+      R.id.action_refresh -> {
+        with(application as App) {
+          config = Config.loadConfigFromDisk()
+          history.loadHistoryFromFile()
+        }
+        toast("Reloaded history and config from disk")
+        true
+      }
       else -> super.onOptionsItemSelected(item)
     }
   }
@@ -103,13 +111,6 @@ class MainActivity : BaseActivity() {
         setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
         show()
       }
-    }
-
-    swipeRefresh.setOnRefreshListener {
-      (application as App).config = Config.loadConfigFromDisk()
-      history.loadHistoryFromFile()
-      toast("Reloaded history and config from disk")
-      swipeRefresh.isRefreshing = false
     }
   }
 }

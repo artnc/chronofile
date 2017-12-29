@@ -6,4 +6,8 @@
     android:id="@+id/action_graph"
     android:title="Graph"
     app:showAsAction="always" />
+  <item
+    android:id="@+id/action_refresh"
+    android:title="Reload from disk"
+    app:showAsAction="never" />
 </menu>
