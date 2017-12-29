@@ -92,10 +92,7 @@ class MainActivity : BaseActivity() {
       toast("Recorded ${entry.activity}")
     }
 
-    historyList.layoutManager = LinearLayoutManager(this).apply {
-      reverseLayout = true
-      stackFromEnd = true
-    }
+    historyList.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
     historyList.adapter = HistoryListAdapter(history, {
       history.addEntry(it.activity, it.note, addEntryCallback)
     })
