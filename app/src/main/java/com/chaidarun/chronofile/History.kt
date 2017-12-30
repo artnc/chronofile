@@ -20,6 +20,9 @@ class History {
 
   init {
     loadHistoryFromFile()
+    RxBus.listen().ofType(AddEntryAction::class.java).subscribe {
+      addEntry(it.activity, it.note, it.callback)
+    }
   }
 
   private fun sanitizeActivityAndNote(
@@ -27,7 +30,7 @@ class History {
     note: String?
   ) = Pair(activity.trim(), if (note.isNullOrBlank()) null else note!!.trim())
 
-  fun addEntry(activity: String, note: String?, callback: (Entry) -> Any) {
+  private fun addEntry(activity: String, note: String?, callback: (Entry) -> Any) {
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
     getLocation {
       val entry = Entry(currentActivityStartTime, sanitizedActivity, it?.toList(), sanitizedNote)
@@ -35,6 +38,7 @@ class History {
       currentActivityStartTime = getEpochSeconds()
       normalizeEntriesAndSaveHistoryToDisk()
       callback(entry)
+      RxBus.dispatch(AddedEntryAction())
     }
   }
 

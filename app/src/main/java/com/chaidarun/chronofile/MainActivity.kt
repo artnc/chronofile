@@ -9,14 +9,21 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.jakewharton.rxbinding2.widget.RxTextView
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : BaseActivity() {
+
+  private lateinit var disposable: Disposable
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -26,6 +33,20 @@ class MainActivity : BaseActivity() {
       setHistory()
     } else {
       ActivityCompat.requestPermissions(this, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
+    }
+  }
+
+  override fun onStart() {
+    super.onStart()
+    disposable = RxTextView
+      .afterTextChangeEvents(addEntryActivity)
+      .subscribe { Log.d("artnc", it.view().text.toString()) }
+  }
+
+  override fun onStop() {
+    super.onStop()
+    if (!disposable.isDisposed) {
+      disposable.dispose()
     }
   }
 
@@ -84,12 +105,12 @@ class MainActivity : BaseActivity() {
 
     historyList.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
     historyList.adapter = HistoryListAdapter(this, historyList, history, {
-      history.addEntry(it.activity, it.note, addEntryCallback)
+      RxBus.dispatch(AddEntryAction(it.activity, it.note, addEntryCallback))
     })
 
     // Set up form
     addEntry.setOnClickListener {
-      history.addEntry(addEntryActivity.text.toString(), addEntryNote.text.toString(), addEntryCallback)
+      RxBus.dispatch(AddEntryAction(addEntryActivity.text.toString(), addEntryNote.text.toString(), addEntryCallback))
       addEntryActivity.text.clear()
       addEntryNote.text.clear()
       currentFocus?.clearFocus()
@@ -101,6 +122,10 @@ class MainActivity : BaseActivity() {
       override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
       override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
     })
+
+    RxBus.listen().ofType(AddedEntryAction::class.java).startWith(AddedEntryAction()).subscribe {
+      addEntry.text = SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(history.currentActivityStartTime * 1000))
+    }
   }
 
   companion object {
