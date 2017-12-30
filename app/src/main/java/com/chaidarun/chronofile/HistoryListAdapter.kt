@@ -168,7 +168,7 @@ class HistoryListAdapter(
   }
 
   companion object {
-    private val DATE_FORMAT = SimpleDateFormat("EEEE, dd MMMM YYYY", Locale.getDefault())
-    private val TIME_FORMAT = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private val DATE_FORMAT = SimpleDateFormat("EE, dd MMM YYYY", Locale.getDefault())
+    private val TIME_FORMAT = SimpleDateFormat("H:mm", Locale.getDefault())
   }
 }
