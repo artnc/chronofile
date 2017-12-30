@@ -1,5 +1,6 @@
 package com.chaidarun.chronofile
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.RadioButton
@@ -7,7 +8,6 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
 import kotlinx.android.synthetic.main.activity_pie.*
 
 class PieActivity : BaseActivity() {
@@ -23,11 +23,14 @@ class PieActivity : BaseActivity() {
 
     with(chart) {
       description.isEnabled = false
-      holeRadius = 25f
+      holeRadius = 50f
       legend.isEnabled = false
       rotationAngle = 195f
+      setCenterTextColor(Color.WHITE)
       setCenterTextTypeface(App.instance.typeface)
       setDrawEntryLabels(false)
+      setExtraOffsets(40f, 40f, 40f, 40f)
+      setHoleColor(Color.TRANSPARENT)
       setTransparentCircleAlpha(0)
     }
     setData()
@@ -82,8 +85,19 @@ class PieActivity : BaseActivity() {
 
     // Show data
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
-      colors = ColorTemplate.MATERIAL_COLORS.toList()
-      valueTextSize = 10f
+      colors = listOf(
+        "#66BB6A",
+        "#388E3C",
+        "#81C784",
+        "#4CAF50",
+        "#2E7D32",
+        "#1B5E20",
+        "#A5D6A7",
+        "#43A047"
+      ).map { Color.parseColor(it) }
+      valueLineColor = Color.TRANSPARENT
+      valueTextColor = Color.WHITE
+      valueTextSize = 12f
       valueTypeface = App.instance.typeface
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {
@@ -91,12 +105,13 @@ class PieActivity : BaseActivity() {
           Metric.PERCENTAGE -> "${value.toLong() * 100 / totalSeconds}%"
           Metric.TOTAL -> formatTime(value.toLong())
         }
-        "${(entry as PieEntry).label}: $num"
+        "${(entry as PieEntry).label} $num"
       }
+      yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
     }
 
     with(chart) {
-      centerText = "Total:\n${formatTime(totalSeconds)}"
+      centerText = "Total\n${formatTime(totalSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
     }
