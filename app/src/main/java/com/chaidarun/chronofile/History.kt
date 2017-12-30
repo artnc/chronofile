@@ -47,7 +47,8 @@ class History {
     val entryIndex = entries.indexOfFirst { it.startTime == oldStartTime }
     val oldEntry = entries[entryIndex]
     val newStartTime = try {
-      newStartTime.trim().toLong()
+      val enteredTime = newStartTime.trim().toLong()
+      if (enteredTime > 15e8 && enteredTime <= getEpochSeconds()) enteredTime else oldStartTime
     } catch (e: Exception) {
       oldStartTime
     }
