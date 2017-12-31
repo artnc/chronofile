@@ -17,7 +17,8 @@
       android:layout_height="?attr/actionBarSize"
       android:background="?attr/colorPrimary"
       android:elevation="4dp"
-      app:popupTheme="@style/AppTheme.PopupOverlay" />
+      app:popupTheme="@style/AppTheme.PopupOverlay"
+      app:title="Timeline" />
 
   </android.support.design.widget.AppBarLayout>
 

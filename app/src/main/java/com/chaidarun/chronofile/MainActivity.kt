@@ -25,7 +25,6 @@ class MainActivity : BaseActivity() {
     // Set up UI
     setContentView(R.layout.activity_main)
     setSupportActionBar(toolbar)
-    title = "Timeline"
 
     // Ensure required permissions are granted
     if (APP_PERMISSIONS.all {
