@@ -25,6 +25,7 @@ class MainActivity : BaseActivity() {
     // Set up UI
     setContentView(R.layout.activity_main)
     setSupportActionBar(toolbar)
+    title = "Timeline"
 
     // Ensure required permissions are granted
     if (APP_PERMISSIONS.all {
@@ -42,13 +43,13 @@ class MainActivity : BaseActivity() {
   }
 
   override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-    R.id.action_graph -> {
-      startActivity(Intent(this, PieActivity::class.java))
-      true
-    }
     R.id.action_refresh -> {
       hydrateStoreFromFiles()
       toast("Reloaded history and config from disk")
+      true
+    }
+    R.id.action_stats -> {
+      startActivity(Intent(this, PieActivity::class.java))
       true
     }
     else -> super.onOptionsItemSelected(item)

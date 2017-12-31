@@ -19,6 +19,7 @@ class PieActivity : BaseActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_pie)
+    title = "Statistics"
 
     with(chart) {
       description.isEnabled = false
