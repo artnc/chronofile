@@ -5,13 +5,17 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.WindowManager
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 
 abstract class BaseActivity : AppCompatActivity() {
 
-  /** RxJava subscriptions that should be GC'ed once this activity exits */
-  protected var disposables: List<Disposable>? = null
+  /**
+   * RxJava subscriptions that should be GC'ed once this activity exits
+   *
+   * https://medium.com/@vanniktech/rxjava-2-disposable-under-the-hood-f842d2373e64
+   */
+  protected var disposables: CompositeDisposable? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     logLifecycleEvent("onCreate")
@@ -50,12 +54,7 @@ abstract class BaseActivity : AppCompatActivity() {
     logLifecycleEvent("onDestroy")
 
     // Clean up Rx subscriptions
-    disposables?.forEach {
-      if (!it.isDisposed) {
-        Log.d(TAG, "Disposing of $it")
-        it.dispose()
-      }
-    }
+    disposables?.clear()
 
     super.onDestroy()
   }

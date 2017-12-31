@@ -9,6 +9,7 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_pie.*
 
 enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
@@ -35,11 +36,12 @@ class PieActivity : BaseActivity() {
       setTransparentCircleAlpha(0)
     }
 
-    disposables = listOf(
-      Store.state.filter { it.config != null && it.history != null }
+    disposables = CompositeDisposable().apply {
+      add(Store.state.filter { it.config != null && it.history != null }
         .map { Triple(it.config!!, it.history!!, it.graphSettings) }
         .distinctUntilChanged().subscribe { update(it) }
-    )
+      )
+    }
   }
 
   fun onRadioButtonClicked(view: View) {

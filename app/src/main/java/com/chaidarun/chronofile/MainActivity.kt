@@ -11,6 +11,7 @@ import android.view.Menu
 import android.view.MenuItem
 import com.jakewharton.rxbinding2.view.RxView
 import com.jakewharton.rxbinding2.widget.RxTextView
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
@@ -84,21 +85,23 @@ class MainActivity : BaseActivity() {
     historyList.adapter = HistoryListAdapter(this)
 
     // Set up listeners
-    disposables = listOf(
-      RxView.clicks(addEntry)
+    disposables = CompositeDisposable().apply {
+      add(RxView.clicks(addEntry)
         .subscribe {
           History.addEntry(addEntryActivity.text.toString(), addEntryNote.text.toString())
           addEntryActivity.text.clear()
           addEntryNote.text.clear()
           currentFocus?.clearFocus()
-        },
-      RxTextView.afterTextChangeEvents(addEntryActivity)
-        .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() },
-      Store.state
+        }
+      )
+      add(RxTextView.afterTextChangeEvents(addEntryActivity)
+        .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() })
+      add(Store.state
         .map { it.history!!.currentActivityStartTime }
         .distinctUntilChanged()
         .subscribe { addEntry.text = TIME_FORMAT.format(Date(it * 1000)) }
-    )
+      )
+    }
   }
 
   companion object {
