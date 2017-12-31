@@ -56,6 +56,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       currentActivityStartTime: Long
     ) = entries.toMutableList().apply {
       // Normalize
+      Log.d(TAG, "Normalizing entries")
       val config = Store.state.value.config
       replaceAll { it.snapToKnownLocation(config) }
       sortBy { it.startTime }
@@ -68,6 +69,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       }
 
       // Save
+      Log.d(TAG, "Saving history")
       val lines = mutableListOf<String>()
       forEach { lines += gson.toJson(it) }
       lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))

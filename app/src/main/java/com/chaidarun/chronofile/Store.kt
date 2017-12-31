@@ -19,7 +19,7 @@ sealed class Action {
     val note: String
   ) : Action()
 
-  data class RemoveEntries(val entries: List<Long>) : Action()
+  data class RemoveEntries(val entries: Collection<Long>) : Action()
   data class SetConfig(val config: Config) : Action()
   data class SetGraphGrouping(val grouped: Boolean) : Action()
   data class SetGraphMetric(val metric: Metric) : Action()
