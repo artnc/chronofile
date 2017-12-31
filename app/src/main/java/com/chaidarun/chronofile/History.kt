@@ -3,6 +3,7 @@ package com.chaidarun.chronofile
 import android.util.Log
 import com.google.android.gms.location.LocationServices
 import com.google.gson.GsonBuilder
+import org.jetbrains.anko.toast
 import java.io.File
 
 data class History(val entries: List<Entry>, val currentActivityStartTime: Long) {
@@ -100,7 +101,10 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     }
 
     fun addEntry(activity: String, note: String?) {
-      getLocation { Store.dispatch(Action.AddEntry(activity, note, it?.toList())) }
+      getLocation {
+        Store.dispatch(Action.AddEntry(activity, note, it?.toList()))
+        App.ctx.toast("Recorded $activity")
+      }
     }
 
     fun fromFile(): History {

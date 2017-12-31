@@ -56,6 +56,7 @@ class HistoryListAdapter(
                 Store.dispatch(Action.EditEntry(
                   entry.startTime, view.formEntryStartTime.text.toString(),
                   view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()))
+                appActivity.toast("Updated entry")
               })
               setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
               show()
