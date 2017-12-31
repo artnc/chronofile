@@ -42,8 +42,4 @@ data class Entry(
     }
     return this
   }
-
-  companion object {
-    private val TAG = "Entry"
-  }
 }

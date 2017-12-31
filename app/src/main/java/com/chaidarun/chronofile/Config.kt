@@ -47,7 +47,6 @@ class Config(
   companion object {
     /** 0.0005 degrees latitude is roughly 182 ft */
     val LOCATION_SNAP_RADIUS_SQUARED = Math.pow(0.0005, 2.0)
-    private val TAG = "Config"
     private val gson by lazy {
       GsonBuilder().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create()
     }

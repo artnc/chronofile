@@ -40,7 +40,6 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
   fun withoutEntries(startTimes: Collection<Long>) = copy(entries = normalizeAndSave(entries.filter { it.startTime !in startTimes }, currentActivityStartTime))
 
   companion object {
-    private val TAG = "History"
     private val file = File("/storage/emulated/0/Sync/chronofile.jsonl")
     private val gson by lazy {
       GsonBuilder().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation().create()

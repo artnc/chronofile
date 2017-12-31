@@ -58,7 +58,7 @@ class PieActivity : BaseActivity() {
   }
 
   private fun setData(config: Config, history: History, graphSettings: GraphSettings) {
-    Log.d("PieActivity", "Rendering pie chart")
+    Log.d(TAG, "Rendering pie chart")
 
     // Get data
     val (grouped, metric) = graphSettings

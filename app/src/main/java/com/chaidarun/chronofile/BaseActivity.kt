@@ -20,8 +20,8 @@ abstract class BaseActivity : AppCompatActivity() {
   override fun onDestroy() {
     disposables?.forEach {
       if (!it.isDisposed) {
+        Log.d(TAG, "Disposing of $it")
         it.dispose()
-        Log.d("BaseActivity", "Disposed of $it")
       }
     }
     super.onDestroy()

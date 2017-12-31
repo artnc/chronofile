@@ -25,7 +25,6 @@ class FetchAddressIntentService : IntentService(TAG) {
   }
 
   companion object {
-    private val TAG = "FetchAddressIS"
     private val PACKAGE_NAME = "com.google.android.gms.location.sample.locationaddress"
     val SUCCESS_CODE = 1
     val FAILURE_CODE = 0

@@ -34,7 +34,7 @@ data class State(
 )
 
 private val reducer: (State, Action) -> State = { state, action ->
-  Log.d("Reducer", "Reducing $action")
+  Log.d(TAG, "Reducing $action")
   with(state) {
     val nextState = when (action) {
       is Action.AddEntry -> copy(history = history?.withNewEntry(action.activity, action.note, action.latLong))
@@ -45,7 +45,7 @@ private val reducer: (State, Action) -> State = { state, action ->
       is Action.SetGraphMetric -> copy(graphSettings = graphSettings.copy(metric = action.metric))
       is Action.SetHistory -> copy(history = action.history)
     }
-    Log.d("Reducer", "State diff: ${dumbDiff(this, nextState)}")
+    Log.d(TAG, "State diff: ${dumbDiff(this, nextState)}")
     nextState
   }
 }

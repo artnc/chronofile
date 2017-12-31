@@ -154,7 +154,6 @@ class HistoryListAdapter(
   }
 
   companion object {
-    private val TAG = "HistoryListAdapter"
     private val DATE_FORMAT = SimpleDateFormat("EE, dd MMM YYYY", Locale.getDefault())
     private val TIME_FORMAT = SimpleDateFormat("H:mm", Locale.getDefault())
   }
