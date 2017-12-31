@@ -14,7 +14,6 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -95,7 +94,8 @@ class MainActivity : BaseActivity() {
       RxTextView.afterTextChangeEvents(addEntryActivity)
         .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() },
       Store.state.subscribe { state ->
-        addEntry.text = SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(state.history!!.currentActivityStartTime * 1000))
+        addEntry.text = TIME_FORMAT.format(
+          Date(state.history!!.currentActivityStartTime * 1000))
       }
     )
   }

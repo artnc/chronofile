@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.form_entry.view.*
 import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
 import org.jetbrains.anko.toast
-import java.text.SimpleDateFormat
 import java.util.*
 
 private enum class ViewType(val id: Int) { DATE(0), ENTRY(1) }
@@ -153,10 +152,5 @@ class HistoryListAdapter(
         }
       }
     }
-  }
-
-  companion object {
-    private val DATE_FORMAT = SimpleDateFormat("EE, dd MMM YYYY", Locale.getDefault())
-    private val TIME_FORMAT = SimpleDateFormat("H:mm", Locale.getDefault())
   }
 }
