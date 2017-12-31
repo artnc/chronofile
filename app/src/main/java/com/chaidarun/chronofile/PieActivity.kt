@@ -19,7 +19,8 @@ class PieActivity : BaseActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_pie)
-    title = "Statistics"
+    setSupportActionBar(pieToolbar)
+    supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
     with(chart) {
       description.isEnabled = false

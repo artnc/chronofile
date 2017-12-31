@@ -1,63 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:orientation="vertical"
   tools:context="com.chaidarun.chronofile.PieActivity">
+
+  <android.support.design.widget.AppBarLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:theme="@style/AppTheme.AppBarOverlay">
+
+    <android.support.v7.widget.Toolbar
+      android:id="@+id/pieToolbar"
+      android:layout_width="match_parent"
+      android:layout_height="?attr/actionBarSize"
+      android:background="?attr/colorPrimary"
+      android:elevation="4dp"
+      app:popupTheme="@style/AppTheme.PopupOverlay"
+      app:title="Statistics" />
+
+  </android.support.design.widget.AppBarLayout>
 
   <com.github.mikephil.charting.charts.PieChart
     android:id="@+id/chart"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="0dp"
+    android:layout_weight="1" />
 
-  <RadioGroup
-    android:layout_width="wrap_content"
+  <LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:layout_constraintTop_toTopOf="parent">
+    android:padding="16dp">
 
-    <RadioButton
-      android:id="@+id/radioGrouped"
+    <RadioGroup
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:checked="true"
-      android:onClick="onRadioButtonClicked"
-      android:text="Activity groups" />
+      android:layout_weight="1"
+      app:layout_constraintTop_toTopOf="parent">
 
-    <RadioButton
-      android:id="@+id/radioIndividual"
+      <RadioButton
+        android:id="@+id/radioGrouped"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:onClick="onRadioButtonClicked"
+        android:text="Activity groups" />
+
+      <RadioButton
+        android:id="@+id/radioIndividual"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onRadioButtonClicked"
+        android:text="Individual activities" />
+    </RadioGroup>
+
+    <RadioGroup
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:onClick="onRadioButtonClicked"
-      android:text="Individual activities" />
-  </RadioGroup>
+      android:layout_weight="1"
+      app:layout_constraintBottom_toBottomOf="parent">
 
-  <RadioGroup
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    app:layout_constraintBottom_toBottomOf="parent">
+      <RadioButton
+        android:id="@+id/radioAverage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:onClick="onRadioButtonClicked"
+        android:text="Average daily" />
 
-    <RadioButton
-      android:id="@+id/radioAverage"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:checked="true"
-      android:onClick="onRadioButtonClicked"
-      android:text="Average daily" />
+      <RadioButton
+        android:id="@+id/radioPercentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onRadioButtonClicked"
+        android:text="Percent recorded" />
 
-    <RadioButton
-      android:id="@+id/radioPercentage"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:onClick="onRadioButtonClicked"
-      android:text="Percent recorded" />
+      <RadioButton
+        android:id="@+id/radioTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onRadioButtonClicked"
+        android:text="Total recorded" />
 
-    <RadioButton
-      android:id="@+id/radioTotal"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:onClick="onRadioButtonClicked"
-      android:text="Total recorded" />
-
-  </RadioGroup>
-</android.support.constraint.ConstraintLayout>
+    </RadioGroup>
+  </LinearLayout>
+</LinearLayout>
