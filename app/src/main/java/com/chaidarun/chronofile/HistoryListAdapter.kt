@@ -116,8 +116,10 @@ class HistoryListAdapter(
   override fun getItemViewType(position: Int) = itemList[position].typeCode
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
-    ViewType.DATE.id -> DateViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false))
-    ViewType.ENTRY.id -> EntryViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false))
+    ViewType.DATE.id -> DateViewHolder(
+      LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false))
+    ViewType.ENTRY.id -> EntryViewHolder(
+      LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false))
     else -> null
   }
 

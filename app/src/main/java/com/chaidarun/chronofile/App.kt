@@ -13,7 +13,12 @@ class App : Application() {
     super.onCreate()
 
     // Set global default font
-    CalligraphyConfig.initDefault(CalligraphyConfig.Builder().setDefaultFontPath("fonts/Exo2-Regular.otf").setFontAttrId(R.attr.fontPath).build())
+    CalligraphyConfig.initDefault(
+      CalligraphyConfig.Builder()
+        .setDefaultFontPath("fonts/Exo2-Regular.otf")
+        .setFontAttrId(R.attr.fontPath)
+        .build()
+    )
 
     ctx = this.applicationContext
     instance = this

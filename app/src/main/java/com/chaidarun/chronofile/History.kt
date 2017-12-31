@@ -37,10 +37,14 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val entry = Entry(currentActivityStartTime, sanitizedActivity, latLong, sanitizedNote)
     val newEntries = entries.toMutableList().apply { add(entry) }
     val nextStartTime = getEpochSeconds()
-    return copy(currentActivityStartTime = nextStartTime, entries = normalizeAndSave(newEntries, nextStartTime))
+    return copy(
+      currentActivityStartTime = nextStartTime,
+      entries = normalizeAndSave(newEntries, nextStartTime)
+    )
   }
 
-  fun withoutEntries(startTimes: Collection<Long>) = copy(entries = normalizeAndSave(entries.filter { it.startTime !in startTimes }, currentActivityStartTime))
+  fun withoutEntries(startTimes: Collection<Long>) = copy(entries = normalizeAndSave(
+    entries.filter { it.startTime !in startTimes }, currentActivityStartTime))
 
   companion object {
     private val file = File("/storage/emulated/0/Sync/chronofile.jsonl")

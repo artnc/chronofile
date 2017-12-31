@@ -48,7 +48,11 @@ class Config(
     /** 0.0005 degrees latitude is roughly 182 ft */
     val LOCATION_SNAP_RADIUS_SQUARED = Math.pow(0.0005, 2.0)
     private val gson by lazy {
-      GsonBuilder().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create()
+      GsonBuilder()
+        .disableHtmlEscaping()
+        .excludeFieldsWithoutExposeAnnotation()
+        .setPrettyPrinting()
+        .create()
     }
     private val file = File("/storage/emulated/0/Sync/chronofile.json")
 

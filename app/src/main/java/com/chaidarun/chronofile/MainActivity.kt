@@ -28,7 +28,9 @@ class MainActivity : BaseActivity() {
     setSupportActionBar(toolbar)
 
     // Ensure required permissions are granted
-    if (APP_PERMISSIONS.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
+    if (APP_PERMISSIONS.all {
+      ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+    }) {
       init()
     } else {
       ActivityCompat.requestPermissions(this, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
