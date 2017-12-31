@@ -40,6 +40,7 @@
       android:id="@+id/addEntry"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Add" />
+      android:text="Add"
+      android:textColor="@color/colorPrimaryDark" />
   </LinearLayout>
 </LinearLayout>

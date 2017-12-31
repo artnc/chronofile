@@ -3,7 +3,6 @@
   <!-- Base application theme. -->
   <style name="AppTheme" parent="Theme.AppCompat">
     <!-- Customize your theme here. -->
-    <item name="android:buttonStyle">@style/ButtonColor</item>
     <item name="colorAccent">@color/colorAccent</item>
     <item name="colorButtonNormal">@color/colorAccent</item>
     <item name="colorPrimary">@color/colorPrimary</item>
@@ -19,9 +18,5 @@
   <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat" />
 
   <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat" />
-
-  <style name="ButtonColor" parent="@style/Widget.AppCompat.Button">
-    <item name="android:textColor">@color/colorPrimary</item>
-  </style>
 
 </resources>
