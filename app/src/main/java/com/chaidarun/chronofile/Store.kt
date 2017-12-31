@@ -35,27 +35,27 @@ data class State(
 
 private val reducer: (State, Action) -> State = { state, action ->
   Log.d("Reducer", "Reducing $action")
-  val nextState = when (action) {
-    is Action.AddEntry -> state.copy(history = state.history?.withNewEntry(action.activity, action.note, action.latLong))
-    is Action.EditEntry -> state.copy(history = state.history?.withEditedEntry(action.oldStartTime, action.newStartTime, action.activity, action.note))
-    is Action.RemoveEntries -> state.copy(history = state.history?.withoutEntries(action.entries))
-    is Action.SetConfig -> state.copy(config = action.config)
-    is Action.SetGraphGrouping -> state.copy(graphSettings = state.graphSettings.copy(grouped = action.grouped))
-    is Action.SetGraphMetric -> state.copy(graphSettings = state.graphSettings.copy(metric = action.metric))
-    is Action.SetHistory -> state.copy(history = action.history)
+  with(state) {
+    val nextState = when (action) {
+      is Action.AddEntry -> copy(history = history?.withNewEntry(action.activity, action.note, action.latLong))
+      is Action.EditEntry -> copy(history = history?.withEditedEntry(action.oldStartTime, action.newStartTime, action.activity, action.note))
+      is Action.RemoveEntries -> copy(history = history?.withoutEntries(action.entries))
+      is Action.SetConfig -> copy(config = action.config)
+      is Action.SetGraphGrouping -> copy(graphSettings = graphSettings.copy(grouped = action.grouped))
+      is Action.SetGraphMetric -> copy(graphSettings = graphSettings.copy(metric = action.metric))
+      is Action.SetHistory -> copy(history = action.history)
+    }
+    Log.d("Reducer", "State diff: ${dumbDiff(this, nextState)}")
+    nextState
   }
-  Log.d("Reducer", "State diff: ${dumbDiff(state, nextState)}")
-  nextState
 }
 
 /** API heavily inspired by Redux */
 object Store {
 
-  private val actions = PublishRelay.create<Action>()
   val state: BehaviorRelay<State> = BehaviorRelay.create()
-
-  init {
-    actions.scan(State(), reducer).subscribe { state.accept(it) }
+  private val actions = PublishRelay.create<Action>().apply {
+    scan(State(), reducer).subscribe { state.accept(it) }
   }
 
   fun dispatch(action: Action) = actions.accept(action)

@@ -22,6 +22,7 @@ data class Entry(
   @SerializedName("n")
   val note: String? = null
 ) {
+
   fun snapToKnownLocation(config: Config?): Entry {
     latLong ?: return this
     config?.locations ?: return this

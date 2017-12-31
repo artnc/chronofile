@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.*
+import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.form_entry.view.*
 import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
@@ -23,9 +24,7 @@ private class DateItem(val date: Date) : ListItem(ViewType.DATE.id)
 private class EntryItem(val entry: Entry) : ListItem(ViewType.ENTRY.id)
 
 class HistoryListAdapter(
-  private val appActivity: AppCompatActivity,
-  private val recyclerView: RecyclerView,
-  private val itemClick: (Entry) -> Unit
+  private val appActivity: AppCompatActivity
 ) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
   private var itemList = listOf<ListItem>()
@@ -102,31 +101,28 @@ class HistoryListAdapter(
       cache = it.history
 
       Log.d(TAG, "Rendering history view")
-      val newItemList = mutableListOf<ListItem>()
-      var currentDate = Date(0)
-      it.history?.entries?.forEach {
-        val entryDate = Date(it.startTime * 1000)
-        if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
-          currentDate = entryDate
-          newItemList.add(DateItem(entryDate))
+      itemList = (mutableListOf<ListItem>()).apply {
+        var currentDate = Date(0)
+        it.history?.entries?.forEach {
+          val entryDate = Date(it.startTime * 1000)
+          if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
+            currentDate = entryDate
+            add(DateItem(entryDate))
+          }
+          add(EntryItem(it))
         }
-        newItemList.add(EntryItem(it))
-      }
-      itemList = newItemList.toList()
+      }.toList()
       notifyDataSetChanged()
-      recyclerView.scrollToPosition(itemList.size - 1)
+      appActivity.historyList.scrollToPosition(itemList.size - 1)
     }
   }
 
   override fun getItemCount() = itemList.size
   override fun getItemViewType(position: Int) = itemList[position].typeCode
 
-  override fun onCreateViewHolder(
-    parent: ViewGroup,
-    viewType: Int
-  ) = when (viewType) {
+  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
     ViewType.DATE.id -> DateViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false))
-    ViewType.ENTRY.id -> EntryViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false), itemClick)
+    ViewType.ENTRY.id -> EntryViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false))
     else -> null
   }
 
@@ -138,17 +134,20 @@ class HistoryListAdapter(
     abstract fun bindItem(listItem: ListItem): Any
   }
 
-  inner class EntryViewHolder(
-    view: View,
-    private val itemClick: (Entry) -> Unit
-  ) : ViewHolder(view) {
+  class DateViewHolder(view: View) : ViewHolder(view) {
+    override fun bindItem(listItem: ListItem) {
+      with((listItem as DateItem).date) { itemView.date.text = DATE_FORMAT.format(this) }
+    }
+  }
+
+  inner class EntryViewHolder(view: View) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
       with((listItem as EntryItem).entry) {
         itemView.entryActivity.text = activity
         itemView.entryNote.text = note
         itemView.entryNote.visibility = if (note == null) View.GONE else View.VISIBLE
         itemView.entryStartTime.text = TIME_FORMAT.format(Date(startTime * 1000))
-        itemView.setOnClickListener { itemClick(this) }
+        itemView.setOnClickListener { History.addEntry(activity, note) }
         itemView.setOnLongClickListener {
           (itemView.context as AppCompatActivity).startActionMode(actionModeCallback)
           selectedEntries.clear()
@@ -156,12 +155,6 @@ class HistoryListAdapter(
           true
         }
       }
-    }
-  }
-
-  class DateViewHolder(view: View) : ViewHolder(view) {
-    override fun bindItem(listItem: ListItem) {
-      with((listItem as DateItem).date) { itemView.date.text = DATE_FORMAT.format(this) }
     }
   }
 
