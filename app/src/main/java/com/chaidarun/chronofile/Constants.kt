@@ -6,5 +6,5 @@ import java.util.*
 /** Logging tag */
 const val TAG = "Chronofile"
 
-val DATE_FORMAT = SimpleDateFormat("EE, dd MMM YYYY", Locale.getDefault())
+val DATE_FORMAT = SimpleDateFormat("EE, dd MMM yyyy", Locale.getDefault())
 val TIME_FORMAT = SimpleDateFormat("H:mm", Locale.getDefault())
