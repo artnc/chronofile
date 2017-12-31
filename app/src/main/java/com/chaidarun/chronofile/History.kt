@@ -32,7 +32,8 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val entry = Entry(currentActivityStartTime, sanitizedActivity, latLong, sanitizedNote)
     val newEntries = entries.toMutableList()
     newEntries.add(entry)
-    return copy(currentActivityStartTime = getEpochSeconds(), entries = normalizeEntriesAndSaveFile(newEntries, currentActivityStartTime))
+    val nextStartTime = getEpochSeconds()
+    return copy(currentActivityStartTime = nextStartTime, entries = normalizeEntriesAndSaveFile(newEntries, nextStartTime))
   }
 
   fun withoutEntries(startTimes: Collection<Long>): History {
