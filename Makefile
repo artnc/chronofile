@@ -2,4 +2,4 @@ MAKEFLAGS += --silent
 
 .PHONY: log
 log:
-	adb logcat -s -v color "Chronofile"
+	adb logcat -s -v color AndroidRuntime Chronofile
