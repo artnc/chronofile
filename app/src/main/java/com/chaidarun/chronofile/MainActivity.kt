@@ -41,17 +41,18 @@ class MainActivity : BaseActivity() {
     return true
   }
 
-  override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-    R.id.action_refresh -> {
-      hydrateStoreFromFiles()
-      toast("Reloaded history and config from disk")
-      true
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    when (item.itemId) {
+      R.id.action_edit_config_file ->
+        startActivity(Intent(this, EditorActivity::class.java))
+      R.id.action_refresh -> {
+        hydrateStoreFromFiles()
+        toast("Reloaded history and config from disk")
+      }
+      R.id.action_stats -> startActivity(Intent(this, PieActivity::class.java))
+      else -> return super.onOptionsItemSelected(item)
     }
-    R.id.action_stats -> {
-      startActivity(Intent(this, PieActivity::class.java))
-      true
-    }
-    else -> super.onOptionsItemSelected(item)
+    return true
   }
 
   override fun onRequestPermissionsResult(
@@ -71,7 +72,7 @@ class MainActivity : BaseActivity() {
   }
 
   private fun hydrateStoreFromFiles() {
-    Store.dispatch(Action.SetConfig(Config.fromFile()))
+    Store.dispatch(Action.SetConfigFromFile(Config.fromFile()))
     Store.dispatch(Action.SetHistory(History.fromFile()))
   }
 

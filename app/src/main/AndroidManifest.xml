@@ -28,6 +28,9 @@
     <activity
       android:name=".PieActivity"
       android:parentActivityName=".MainActivity" />
+    <activity
+      android:name=".EditorActivity"
+      android:parentActivityName=".MainActivity" />
 
     <service
       android:name=".FetchAddressIntentService"

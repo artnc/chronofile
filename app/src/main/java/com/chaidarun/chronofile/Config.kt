@@ -35,8 +35,10 @@ class Config(
 
   fun getActivityGroup(activity: String) = activityGroups.getOrDefault(activity, activity)
 
+  fun serialize() = gson.toJson(this)
+
   fun saveFile() {
-    val textToWrite = gson.toJson(this)
+    val textToWrite = serialize()
     if (file.exists() && file.readText() == textToWrite) {
       Log.d(TAG, "File unchanged; skipping write")
     } else {
@@ -56,12 +58,12 @@ class Config(
     }
     private val file = File("/storage/emulated/0/Sync/chronofile.json")
 
+    private fun deserialize(text: String) = gson.fromJson(text, Config::class.java)
+
+    fun fromText(text: String): Config = deserialize(text).apply { saveFile() }
+
     fun fromFile(): Config {
-      val config = if (file.exists()) {
-        gson.fromJson(file.readText(), Config::class.java)
-      } else {
-        Config()
-      }
+      val config = if (file.exists()) deserialize(file.readText()) else Config()
       config.saveFile()
       return config
     }

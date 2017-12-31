@@ -3,6 +3,7 @@ package com.chaidarun.chronofile
 import android.util.Log
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import org.jetbrains.anko.toast
 
 /** All actions must be immutable */
 sealed class Action {
@@ -20,7 +21,8 @@ sealed class Action {
   ) : Action()
 
   data class RemoveEntries(val entries: Collection<Long>) : Action()
-  data class SetConfig(val config: Config) : Action()
+  data class SetConfigFromText(val text: String) : Action()
+  data class SetConfigFromFile(val config: Config) : Action()
   data class SetGraphGrouping(val grouped: Boolean) : Action()
   data class SetGraphMetric(val metric: Metric) : Action()
   data class SetHistory(val history: History) : Action()
@@ -42,7 +44,17 @@ private val reducer: (State, Action) -> State = { state, action ->
       is Action.EditEntry -> copy(history = history?.withEditedEntry(
         action.oldStartTime, action.newStartTime, action.activity, action.note))
       is Action.RemoveEntries -> copy(history = history?.withoutEntries(action.entries))
-      is Action.SetConfig -> copy(config = action.config)
+      is Action.SetConfigFromText -> {
+        try {
+          val config = Config.fromText(action.text)
+          App.ctx.toast("Saved config")
+          copy(config = config)
+        } catch (e: Throwable) {
+          App.ctx.toast("Failed to save invalid config")
+          this
+        }
+      }
+      is Action.SetConfigFromFile -> copy(config = action.config)
       is Action.SetGraphGrouping -> copy(
         graphSettings = graphSettings.copy(grouped = action.grouped))
       is Action.SetGraphMetric -> copy(graphSettings = graphSettings.copy(metric = action.metric))
