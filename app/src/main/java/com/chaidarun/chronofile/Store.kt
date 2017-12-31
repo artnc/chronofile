@@ -53,6 +53,12 @@ private val reducer: (State, Action) -> State = { state, action ->
 /** API heavily inspired by Redux */
 object Store {
 
+  /**
+   * This exposes `.value` (analogous to Redux `store.getState`) and `.subscribe` (analogous to
+   * Redux `store.subscribe`).
+   *
+   * TODO: Wrap this object to hide its `.accept` from public callers?
+   * */
   val state: BehaviorRelay<State> = BehaviorRelay.create()
   private val actions = PublishRelay.create<Action>().apply {
     scan(State(), reducer).subscribe { state.accept(it) }

@@ -23,6 +23,7 @@ data class Entry(
   val note: String? = null
 ) {
 
+  /** Returns a version of this entry with location snapped to a nearby known one if found */
   fun snapToKnownLocation(config: Config?): Entry {
     latLong ?: return this
     config?.locations ?: return this
@@ -40,6 +41,7 @@ data class Entry(
         return Entry(startTime, activity, snapLatLong, note)
       }
     }
+
     return this
   }
 }

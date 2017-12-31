@@ -14,15 +14,18 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     activity: String,
     note: String?
   ): History {
+    // Collect inputs
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
-    val entryIndex = entries.indexOfFirst { it.startTime == oldStartTime }
-    val oldEntry = entries[entryIndex]
     val newStartTime = try {
       val enteredTime = editedStartTime.trim().toLong()
       if (enteredTime > 15e8 && enteredTime <= getEpochSeconds()) enteredTime else oldStartTime
     } catch (e: Exception) {
       oldStartTime
     }
+
+    // Edit entry
+    val entryIndex = entries.indexOfFirst { it.startTime == oldStartTime }
+    val oldEntry = entries[entryIndex]
     val newEntries = entries.toMutableList().apply {
       this[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLong, sanitizedNote)
     }
@@ -48,6 +51,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       LocationServices.getFusedLocationProviderClient(App.ctx)
     }
 
+    /** Gets current Unix timestamp in seconds */
     private fun getEpochSeconds() = System.currentTimeMillis() / 1000
 
     private fun normalizeAndSave(
@@ -101,6 +105,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       callback(null)
     }
 
+    /** Acquires current location before dispatching action to create new entry */
     fun addEntry(activity: String, note: String?) {
       getLocation {
         Store.dispatch(Action.AddEntry(activity, note, it?.toList()))
@@ -109,18 +114,22 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     }
 
     fun fromFile(): History {
+      // Ensure file exists
       var currentActivityStartTime = getEpochSeconds()
-      if (!file.exists()) {
-        file.writeText(gson.toJson(PlaceholderEntry(currentActivityStartTime)))
-      }
+      val lines = if (file.exists()) file.readLines() else listOf(
+        gson.toJson(PlaceholderEntry(currentActivityStartTime)).apply { file.writeText(this) }
+      )
+
+      // Parse lines
       val entries = mutableListOf<Entry>()
-      file.readLines().forEach {
+      lines.forEach {
         if (',' in it) {
           entries += gson.fromJson(it, Entry::class.java)
         } else if (it.trim().isNotEmpty()) {
           currentActivityStartTime = gson.fromJson(it, PlaceholderEntry::class.java).startTime
         }
       }
+
       return History(
         normalizeAndSave(entries, currentActivityStartTime), currentActivityStartTime)
     }

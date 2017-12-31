@@ -11,9 +11,12 @@ class App : Application() {
 
   override fun onCreate() {
     super.onCreate()
+
+    // Set global default font
     CalligraphyConfig.initDefault(CalligraphyConfig.Builder().setDefaultFontPath("fonts/Exo2-Regular.otf").setFontAttrId(R.attr.fontPath).build())
-    instance = this
+
     ctx = this.applicationContext
+    instance = this
   }
 
   companion object {

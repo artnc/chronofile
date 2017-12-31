@@ -35,10 +35,8 @@ class PieActivity : BaseActivity() {
 
     disposables = listOf(
       Store.state.filter { it.config != null && it.history != null }
-        .map { Triple(it.config, it.history, it.graphSettings) }
-        .distinctUntilChanged().subscribe { (config, history, graphSettings) ->
-        setData(config!!, history!!, graphSettings)
-      }
+        .map { Triple(it.config!!, it.history!!, it.graphSettings) }
+        .distinctUntilChanged().subscribe { update(it) }
     )
   }
 
@@ -57,7 +55,9 @@ class PieActivity : BaseActivity() {
     }
   }
 
-  private fun setData(config: Config, history: History, graphSettings: GraphSettings) {
+  /** (Re-)renders pie chart */
+  private fun update(state: Triple<Config, History, GraphSettings>) {
+    val (config, history, graphSettings) = state
     Log.d(TAG, "Rendering pie chart")
 
     // Get data
@@ -75,6 +75,7 @@ class PieActivity : BaseActivity() {
         else -> 0
       }
 
+      // Bucket entries into slices
       var endTime = currentActivityStartTime
       for (entry in entries.reversed()) {
         val startTime = Math.max(entry.startTime, minStartTime)
@@ -86,11 +87,13 @@ class PieActivity : BaseActivity() {
         }
         endTime = startTime
       }
+
       totalSeconds
     }
-    val pieEntries = slices.entries.sortedByDescending { it.value }.map { PieEntry(it.value.toFloat(), it.key) }
 
     // Show data
+    val pieEntries = slices.entries.sortedByDescending { it.value }
+      .map { PieEntry(it.value.toFloat(), it.key) }
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
       colors = listOf(
         "#66BB6A",

@@ -22,8 +22,12 @@ class MainActivity : BaseActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    // Set up UI
     setContentView(R.layout.activity_main)
     setSupportActionBar(toolbar)
+
+    // Ensure required permissions are granted
     if (APP_PERMISSIONS.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
       init()
     } else {
@@ -38,8 +42,7 @@ class MainActivity : BaseActivity() {
 
   override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
     R.id.action_graph -> {
-      val intent = Intent(this, PieActivity::class.java)
-      startActivity(intent)
+      startActivity(Intent(this, PieActivity::class.java))
       true
     }
     R.id.action_refresh -> {
@@ -74,9 +77,11 @@ class MainActivity : BaseActivity() {
   private fun init() {
     hydrateStoreFromFiles()
 
+    // Hook up list view
     historyList.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
     historyList.adapter = HistoryListAdapter(this)
 
+    // Set up listeners
     disposables = listOf(
       RxView.clicks(addEntry)
         .subscribe {
@@ -86,9 +91,7 @@ class MainActivity : BaseActivity() {
           currentFocus?.clearFocus()
         },
       RxTextView.afterTextChangeEvents(addEntryActivity)
-        .subscribe {
-          addEntry.isEnabled = !addEntryActivity.text.toString().isBlank()
-        },
+        .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() },
       Store.state.subscribe { state ->
         addEntry.text = SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(state.history!!.currentActivityStartTime * 1000))
       }
