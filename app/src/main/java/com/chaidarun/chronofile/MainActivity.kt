@@ -93,10 +93,10 @@ class MainActivity : BaseActivity() {
         },
       RxTextView.afterTextChangeEvents(addEntryActivity)
         .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() },
-      Store.state.subscribe { state ->
-        addEntry.text = TIME_FORMAT.format(
-          Date(state.history!!.currentActivityStartTime * 1000))
-      }
+      Store.state
+        .map { it.history!!.currentActivityStartTime }
+        .distinctUntilChanged()
+        .subscribe { addEntry.text = TIME_FORMAT.format(Date(it * 1000)) }
     )
   }
 
