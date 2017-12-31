@@ -2,6 +2,7 @@ package com.chaidarun.chronofile
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RadioButton
 import com.github.mikephil.charting.data.PieData
@@ -32,16 +33,11 @@ class PieActivity : BaseActivity() {
       setTransparentCircleAlpha(0)
     }
 
-    var cache: Triple<Config, History, GraphSettings>? = null
     disposables = listOf(
-      Store.state.subscribe { state ->
-        if (state.config != null && state.history != null) {
-          val newData = Triple(state.config, state.history, state.graphSettings)
-          if (cache != newData) {
-            cache = newData
-            setData(state.config, state.history, state.graphSettings)
-          }
-        }
+      Store.state.filter { it.config != null && it.history != null }
+        .map { Triple(it.config, it.history, it.graphSettings) }
+        .distinctUntilChanged().subscribe { (config, history, graphSettings) ->
+        setData(config!!, history!!, graphSettings)
       }
     )
   }
@@ -62,6 +58,8 @@ class PieActivity : BaseActivity() {
   }
 
   private fun setData(config: Config, history: History, graphSettings: GraphSettings) {
+    Log.d("PieActivity", "Rendering pie chart")
+
     // Get data
     val (grouped, metric) = graphSettings
     val slices = mutableMapOf<String, Long>()

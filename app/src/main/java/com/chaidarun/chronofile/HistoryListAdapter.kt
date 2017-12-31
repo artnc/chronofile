@@ -94,17 +94,11 @@ class HistoryListAdapter(
   }
 
   init {
-    var cache: History? = null
-    Store.state.subscribe {
-      if (cache == it.history) {
-        return@subscribe
-      }
-      cache = it.history
-
+    Store.state.map { it.history }.distinctUntilChanged().subscribe {
       Log.d(TAG, "Rendering history view")
       itemList = (mutableListOf<ListItem>()).apply {
         var currentDate = Date(0)
-        it.history?.entries?.forEach {
+        it?.entries?.forEach {
           val entryDate = Date(it.startTime * 1000)
           if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
             currentDate = entryDate
