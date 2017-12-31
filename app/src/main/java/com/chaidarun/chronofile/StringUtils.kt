@@ -1,5 +1,19 @@
 package com.chaidarun.chronofile
 
+private const val ELLIPSIS = "..."
+
+/**
+ * Ellipsizes an object's string representation if needed so that it (including ellipsis) is at
+ * most the given length
+ */
+fun ellipsize(obj: Any, maxLength: Int = 64) = with(obj.toString()) {
+  when {
+    this.length <= ELLIPSIS.length -> this
+    this.length > maxLength -> this.substring(0, maxLength - ELLIPSIS.length) + ELLIPSIS
+    else -> this
+  }
+}
+
 /**
  * Greedily trims matching character sequences from both the start and the end of two objects'
  * string representations, returning the resulting substrings as the diff
@@ -25,5 +39,5 @@ fun dumbDiff(objA: Any, objB: Any): String {
   a = a.substring(0, lenA - endSame)
   b = b.substring(0, lenB - endSame)
 
-  return "`$a` => `$b`"
+  return "`${ellipsize(a)}` => `${ellipsize(b)}`"
 }

@@ -34,7 +34,7 @@ data class State(
 )
 
 private val reducer: (State, Action) -> State = { state, action ->
-  Log.d(TAG, "Reducing $action")
+  Log.d(TAG, "Reducing ${ellipsize(action)}")
   with(state) {
     val nextState = when (action) {
       is Action.AddEntry -> copy(history = history?.withNewEntry(
