@@ -44,14 +44,13 @@ private val reducer: (State, Action) -> State = { state, action ->
     is Action.SetGraphMetric -> state.copy(graphSettings = state.graphSettings.copy(metric = action.metric))
     is Action.SetHistory -> state.copy(history = action.history)
   }
-  Log.d("Reducer", "State is now $nextState")
+  Log.d("Reducer", "State diff: ${dumbDiff(state, nextState)}")
   nextState
 }
 
 /** API heavily inspired by Redux */
 object Store {
 
-  private val TAG = "Store"
   private val actions = PublishRelay.create<Action>()
   val state: BehaviorRelay<State> = BehaviorRelay.create()
 
@@ -59,8 +58,5 @@ object Store {
     actions.scan(State(), reducer).subscribe { state.accept(it) }
   }
 
-  fun dispatch(action: Action) {
-    Log.d(TAG, "Dispatching $action")
-    actions.accept(action)
-  }
+  fun dispatch(action: Action) = actions.accept(action)
 }
