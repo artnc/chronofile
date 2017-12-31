@@ -7,9 +7,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyConfig
 
 class App : Application() {
 
-  lateinit var config: Config
-  lateinit var history: History
-  val typeface by lazy { Typeface.createFromAsset(assets, "fonts/Exo2-Regular.otf") }
+  val typeface: Typeface by lazy { Typeface.createFromAsset(assets, "fonts/Exo2-Regular.otf") }
 
   override fun onCreate() {
     super.onCreate()

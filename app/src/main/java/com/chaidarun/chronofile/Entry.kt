@@ -22,13 +22,13 @@ data class Entry(
   @SerializedName("n")
   val note: String? = null
 ) {
-  fun snapToKnownLocation(): Entry {
+  fun snapToKnownLocation(config: Config?): Entry {
     latLong ?: return this
-    val snapLocations = App.instance.config.locations ?: return this
+    config?.locations ?: return this
 
     // Snap to known location if in range
     val (x1, y1) = latLong
-    for ((snapName, snapLatLong) in snapLocations) {
+    for ((snapName, snapLatLong) in config.locations) {
       val (x2, y2) = snapLatLong
       val distanceSquared = Math.pow(x2 - x1, 2.0) + Math.pow(y2 - y1, 2.0)
       if (distanceSquared == 0.0) {

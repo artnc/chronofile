@@ -35,7 +35,7 @@ class Config(
 
   fun getActivityGroup(activity: String) = activityGroups.getOrDefault(activity, activity)
 
-  fun saveConfigToDisk() {
+  fun saveFile() {
     val textToWrite = gson.toJson(this)
     if (file.exists() && file.readText() == textToWrite) {
       Log.d(TAG, "File unchanged; skipping write")
@@ -53,13 +53,13 @@ class Config(
     }
     private val file = File("/storage/emulated/0/Sync/chronofile.json")
 
-    fun loadConfigFromDisk(): Config {
+    fun fromFile(): Config {
       val config = if (file.exists()) {
         gson.fromJson(file.readText(), Config::class.java)
       } else {
         Config()
       }
-      config.saveConfigToDisk()
+      config.saveFile()
       return config
     }
   }

@@ -8,6 +8,7 @@ import android.os.ResultReceiver
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.*
 import kotlinx.android.synthetic.main.form_entry.view.*
 import kotlinx.android.synthetic.main.item_date.view.*
@@ -24,11 +25,10 @@ private class EntryItem(val entry: Entry) : ListItem(ViewType.ENTRY.id)
 class HistoryListAdapter(
   private val appActivity: AppCompatActivity,
   private val recyclerView: RecyclerView,
-  private val history: History,
   private val itemClick: (Entry) -> Unit
 ) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
-  private val itemList = mutableListOf<ListItem>()
+  private var itemList = listOf<ListItem>()
   private val selectedEntries = mutableListOf<Entry>()
   private val receiver by lazy {
     object : ResultReceiver(Handler()) {
@@ -43,7 +43,7 @@ class HistoryListAdapter(
     object : ActionMode.Callback {
       override fun onActionItemClicked(mode: ActionMode, item: MenuItem?): Boolean {
         when (item?.itemId) {
-          R.id.delete -> history.removeEntries(selectedEntries.map { it.startTime })
+          R.id.delete -> Store.dispatch(Action.RemoveEntries(selectedEntries.map { it.startTime }))
           R.id.edit -> {
             val entry = selectedEntries[0]
             val view = LayoutInflater.from(appActivity).inflate(R.layout.form_entry, null)
@@ -54,9 +54,9 @@ class HistoryListAdapter(
               view.formEntryNote.setText(entry.note ?: "")
               setView(view)
               setPositiveButton("OK", { _, _ ->
-                history.editEntry(entry.startTime, view.formEntryStartTime.text.toString(), view.formEntryActivity.text.toString(), view.formEntryNote.text.toString())
-                refreshAdapter()
-                appActivity.toast("Updated ${entry.activity}")
+                Store.dispatch(Action.EditEntry(
+                  entry.startTime, view.formEntryStartTime.text.toString(),
+                  view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()))
               })
               setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
               show()
@@ -89,24 +89,32 @@ class HistoryListAdapter(
       }
 
       override fun onPrepareActionMode(p0: ActionMode?, p1: Menu?) = false
-      override fun onDestroyActionMode(mode: ActionMode?) = refreshAdapter()
+      override fun onDestroyActionMode(mode: ActionMode?) {}
     }
   }
 
   init {
-    refreshItemList()
-  }
-
-  private fun refreshItemList() {
-    itemList.clear()
-    var currentDate = Date(0)
-    history.entries.forEach {
-      val entryDate = Date(it.startTime * 1000)
-      if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
-        currentDate = entryDate
-        itemList.add(DateItem(entryDate))
+    var cache: History? = null
+    Store.state.subscribe {
+      if (cache == it.history) {
+        return@subscribe
       }
-      itemList.add(EntryItem(it))
+      cache = it.history
+
+      Log.d(TAG, "Rendering history view")
+      val newItemList = mutableListOf<ListItem>()
+      var currentDate = Date(0)
+      it.history?.entries?.forEach {
+        val entryDate = Date(it.startTime * 1000)
+        if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
+          currentDate = entryDate
+          newItemList.add(DateItem(entryDate))
+        }
+        newItemList.add(EntryItem(it))
+      }
+      itemList = newItemList.toList()
+      notifyDataSetChanged()
+      recyclerView.scrollToPosition(itemList.size - 1)
     }
   }
 
@@ -118,18 +126,12 @@ class HistoryListAdapter(
     viewType: Int
   ) = when (viewType) {
     ViewType.DATE.id -> DateViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false))
-    ViewType.ENTRY.id -> EntryViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false), itemClick, this)
+    ViewType.ENTRY.id -> EntryViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false), itemClick)
     else -> null
   }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     holder.bindItem(itemList[position])
-  }
-
-  fun refreshAdapter() {
-    refreshItemList()
-    notifyDataSetChanged()
-    recyclerView.scrollToPosition(itemList.size - 1)
   }
 
   abstract class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -138,8 +140,7 @@ class HistoryListAdapter(
 
   inner class EntryViewHolder(
     view: View,
-    private val itemClick: (Entry) -> Unit,
-    private val adapter: HistoryListAdapter
+    private val itemClick: (Entry) -> Unit
   ) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
       with((listItem as EntryItem).entry) {
@@ -147,10 +148,7 @@ class HistoryListAdapter(
         itemView.entryNote.text = note
         itemView.entryNote.visibility = if (note == null) View.GONE else View.VISIBLE
         itemView.entryStartTime.text = TIME_FORMAT.format(Date(startTime * 1000))
-        itemView.setOnClickListener {
-          itemClick(this)
-          adapter.refreshAdapter()
-        }
+        itemView.setOnClickListener { itemClick(this) }
         itemView.setOnLongClickListener {
           (itemView.context as AppCompatActivity).startActionMode(actionModeCallback)
           selectedEntries.clear()
@@ -168,6 +166,7 @@ class HistoryListAdapter(
   }
 
   companion object {
+    private val TAG = "HistoryListAdapter"
     private val DATE_FORMAT = SimpleDateFormat("EE, dd MMM YYYY", Locale.getDefault())
     private val TIME_FORMAT = SimpleDateFormat("H:mm", Locale.getDefault())
   }

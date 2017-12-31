@@ -10,12 +10,10 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
 import kotlinx.android.synthetic.main.activity_pie.*
 
+enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
+data class GraphSettings(val grouped: Boolean = true, val metric: Metric = Metric.AVERAGE)
+
 class PieActivity : BaseActivity() {
-
-  private enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
-
-  private var grouped = true
-  private var metric = Metric.AVERAGE
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -33,7 +31,19 @@ class PieActivity : BaseActivity() {
       setHoleColor(Color.TRANSPARENT)
       setTransparentCircleAlpha(0)
     }
-    setData()
+
+    var cache: Triple<Config, History, GraphSettings>? = null
+    disposables = listOf(
+      Store.state.subscribe { state ->
+        if (state.config != null && state.history != null) {
+          val newData = Triple(state.config, state.history, state.graphSettings)
+          if (cache != newData) {
+            cache = newData
+            setData(state.config, state.history, state.graphSettings)
+          }
+        }
+      }
+    )
   }
 
   fun onRadioButtonClicked(view: View) {
@@ -42,20 +52,20 @@ class PieActivity : BaseActivity() {
         return
       }
       when (id) {
-        R.id.radioAverage -> metric = Metric.AVERAGE
-        R.id.radioGrouped -> grouped = true
-        R.id.radioIndividual -> grouped = false
-        R.id.radioPercentage -> metric = Metric.PERCENTAGE
-        R.id.radioTotal -> metric = Metric.TOTAL
+        R.id.radioAverage -> Store.dispatch(Action.SetGraphMetric(Metric.AVERAGE))
+        R.id.radioGrouped -> Store.dispatch(Action.SetGraphGrouping(true))
+        R.id.radioIndividual -> Store.dispatch(Action.SetGraphGrouping(false))
+        R.id.radioPercentage -> Store.dispatch(Action.SetGraphMetric(Metric.PERCENTAGE))
+        R.id.radioTotal -> Store.dispatch(Action.SetGraphMetric(Metric.TOTAL))
       }
-      setData()
     }
   }
 
-  private fun setData() {
+  private fun setData(config: Config, history: History, graphSettings: GraphSettings) {
     // Get data
+    val (grouped, metric) = graphSettings
     val slices = mutableMapOf<String, Long>()
-    val totalSeconds = with(App.instance.history) {
+    val totalSeconds = with(history) {
       var totalSeconds = currentActivityStartTime - entries[0].startTime
 
       // For daily metrics, we restrict the timeframe to as many whole days as possible
@@ -68,7 +78,6 @@ class PieActivity : BaseActivity() {
       }
 
       var endTime = currentActivityStartTime
-      val config = App.instance.config
       for (entry in entries.reversed()) {
         val startTime = Math.max(entry.startTime, minStartTime)
         val seconds = endTime - startTime
