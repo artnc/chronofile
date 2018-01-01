@@ -1,5 +1,7 @@
 package com.chaidarun.chronofile
 
+import android.util.Log
+
 private const val ELLIPSIS = "..."
 
 /**
@@ -44,3 +46,7 @@ fun dumbDiff(objA: Any, objB: Any): Pair<String, String> {
 
 /** Gets current Unix timestamp in seconds */
 fun epochSeconds() = System.currentTimeMillis() / 1000
+
+/** Log a message at warning level if given boolean is true, else at debug level */
+fun logDW(message: String, warnIf: Boolean = true) =
+  if (warnIf) Log.w(TAG, message) else Log.d(TAG, message)

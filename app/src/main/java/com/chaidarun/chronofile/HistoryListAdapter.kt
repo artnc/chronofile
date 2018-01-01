@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
 import org.jetbrains.anko.toast
 import java.util.*
+import kotlin.system.measureTimeMillis
 
 private enum class ViewType(val id: Int) { DATE(0), ENTRY(1) }
 sealed class ListItem(val typeCode: Int)
@@ -99,20 +100,22 @@ class HistoryListAdapter(
         return@subscribe
       }
 
-      Log.d(TAG, "Rendering history view")
-      itemList = (mutableListOf<ListItem>()).apply {
-        var currentDate = Date(it.currentActivityStartTime * 1000)
-        it.entries.reversed().forEach {
-          val entryDate = Date(it.startTime * 1000)
-          if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
-            add(DateItem(currentDate))
-            currentDate = entryDate
+      val elapsedMs = measureTimeMillis {
+        itemList = (mutableListOf<ListItem>()).apply {
+          var currentDate = Date(it.currentActivityStartTime * 1000)
+          it.entries.reversed().forEach {
+            val entryDate = Date(it.startTime * 1000)
+            if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
+              add(DateItem(currentDate))
+              currentDate = entryDate
+            }
+            add(EntryItem(it))
           }
-          add(EntryItem(it))
-        }
-      }.reversed()
-      notifyDataSetChanged()
-      appActivity.historyList.scrollToPosition(itemList.size - 1)
+        }.reversed()
+        notifyDataSetChanged()
+        appActivity.historyList.scrollToPosition(itemList.size - 1)
+      }
+      logDW("Rendered history view in $elapsedMs ms", elapsedMs > 20)
     }
   }
 

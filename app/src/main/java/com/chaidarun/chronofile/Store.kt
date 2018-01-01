@@ -1,6 +1,5 @@
 package com.chaidarun.chronofile
 
-import android.util.Log
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import org.jetbrains.anko.toast
@@ -85,7 +84,7 @@ private val reducer: (State, Action) -> State = { state, action ->
     val elapsed = System.currentTimeMillis() - start
     val stateDiff = dumbDiff(this, nextState)
     val message = "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff"
-    if (elapsed > 20) Log.w(TAG, message) else Log.d(TAG, message)
+    logDW(message, elapsed > 20)
 
     nextState
   }
