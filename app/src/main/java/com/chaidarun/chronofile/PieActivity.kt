@@ -136,7 +136,7 @@ class PieActivity : BaseActivity() {
   /** (Re-)renders pie chart */
   private fun update(state: Triple<Config, History, GraphSettings>) {
     val (config, history, graphSettings) = state
-    Log.d(TAG, "Rendering pie chart")
+    val start = System.currentTimeMillis()
 
     // Determine date range
     val (rangeStart, rangeEnd) = getChartRange(history, graphSettings)
@@ -189,16 +189,7 @@ class PieActivity : BaseActivity() {
     // Show data
     val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
-      colors = listOf(
-        "#66BB6A",
-        "#388E3C",
-        "#81C784",
-        "#4CAF50",
-        "#2E7D32",
-        "#1B5E20",
-        "#A5D6A7",
-        "#43A047"
-      ).map { Color.parseColor(it) }
+      colors = COLORS
       valueLineColor = Color.TRANSPARENT
       valueLinePart1Length = 0.5f
       valueLinePart2Length = 0f
@@ -221,6 +212,8 @@ class PieActivity : BaseActivity() {
       data = PieData(pieDataSet)
       invalidate()
     }
+
+    Log.d(TAG, "Rendered pie chart in ${System.currentTimeMillis() - start} ms")
   }
 
   /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
@@ -246,5 +239,18 @@ class PieActivity : BaseActivity() {
   companion object {
     /** Slices smaller than this will get bucketed into "Other" */
     private val MIN_SLICE_PERCENT = 0.015
+
+    private val COLORS by lazy {
+      listOf(
+        "#66BB6A",
+        "#388E3C",
+        "#81C784",
+        "#4CAF50",
+        "#2E7D32",
+        "#1B5E20",
+        "#A5D6A7",
+        "#43A047"
+      ).map { Color.parseColor(it) }
+    }
   }
 }
