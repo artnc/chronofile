@@ -82,7 +82,9 @@ private val reducer: (State, Action) -> State = { state, action ->
 
     // Print reduction stats
     val elapsed = System.currentTimeMillis() - start
-    val stateDiff = dumbDiff(this, nextState)
+    val stateDiff = with(dumbDiff(this, nextState)) {
+      "`${ellipsize(this.first)}` => `${ellipsize(this.second)}`"
+    }
     val message = "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff"
     logDW(message, elapsed > 20)
 
