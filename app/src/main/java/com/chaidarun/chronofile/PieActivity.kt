@@ -123,12 +123,12 @@ class PieActivity : BaseActivity() {
       Long.MAX_VALUE
     } else {
       // Must append a day's worth of seconds to the range to make it inclusive
-      graphSettings.endTime + 86400
+      graphSettings.endTime + DAY_SECONDS
     }
     val rangeEnd = Math.min(historyEnd, pickerEnd)
     var rangeStart = Math.max(historyStart, pickerStart)
     if (graphSettings.metric == Metric.AVERAGE) {
-      rangeStart = rangeEnd - ((rangeEnd - rangeStart) / 86400 * 86400)
+      rangeStart = rangeEnd - ((rangeEnd - rangeStart) / DAY_SECONDS * DAY_SECONDS)
     }
     return Pair(rangeStart, rangeEnd)
   }
@@ -192,7 +192,7 @@ class PieActivity : BaseActivity() {
       valueTypeface = App.instance.typeface
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {
-          Metric.AVERAGE -> formatTime(value.toLong() * 86400 / rangeSeconds)
+          Metric.AVERAGE -> formatTime(value.toLong() * DAY_SECONDS / rangeSeconds)
           Metric.PERCENTAGE -> "${value.toLong() * 100 / rangeSeconds}%"
           Metric.TOTAL -> formatTime(value.toLong())
         }
