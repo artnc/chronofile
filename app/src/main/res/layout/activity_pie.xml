@@ -44,7 +44,6 @@
         android:id="@+id/radioGrouped"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:checked="true"
         android:onClick="onRadioButtonClicked"
         android:text="Grouped activities" />
 
@@ -66,7 +65,6 @@
         android:id="@+id/radioAverage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:checked="true"
         android:onClick="onRadioButtonClicked"
         android:text="Average daily" />
 

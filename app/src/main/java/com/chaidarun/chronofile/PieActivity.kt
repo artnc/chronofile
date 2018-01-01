@@ -44,9 +44,20 @@ class PieActivity : BaseActivity() {
       setTransparentCircleAlpha(0)
     }
 
-    // Set date picker range to history range by default
-    Store.dispatch(Action.SetGraphRangeStart(Store.state.value.history!!.entries[0].startTime))
-    Store.dispatch(Action.SetGraphRangeEnd(Store.state.value.history!!.currentActivityStartTime))
+    // Populate form with current state
+    with(Store.state.value) {
+      Store.dispatch(Action.SetGraphRangeStart(history!!.entries[0].startTime))
+      Store.dispatch(Action.SetGraphRangeEnd(history.currentActivityStartTime))
+      (when (graphSettings.grouped) {
+        true -> radioGrouped
+        false -> radioIndividual
+      }).isChecked = true
+      (when (graphSettings.metric) {
+        Metric.AVERAGE -> radioAverage
+        Metric.PERCENTAGE -> radioPercentage
+        Metric.TOTAL -> radioTotal
+      }).isChecked = true
+    }
 
     var startTime: Long? = null
     var endTime: Long? = null
