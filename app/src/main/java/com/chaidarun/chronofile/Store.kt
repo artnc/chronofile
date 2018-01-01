@@ -38,8 +38,8 @@ data class State(
 )
 
 private val reducer: (State, Action) -> State = { state, action ->
-  Log.d(TAG, "Reducing ${ellipsize(action)}")
   with(state) {
+    val start = System.currentTimeMillis()
     val nextState = when (action) {
       is Action.AddEntry -> copy(history = history?.withNewEntry(
         action.activity, action.note, action.latLong))
@@ -80,7 +80,13 @@ private val reducer: (State, Action) -> State = { state, action ->
       }
       is Action.SetHistory -> copy(history = action.history)
     }
-    Log.d(TAG, "State diff: ${dumbDiff(this, nextState)}")
+
+    // Print reduction stats
+    val elapsed = System.currentTimeMillis() - start
+    val stateDiff = dumbDiff(this, nextState)
+    val message = "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff"
+    if (elapsed > 20) Log.w(TAG, message) else Log.d(TAG, message)
+
     nextState
   }
 }

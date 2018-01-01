@@ -18,11 +18,11 @@ fun ellipsize(obj: Any, maxLength: Int = 64) = with(obj.toString()) {
  * Greedily trims matching character sequences from both the start and the end of two objects'
  * string representations, returning the resulting substrings as the diff
  */
-fun dumbDiff(objA: Any, objB: Any): String {
+fun dumbDiff(objA: Any, objB: Any): Pair<String, String> {
   var a = objA.toString()
   var b = objB.toString()
   if (a == b) {
-    return "no change"
+    return Pair("", "")
   }
 
   // Trim from start
@@ -39,7 +39,7 @@ fun dumbDiff(objA: Any, objB: Any): String {
   a = a.substring(0, lenA - endSame)
   b = b.substring(0, lenB - endSame)
 
-  return "`${ellipsize(a)}` => `${ellipsize(b)}`"
+  return Pair(a, b)
 }
 
 /** Gets current Unix timestamp in seconds */
