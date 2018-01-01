@@ -14,14 +14,21 @@ import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.form_entry.view.*
 import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
+import kotlinx.android.synthetic.main.item_time.view.*
 import org.jetbrains.anko.toast
 import java.util.*
 import kotlin.system.measureTimeMillis
 
-private enum class ViewType(val id: Int) { DATE(0), ENTRY(1) }
+private enum class ViewType(val id: Int) { DATE(0), ENTRY(1), TIME(2) }
 sealed class ListItem(val typeCode: Int)
-private class DateItem(val date: Date) : ListItem(ViewType.DATE.id)
-private class EntryItem(val entry: Entry) : ListItem(ViewType.ENTRY.id)
+private data class DateItem(val date: Date) : ListItem(ViewType.DATE.id)
+private data class EntryItem(
+  val entry: Entry,
+  val itemStart: Long,
+  val itemEnd: Long
+) : ListItem(ViewType.ENTRY.id)
+
+private data class TimeItem(val time: Date) : ListItem(ViewType.TIME.id)
 
 class HistoryListAdapter(
   private val appActivity: AppCompatActivity
@@ -102,14 +109,30 @@ class HistoryListAdapter(
 
       val elapsedMs = measureTimeMillis {
         itemList = (mutableListOf<ListItem>()).apply {
-          var currentDate = Date(it.currentActivityStartTime * 1000)
+          var lastSeenStartTime = it.currentActivityStartTime
           it.entries.reversed().forEach {
-            val entryDate = Date(it.startTime * 1000)
-            if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
-              add(DateItem(currentDate))
-              currentDate = entryDate
+            add(TimeItem(Date(lastSeenStartTime * 1000)))
+
+            // Use either one or two items for entry depending on whether it crosses midnight
+            val entryCrossesMidnight = DATE_FORMAT.format(Date(it.startTime * 1000)) !=
+              DATE_FORMAT.format(Date(lastSeenStartTime * 1000))
+            if (entryCrossesMidnight) {
+              val midnight = with(Calendar.getInstance()) {
+                apply { timeInMillis = lastSeenStartTime * 1000 }
+                GregorianCalendar(
+                  get(Calendar.YEAR),
+                  get(Calendar.MONTH),
+                  get(Calendar.DAY_OF_MONTH)
+                ).time.time / 1000
+              }
+              add(EntryItem(it, midnight, lastSeenStartTime))
+              add(DateItem(Date(lastSeenStartTime * 1000)))
+              add(EntryItem(it, it.startTime, midnight))
+            } else {
+              add(EntryItem(it, it.startTime, lastSeenStartTime))
             }
-            add(EntryItem(it))
+
+            lastSeenStartTime = it.startTime
           }
         }.reversed()
         notifyDataSetChanged()
@@ -127,6 +150,8 @@ class HistoryListAdapter(
       LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false))
     ViewType.ENTRY.id -> EntryViewHolder(
       LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false))
+    ViewType.TIME.id -> TimeViewHolder(
+      LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false))
     else -> null
   }
 
@@ -146,19 +171,29 @@ class HistoryListAdapter(
 
   inner class EntryViewHolder(view: View) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
-      with((listItem as EntryItem).entry) {
-        itemView.entryActivity.text = activity
-        itemView.entryNote.text = note
-        itemView.entryNote.visibility = if (note == null) View.GONE else View.VISIBLE
-        itemView.entryStartTime.text = TIME_FORMAT.format(Date(startTime * 1000))
-        itemView.setOnClickListener { History.addEntry(activity, note) }
-        itemView.setOnLongClickListener {
-          (itemView.context as AppCompatActivity).startActionMode(actionModeCallback)
+      val (entry, itemStart, itemEnd) = listItem as EntryItem
+      val activity = entry.activity
+      val note = entry.note
+
+      with(itemView) {
+        entryActivity.text = activity
+        entryNote.text = note
+        entryNote.visibility = if (note == null) View.GONE else View.VISIBLE
+        entryDuration.text = formatTime(itemEnd - itemStart)
+        setOnClickListener { History.addEntry(activity, note) }
+        setOnLongClickListener {
+          (context as AppCompatActivity).startActionMode(actionModeCallback)
           selectedEntries.clear()
-          selectedEntries.add(this)
+          selectedEntries.add(entry)
           true
         }
       }
+    }
+  }
+
+  class TimeViewHolder(view: View) : ViewHolder(view) {
+    override fun bindItem(listItem: ListItem) {
+      with((listItem as TimeItem).time) { itemView.time.text = TIME_FORMAT.format(this) }
     }
   }
 }

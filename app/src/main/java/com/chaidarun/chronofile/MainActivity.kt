@@ -15,7 +15,6 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
-import java.util.*
 
 
 class MainActivity : BaseActivity() {
@@ -96,11 +95,6 @@ class MainActivity : BaseActivity() {
       )
       add(RxTextView.afterTextChangeEvents(addEntryActivity)
         .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() })
-      add(Store.state
-        .map { it.history!!.currentActivityStartTime }
-        .distinctUntilChanged()
-        .subscribe { addEntry.text = TIME_FORMAT.format(Date(it * 1000)) }
-      )
     }
   }
 

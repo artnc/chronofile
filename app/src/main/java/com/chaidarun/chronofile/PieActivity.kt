@@ -227,26 +227,6 @@ class PieActivity : BaseActivity() {
     Log.d(TAG, "Rendered pie chart in ${System.currentTimeMillis() - start} ms")
   }
 
-  /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
-  private fun formatTime(seconds: Long): String {
-    val pieces = mutableListOf<String>()
-    val totalMinutes = seconds / 60
-    val minutes = totalMinutes % 60
-    if (minutes != 0L) {
-      pieces.add(0, "${minutes}m")
-    }
-    val totalHours = totalMinutes / 60
-    val hours = totalHours % 24
-    if (hours != 0L) {
-      pieces.add(0, "${hours}h")
-    }
-    val days = totalHours / 24
-    if (days != 0L) {
-      pieces.add(0, "${days}d")
-    }
-    return pieces.joinToString(" ")
-  }
-
   companion object {
     /** Slices smaller than this will get bucketed into "Other" */
     private val MIN_SLICE_PERCENT = 0.015

@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
-  android:paddingHorizontal="16dp"
-  android:paddingVertical="8dp">
+  android:clipToPadding="false"
+  android:paddingHorizontal="16dp">
 
   <TextView
     android:id="@+id/entryActivity"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
     tools:text="Sleep" />
 
   <TextView
@@ -25,16 +21,18 @@
     android:alpha="0.25"
     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
     android:visibility="gone"
-    app:layout_constraintStart_toEndOf="@id/entryActivity"
     tools:text="REM" />
 
+  <Space
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1" />
+
   <TextView
-    android:id="@+id/entryStartTime"
+    android:id="@+id/entryDuration"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
     tools:text="Dec 31" />
-</android.support.constraint.ConstraintLayout>
+
+</LinearLayout>
