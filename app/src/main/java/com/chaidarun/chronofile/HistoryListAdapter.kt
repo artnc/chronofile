@@ -94,18 +94,23 @@ class HistoryListAdapter(
 
   init {
     Store.state.map { it.history }.distinctUntilChanged().subscribe {
+      if (it == null) {
+        Log.d(TAG, "History is null")
+        return@subscribe
+      }
+
       Log.d(TAG, "Rendering history view")
       itemList = (mutableListOf<ListItem>()).apply {
-        var currentDate = Date(0)
-        it?.entries?.forEach {
+        var currentDate = Date(it.currentActivityStartTime * 1000)
+        it.entries.reversed().forEach {
           val entryDate = Date(it.startTime * 1000)
           if (DATE_FORMAT.format(entryDate) != DATE_FORMAT.format(currentDate)) {
+            add(DateItem(currentDate))
             currentDate = entryDate
-            add(DateItem(entryDate))
           }
           add(EntryItem(it))
         }
-      }.toList()
+      }.reversed()
       notifyDataSetChanged()
       appActivity.historyList.scrollToPosition(itemList.size - 1)
     }
