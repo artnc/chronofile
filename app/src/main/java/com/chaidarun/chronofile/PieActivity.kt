@@ -39,7 +39,7 @@ class PieActivity : BaseActivity() {
       setCenterTextColor(Color.WHITE)
       setCenterTextTypeface(App.instance.typeface)
       setDrawEntryLabels(false)
-      setExtraOffsets(40f, 40f, 40f, 40f)
+      setExtraOffsets(41f, 41f, 41f, 41f)
       setHoleColor(Color.TRANSPARENT)
       setTransparentCircleAlpha(0)
     }
@@ -148,7 +148,7 @@ class PieActivity : BaseActivity() {
 
     // Get data
     val (grouped, metric) = graphSettings
-    val slices = mutableMapOf<String, Long>()
+    val sliceMap = mutableMapOf<String, Long>()
     with(history) {
       // Bucket entries into slices
       var endTime = rangeEnd
@@ -162,7 +162,7 @@ class PieActivity : BaseActivity() {
         val startTime = Math.max(entry.startTime, rangeStart)
         val seconds = endTime - startTime
         val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-        slices[slice] = slices.getOrDefault(slice, 0) + seconds
+        sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
         endTime = startTime
 
         // Skip entries from before date range
@@ -172,9 +172,22 @@ class PieActivity : BaseActivity() {
       }
     }
 
+    // Sort slices by size, consolidating small slices into "Other"
+    val sliceThresholdSeconds = rangeSeconds * MIN_SLICE_PERCENT
+    var bigSliceSeconds = 0L
+    val sliceList = sliceMap.entries
+      .sortedByDescending { it.value }
+      .takeWhile {
+        val shouldTake = it.value > sliceThresholdSeconds
+        if (shouldTake) bigSliceSeconds += it.value
+        shouldTake
+      }
+      .map { Pair(it.key, it.value) }
+      .toMutableList()
+    if (bigSliceSeconds < rangeSeconds) sliceList += Pair("Other", rangeSeconds - bigSliceSeconds)
+
     // Show data
-    val pieEntries = slices.entries.sortedByDescending { it.value }
-      .map { PieEntry(it.value.toFloat(), it.key) }
+    val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
       colors = listOf(
         "#66BB6A",
@@ -187,6 +200,8 @@ class PieActivity : BaseActivity() {
         "#43A047"
       ).map { Color.parseColor(it) }
       valueLineColor = Color.TRANSPARENT
+      valueLinePart1Length = 0.5f
+      valueLinePart2Length = 0f
       valueTextColor = Color.WHITE
       valueTextSize = 12f
       valueTypeface = App.instance.typeface
@@ -226,5 +241,10 @@ class PieActivity : BaseActivity() {
       pieces.add(0, "${days}d")
     }
     return pieces.joinToString(" ")
+  }
+
+  companion object {
+    /** Slices smaller than this will get bucketed into "Other" */
+    private val MIN_SLICE_PERCENT = 0.015
   }
 }
