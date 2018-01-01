@@ -9,11 +9,19 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
+import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_pie.*
+import org.jetbrains.anko.toast
+import java.util.*
 
 enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
-data class GraphSettings(val grouped: Boolean = true, val metric: Metric = Metric.AVERAGE)
+data class GraphSettings(
+  val grouped: Boolean = true,
+  val metric: Metric = Metric.AVERAGE,
+  val startTime: Long? = null,
+  val endTime: Long? = null
+)
 
 class PieActivity : BaseActivity() {
 
@@ -36,11 +44,53 @@ class PieActivity : BaseActivity() {
       setTransparentCircleAlpha(0)
     }
 
+    // Set date picker range to history range by default
+    Store.dispatch(Action.SetGraphRangeStart(Store.state.value.history!!.entries[0].startTime))
+    Store.dispatch(Action.SetGraphRangeEnd(Store.state.value.history!!.currentActivityStartTime))
+
+    var startTime: Long? = null
+    var endTime: Long? = null
     disposables = CompositeDisposable().apply {
-      add(Store.state.filter { it.config != null && it.history != null }
+      add(Store.state
+        .filter { it.config != null && it.history != null }
         .map { Triple(it.config!!, it.history!!, it.graphSettings) }
-        .distinctUntilChanged().subscribe { update(it) }
+        .distinctUntilChanged()
+        .subscribe { update(it) }
       )
+      add(Store.state
+        .map { it.graphSettings.startTime }
+        .distinctUntilChanged()
+        .subscribe {
+          startTime = it
+          if (it != null) startDate.text = DATE_FORMAT.format(Date(it * 1000))
+        }
+      )
+      add(Store.state
+        .map { it.graphSettings.endTime }
+        .distinctUntilChanged()
+        .subscribe {
+          endTime = it
+          if (it != null) endDate.text = DATE_FORMAT.format(Date(it * 1000))
+        }
+      )
+      add(RxView.clicks(startDate).subscribe {
+        val fragment = DatePickerFragment().apply {
+          arguments = Bundle().apply {
+            putString(DatePickerFragment.ENDPOINT, "start")
+            putLong(DatePickerFragment.TIMESTAMP, startTime ?: epochSeconds())
+          }
+        }
+        fragment.show(fragmentManager, "datePicker")
+      })
+      add(RxView.clicks(endDate).subscribe {
+        val fragment = DatePickerFragment().apply {
+          arguments = Bundle().apply {
+            putString(DatePickerFragment.ENDPOINT, "end")
+            putLong(DatePickerFragment.TIMESTAMP, endTime ?: epochSeconds())
+          }
+        }
+        fragment.show(fragmentManager, "datePicker")
+      })
     }
   }
 
@@ -59,40 +109,67 @@ class PieActivity : BaseActivity() {
     }
   }
 
+  /**
+   * Determines the date range that should be used to render the pie chart.
+   *
+   * This takes into account the earliest recorded entry, the last recorded entry, the
+   * user-selected start date, the user-selected end date, and the graph metric.
+   */
+  private fun getChartRange(history: History, graphSettings: GraphSettings): Pair<Long, Long> {
+    val historyStart = history.entries[0].startTime
+    val historyEnd = history.currentActivityStartTime
+    val pickerStart = graphSettings.startTime ?: 0
+    val pickerEnd = if (graphSettings.endTime == null) {
+      Long.MAX_VALUE
+    } else {
+      // Must append a day's worth of seconds to the range to make it inclusive
+      graphSettings.endTime + 86400
+    }
+    val rangeEnd = Math.min(historyEnd, pickerEnd)
+    var rangeStart = Math.max(historyStart, pickerStart)
+    if (graphSettings.metric == Metric.AVERAGE) {
+      rangeStart = rangeEnd - ((rangeEnd - rangeStart) / 86400 * 86400)
+    }
+    return Pair(rangeStart, rangeEnd)
+  }
+
   /** (Re-)renders pie chart */
   private fun update(state: Triple<Config, History, GraphSettings>) {
     val (config, history, graphSettings) = state
     Log.d(TAG, "Rendering pie chart")
 
+    // Determine date range
+    val (rangeStart, rangeEnd) = getChartRange(history, graphSettings)
+    val rangeSeconds = rangeEnd - rangeStart
+    if (rangeSeconds <= 0) {
+      toast("No data to show!")
+      return
+    }
+
     // Get data
     val (grouped, metric) = graphSettings
     val slices = mutableMapOf<String, Long>()
-    val totalSeconds = with(history) {
-      var totalSeconds = currentActivityStartTime - entries[0].startTime
-
-      // For daily metrics, we restrict the timeframe to as many whole days as possible
-      val minStartTime = when (metric) {
-        Metric.AVERAGE -> {
-          totalSeconds = totalSeconds / 86400 * 86400
-          currentActivityStartTime - totalSeconds
-        }
-        else -> 0
-      }
-
+    with(history) {
       // Bucket entries into slices
-      var endTime = currentActivityStartTime
+      var endTime = rangeEnd
       for (entry in entries.reversed()) {
-        val startTime = Math.max(entry.startTime, minStartTime)
+        // Skip entries from after date range
+        if (entry.startTime >= rangeEnd) {
+          continue
+        }
+
+        // Process entry
+        val startTime = Math.max(entry.startTime, rangeStart)
         val seconds = endTime - startTime
         val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
         slices[slice] = slices.getOrDefault(slice, 0) + seconds
-        if (startTime == minStartTime) {
+        endTime = startTime
+
+        // Skip entries from before date range
+        if (startTime <= rangeStart) {
           break
         }
-        endTime = startTime
       }
-
-      totalSeconds
     }
 
     // Show data
@@ -115,8 +192,8 @@ class PieActivity : BaseActivity() {
       valueTypeface = App.instance.typeface
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {
-          Metric.AVERAGE -> formatTime(value.toLong() * 86400 / totalSeconds)
-          Metric.PERCENTAGE -> "${value.toLong() * 100 / totalSeconds}%"
+          Metric.AVERAGE -> formatTime(value.toLong() * 86400 / rangeSeconds)
+          Metric.PERCENTAGE -> "${value.toLong() * 100 / rangeSeconds}%"
           Metric.TOTAL -> formatTime(value.toLong())
         }
         "${(entry as PieEntry).label} $num"
@@ -125,7 +202,7 @@ class PieActivity : BaseActivity() {
     }
 
     with(chart) {
-      centerText = "Total\n${formatTime(totalSeconds)}"
+      centerText = "Total\n${formatTime(rangeSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
     }

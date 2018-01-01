@@ -41,3 +41,6 @@ fun dumbDiff(objA: Any, objB: Any): String {
 
   return "`${ellipsize(a)}` => `${ellipsize(b)}`"
 }
+
+/** Gets current Unix timestamp in seconds */
+fun epochSeconds() = System.currentTimeMillis() / 1000

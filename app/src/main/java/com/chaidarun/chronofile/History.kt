@@ -18,7 +18,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
     val newStartTime = try {
       val enteredTime = editedStartTime.trim().toLong()
-      if (enteredTime > 15e8 && enteredTime <= getEpochSeconds()) enteredTime else oldStartTime
+      if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else oldStartTime
     } catch (e: Exception) {
       oldStartTime
     }
@@ -36,7 +36,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
     val entry = Entry(currentActivityStartTime, sanitizedActivity, latLong, sanitizedNote)
     val newEntries = entries.toMutableList().apply { add(entry) }
-    val nextStartTime = getEpochSeconds()
+    val nextStartTime = epochSeconds()
     return copy(
       currentActivityStartTime = nextStartTime,
       entries = normalizeAndSave(newEntries, nextStartTime)
@@ -54,9 +54,6 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     private val locationClient by lazy {
       LocationServices.getFusedLocationProviderClient(App.ctx)
     }
-
-    /** Gets current Unix timestamp in seconds */
-    private fun getEpochSeconds() = System.currentTimeMillis() / 1000
 
     private fun normalizeAndSave(
       entries: Collection<Entry>,
@@ -119,7 +116,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
 
     fun fromFile(): History {
       // Ensure file exists
-      var currentActivityStartTime = getEpochSeconds()
+      var currentActivityStartTime = epochSeconds()
       val lines = if (file.exists()) file.readLines() else listOf(
         gson.toJson(PlaceholderEntry(currentActivityStartTime)).apply { file.writeText(this) }
       )

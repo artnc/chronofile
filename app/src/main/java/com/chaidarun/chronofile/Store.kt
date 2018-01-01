@@ -25,6 +25,8 @@ sealed class Action {
   data class SetConfigFromFile(val config: Config) : Action()
   data class SetGraphGrouping(val grouped: Boolean) : Action()
   data class SetGraphMetric(val metric: Metric) : Action()
+  data class SetGraphRangeEnd(val timestamp: Long) : Action()
+  data class SetGraphRangeStart(val timestamp: Long) : Action()
   data class SetHistory(val history: History) : Action()
 }
 
@@ -58,6 +60,24 @@ private val reducer: (State, Action) -> State = { state, action ->
       is Action.SetGraphGrouping -> copy(
         graphSettings = graphSettings.copy(grouped = action.grouped))
       is Action.SetGraphMetric -> copy(graphSettings = graphSettings.copy(metric = action.metric))
+      is Action.SetGraphRangeEnd -> {
+        val timestamp = action.timestamp
+        val newSettings = if (timestamp >= (state.graphSettings.startTime ?: 0)) {
+          graphSettings.copy(endTime = timestamp)
+        } else {
+          graphSettings.copy(endTime = timestamp, startTime = timestamp)
+        }
+        copy(graphSettings = newSettings)
+      }
+      is Action.SetGraphRangeStart -> {
+        val timestamp = action.timestamp
+        val newSettings = if (timestamp <= (state.graphSettings.endTime ?: Long.MAX_VALUE)) {
+          graphSettings.copy(startTime = timestamp)
+        } else {
+          graphSettings.copy(endTime = timestamp, startTime = timestamp)
+        }
+        copy(graphSettings = newSettings)
+      }
       is Action.SetHistory -> copy(history = action.history)
     }
     Log.d(TAG, "State diff: ${dumbDiff(this, nextState)}")
