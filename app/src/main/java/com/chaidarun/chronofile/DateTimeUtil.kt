@@ -15,6 +15,8 @@ fun formatTime(date: Date): String = timeFormat.format(date)
 
 /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
 fun formatDuration(seconds: Long): String {
+  if (seconds < 30) return "0m"
+
   // Rounds to nearest minute
   val adjustedSeconds = if (seconds % 60 < 30) seconds else seconds + 60
 
