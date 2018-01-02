@@ -2,6 +2,7 @@ package com.chaidarun.chronofile
 
 import android.graphics.Color
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
 import android.widget.RadioButton
@@ -15,6 +16,7 @@ import kotlinx.android.synthetic.main.activity_pie.*
 import org.jetbrains.anko.toast
 import java.util.*
 
+private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK }
 enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
 data class GraphSettings(
   val grouped: Boolean = true,
@@ -46,8 +48,7 @@ class PieActivity : BaseActivity() {
 
     // Populate form with current state
     with(Store.state.value) {
-      Store.dispatch(Action.SetGraphRangeStart(history!!.entries[0].startTime))
-      Store.dispatch(Action.SetGraphRangeEnd(history.currentActivityStartTime))
+      setPresetRange(history!!, PresetRange.LAST_MONTH)
       (when (graphSettings.grouped) {
         true -> radioGrouped
         false -> radioIndividual
@@ -102,7 +103,36 @@ class PieActivity : BaseActivity() {
         }
         fragment.show(fragmentManager, "datePicker")
       })
+      add(RxView.clicks(quickRange).subscribe {
+        with(AlertDialog.Builder(this@PieActivity)) {
+          val options = arrayOf("Past week", "Past month", "All time")
+          setSingleChoiceItems(options, 0, null)
+          setPositiveButton("OK") { dialog, _ ->
+            val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
+            setPresetRange(Store.state.value.history!!, when (optionIndex) {
+              0 -> PresetRange.LAST_WEEK
+              1 -> PresetRange.LAST_MONTH
+              2 -> PresetRange.ALL_TIME
+              else -> throw Exception("Invalid preset range")
+            })
+          }
+          setNegativeButton("Cancel", null)
+          show()
+        }
+      })
     }
+  }
+
+  private fun setPresetRange(history: History, presetRange: PresetRange) {
+    Log.d(TAG, "Setting range to $presetRange")
+    val now = history.currentActivityStartTime
+    val startTime = now - when (presetRange) {
+      PresetRange.ALL_TIME -> 0
+      PresetRange.LAST_MONTH -> now - 30 * DAY_SECONDS
+      PresetRange.LAST_WEEK -> now - 7 * DAY_SECONDS
+    }
+    Store.dispatch(Action.SetGraphRangeStart(Math.max(startTime, history.entries[0].startTime)))
+    Store.dispatch(Action.SetGraphRangeEnd(now))
   }
 
   fun onRadioButtonClicked(view: View) {

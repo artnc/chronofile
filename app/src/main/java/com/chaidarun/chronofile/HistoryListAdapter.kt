@@ -65,7 +65,7 @@ class HistoryListAdapter(
                   view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()))
                 appActivity.toast("Updated entry")
               })
-              setNegativeButton("Cancel", { dialog, _ -> dialog.cancel() })
+              setNegativeButton("Cancel", null)
               show()
             }
           }
