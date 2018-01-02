@@ -126,7 +126,7 @@ class PieActivity : BaseActivity() {
     Log.d(TAG, "Setting range to $presetRange")
     val now = history.currentActivityStartTime
     val startTime = now - when (presetRange) {
-      PresetRange.ALL_TIME -> 0
+      PresetRange.ALL_TIME -> now
       PresetRange.LAST_MONTH -> now - 30 * DAY_SECONDS
       PresetRange.LAST_WEEK -> now - 7 * DAY_SECONDS
     }
