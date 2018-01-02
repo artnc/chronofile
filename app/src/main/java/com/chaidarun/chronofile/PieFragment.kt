@@ -33,7 +33,7 @@ class PieFragment : GraphFragment() {
       setCenterTextColor(Color.WHITE)
       setCenterTextTypeface(App.instance.typeface)
       setDrawEntryLabels(false)
-      setExtraOffsets(41f, 41f, 41f, 41f)
+      setExtraOffsets(35f, 35f, 35f, 35f)
       setHoleColor(Color.TRANSPARENT)
       setTransparentCircleAlpha(0)
     }
