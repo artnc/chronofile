@@ -14,7 +14,6 @@ import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_pie.*
 import org.jetbrains.anko.toast
-import java.util.*
 
 private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK }
 enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
@@ -74,7 +73,7 @@ class PieActivity : BaseActivity() {
         .distinctUntilChanged()
         .subscribe {
           startTime = it
-          if (it != null) startDate.text = DATE_FORMAT.format(Date(it * 1000))
+          if (it != null) startDate.text = formatDate(it)
         }
       )
       add(Store.state
@@ -82,7 +81,7 @@ class PieActivity : BaseActivity() {
         .distinctUntilChanged()
         .subscribe {
           endTime = it
-          if (it != null) endDate.text = DATE_FORMAT.format(Date(it * 1000))
+          if (it != null) endDate.text = formatDate(it)
         }
       )
       add(RxView.clicks(startDate).subscribe {
@@ -239,9 +238,9 @@ class PieActivity : BaseActivity() {
       valueTypeface = App.instance.typeface
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {
-          Metric.AVERAGE -> formatTime(value.toLong() * DAY_SECONDS / rangeSeconds)
+          Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
           Metric.PERCENTAGE -> "${value.toLong() * 100 / rangeSeconds}%"
-          Metric.TOTAL -> formatTime(value.toLong())
+          Metric.TOTAL -> formatDuration(value.toLong())
         }
         "${(entry as PieEntry).label} $num"
       }
@@ -249,7 +248,7 @@ class PieActivity : BaseActivity() {
     }
 
     with(chart) {
-      centerText = "Total\n${formatTime(rangeSeconds)}"
+      centerText = "Total\n${formatDuration(rangeSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
     }

@@ -114,8 +114,7 @@ class HistoryListAdapter(
             add(TimeItem(Date(lastSeenStartTime * 1000)))
 
             // Use either one or two items for entry depending on whether it crosses midnight
-            val entryCrossesMidnight = DATE_FORMAT.format(Date(it.startTime * 1000)) !=
-              DATE_FORMAT.format(Date(lastSeenStartTime * 1000))
+            val entryCrossesMidnight = formatDate(it.startTime) != formatDate(lastSeenStartTime)
             if (entryCrossesMidnight) {
               val midnight = with(Calendar.getInstance()) {
                 apply { timeInMillis = lastSeenStartTime * 1000 }
@@ -165,7 +164,7 @@ class HistoryListAdapter(
 
   class DateViewHolder(view: View) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
-      with((listItem as DateItem).date) { itemView.date.text = DATE_FORMAT.format(this) }
+      with((listItem as DateItem).date) { itemView.date.text = formatDate(this) }
     }
   }
 
@@ -179,7 +178,7 @@ class HistoryListAdapter(
         entryActivity.text = activity
         entryNote.text = note
         entryNote.visibility = if (note == null) View.GONE else View.VISIBLE
-        entryDuration.text = formatTime(itemEnd - itemStart)
+        entryDuration.text = formatDuration(itemEnd - itemStart)
         setOnClickListener { History.addEntry(activity, note) }
         setOnLongClickListener {
           (context as AppCompatActivity).startActionMode(actionModeCallback)
@@ -193,7 +192,7 @@ class HistoryListAdapter(
 
   class TimeViewHolder(view: View) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
-      with((listItem as TimeItem).time) { itemView.time.text = TIME_FORMAT.format(this) }
+      with((listItem as TimeItem).time) { itemView.time.text = formatTime(this) }
     }
   }
 }
