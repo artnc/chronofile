@@ -33,7 +33,7 @@ sealed class Action {
 data class State(
   val config: Config? = null,
   val history: History? = null,
-  val graphSettings: GraphSettings = GraphSettings()
+  val graphConfig: GraphConfig = GraphConfig()
 )
 
 private val reducer: (State, Action) -> State = { state, action ->
@@ -57,25 +57,25 @@ private val reducer: (State, Action) -> State = { state, action ->
       }
       is Action.SetConfigFromFile -> copy(config = action.config)
       is Action.SetGraphGrouping -> copy(
-        graphSettings = graphSettings.copy(grouped = action.grouped))
-      is Action.SetGraphMetric -> copy(graphSettings = graphSettings.copy(metric = action.metric))
+        graphConfig = graphConfig.copy(grouped = action.grouped))
+      is Action.SetGraphMetric -> copy(graphConfig = graphConfig.copy(metric = action.metric))
       is Action.SetGraphRangeEnd -> {
         val timestamp = action.timestamp
-        val newSettings = if (timestamp >= (state.graphSettings.startTime ?: 0)) {
-          graphSettings.copy(endTime = timestamp)
+        val newSettings = if (timestamp >= (state.graphConfig.startTime ?: 0)) {
+          graphConfig.copy(endTime = timestamp)
         } else {
-          graphSettings.copy(endTime = timestamp, startTime = timestamp)
+          graphConfig.copy(endTime = timestamp, startTime = timestamp)
         }
-        copy(graphSettings = newSettings)
+        copy(graphConfig = newSettings)
       }
       is Action.SetGraphRangeStart -> {
         val timestamp = action.timestamp
-        val newSettings = if (timestamp <= (state.graphSettings.endTime ?: Long.MAX_VALUE)) {
-          graphSettings.copy(startTime = timestamp)
+        val newSettings = if (timestamp <= (state.graphConfig.endTime ?: Long.MAX_VALUE)) {
+          graphConfig.copy(startTime = timestamp)
         } else {
-          graphSettings.copy(endTime = timestamp, startTime = timestamp)
+          graphConfig.copy(endTime = timestamp, startTime = timestamp)
         }
-        copy(graphSettings = newSettings)
+        copy(graphConfig = newSettings)
       }
       is Action.SetHistory -> copy(history = action.history)
     }

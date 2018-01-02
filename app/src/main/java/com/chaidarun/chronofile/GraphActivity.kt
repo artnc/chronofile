@@ -9,14 +9,6 @@ import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_graph.*
 
-enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
-data class GraphSettings(
-  val grouped: Boolean = true,
-  val metric: Metric = Metric.AVERAGE,
-  val startTime: Long? = null,
-  val endTime: Long? = null
-)
-
 class GraphActivity : BaseActivity() {
 
   private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK }
@@ -36,7 +28,7 @@ class GraphActivity : BaseActivity() {
     var endTime: Long? = null
     disposables = CompositeDisposable().apply {
       add(Store.state
-        .map { it.graphSettings.startTime }
+        .map { it.graphConfig.startTime }
         .distinctUntilChanged()
         .subscribe {
           startTime = it
@@ -44,7 +36,7 @@ class GraphActivity : BaseActivity() {
         }
       )
       add(Store.state
-        .map { it.graphSettings.endTime }
+        .map { it.graphConfig.endTime }
         .distinctUntilChanged()
         .subscribe {
           endTime = it

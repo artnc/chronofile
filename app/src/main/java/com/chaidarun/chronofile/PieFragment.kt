@@ -40,11 +40,11 @@ class PieFragment : GraphFragment() {
 
     // Populate form with current state
     with(Store.state.value) {
-      (when (graphSettings.grouped) {
+      (when (graphConfig.grouped) {
         true -> radioGrouped
         false -> radioIndividual
       }).isChecked = true
-      (when (graphSettings.metric) {
+      (when (graphConfig.metric) {
         Metric.AVERAGE -> radioAverage
         Metric.PERCENTAGE -> radioPercentage
         Metric.TOTAL -> radioTotal
@@ -54,7 +54,7 @@ class PieFragment : GraphFragment() {
     disposables = CompositeDisposable().apply {
       add(Store.state
         .filter { it.config != null && it.history != null }
-        .map { Triple(it.config!!, it.history!!, it.graphSettings) }
+        .map { Triple(it.config!!, it.history!!, it.graphConfig) }
         .distinctUntilChanged()
         .subscribe { update(it) }
       )
@@ -62,7 +62,7 @@ class PieFragment : GraphFragment() {
   }
 
   /** (Re-)renders pie chart */
-  private fun update(state: Triple<Config, History, GraphSettings>) {
+  private fun update(state: Triple<Config, History, GraphConfig>) {
     val (config, history, graphSettings) = state
     val start = System.currentTimeMillis()
 

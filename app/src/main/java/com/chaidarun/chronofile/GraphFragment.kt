@@ -10,19 +10,19 @@ abstract class GraphFragment : BaseFragment() {
    * This takes into account the earliest recorded entry, the last recorded entry, the
    * user-selected start date, the user-selected end date, and the graph metric.
    */
-  protected fun getChartRange(history: History, graphSettings: GraphSettings): Pair<Long, Long> {
+  protected fun getChartRange(history: History, graphConfig: GraphConfig): Pair<Long, Long> {
     val historyStart = history.entries[0].startTime
     val historyEnd = history.currentActivityStartTime
-    val pickerStart = graphSettings.startTime ?: 0
-    val pickerEnd = if (graphSettings.endTime == null) {
+    val pickerStart = graphConfig.startTime ?: 0
+    val pickerEnd = if (graphConfig.endTime == null) {
       Long.MAX_VALUE
     } else {
       // Must append a day's worth of seconds to the range to make it inclusive
-      graphSettings.endTime + DAY_SECONDS
+      graphConfig.endTime + DAY_SECONDS
     }
     val rangeEnd = Math.min(historyEnd, pickerEnd)
     var rangeStart = Math.max(historyStart, pickerStart)
-    if (graphSettings.metric == Metric.AVERAGE) {
+    if (graphConfig.metric == Metric.AVERAGE) {
       rangeStart = rangeEnd - ((rangeEnd - rangeStart) / DAY_SECONDS * DAY_SECONDS)
     }
     return Pair(rangeStart, rangeEnd)
