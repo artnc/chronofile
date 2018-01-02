@@ -2,35 +2,28 @@ package com.chaidarun.chronofile
 
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.RadioButton
+import android.view.ViewGroup
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
-import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_pie.*
+import kotlinx.android.synthetic.main.fragment_pie.*
 import org.jetbrains.anko.toast
 
-private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK }
-enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
-data class GraphSettings(
-  val grouped: Boolean = true,
-  val metric: Metric = Metric.AVERAGE,
-  val startTime: Long? = null,
-  val endTime: Long? = null
-)
+class PieFragment : BaseFragment() {
 
-class PieActivity : BaseActivity() {
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View = inflater.inflate(R.layout.fragment_pie, container, false)
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_pie)
-    setSupportActionBar(pieToolbar)
-    supportActionBar?.setDisplayHomeAsUpEnabled(true)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
     with(chart) {
       description.isEnabled = false
@@ -47,7 +40,6 @@ class PieActivity : BaseActivity() {
 
     // Populate form with current state
     with(Store.state.value) {
-      setPresetRange(history!!, PresetRange.LAST_MONTH)
       (when (graphSettings.grouped) {
         true -> radioGrouped
         false -> radioIndividual
@@ -59,8 +51,6 @@ class PieActivity : BaseActivity() {
       }).isChecked = true
     }
 
-    var startTime: Long? = null
-    var endTime: Long? = null
     disposables = CompositeDisposable().apply {
       add(Store.state
         .filter { it.config != null && it.history != null }
@@ -68,84 +58,6 @@ class PieActivity : BaseActivity() {
         .distinctUntilChanged()
         .subscribe { update(it) }
       )
-      add(Store.state
-        .map { it.graphSettings.startTime }
-        .distinctUntilChanged()
-        .subscribe {
-          startTime = it
-          if (it != null) startDate.text = formatDate(it)
-        }
-      )
-      add(Store.state
-        .map { it.graphSettings.endTime }
-        .distinctUntilChanged()
-        .subscribe {
-          endTime = it
-          if (it != null) endDate.text = formatDate(it)
-        }
-      )
-      add(RxView.clicks(startDate).subscribe {
-        val fragment = DatePickerFragment().apply {
-          arguments = Bundle().apply {
-            putString(DatePickerFragment.ENDPOINT, "start")
-            putLong(DatePickerFragment.TIMESTAMP, startTime ?: epochSeconds())
-          }
-        }
-        fragment.show(fragmentManager, "datePicker")
-      })
-      add(RxView.clicks(endDate).subscribe {
-        val fragment = DatePickerFragment().apply {
-          arguments = Bundle().apply {
-            putString(DatePickerFragment.ENDPOINT, "end")
-            putLong(DatePickerFragment.TIMESTAMP, endTime ?: epochSeconds())
-          }
-        }
-        fragment.show(fragmentManager, "datePicker")
-      })
-      add(RxView.clicks(quickRange).subscribe {
-        with(AlertDialog.Builder(this@PieActivity, R.style.MyAlertDialogTheme)) {
-          val options = arrayOf("Past week", "Past month", "All time")
-          setSingleChoiceItems(options, 0, null)
-          setPositiveButton("OK") { dialog, _ ->
-            val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
-            setPresetRange(Store.state.value.history!!, when (optionIndex) {
-              0 -> PresetRange.LAST_WEEK
-              1 -> PresetRange.LAST_MONTH
-              2 -> PresetRange.ALL_TIME
-              else -> throw Exception("Invalid preset range")
-            })
-          }
-          setNegativeButton("Cancel", null)
-          show()
-        }
-      })
-    }
-  }
-
-  private fun setPresetRange(history: History, presetRange: PresetRange) {
-    Log.d(TAG, "Setting range to $presetRange")
-    val now = history.currentActivityStartTime
-    val startTime = now - when (presetRange) {
-      PresetRange.ALL_TIME -> now
-      PresetRange.LAST_MONTH -> now - 30 * DAY_SECONDS
-      PresetRange.LAST_WEEK -> now - 7 * DAY_SECONDS
-    }
-    Store.dispatch(Action.SetGraphRangeStart(Math.max(startTime, history.entries[0].startTime)))
-    Store.dispatch(Action.SetGraphRangeEnd(now))
-  }
-
-  fun onRadioButtonClicked(view: View) {
-    with(view as RadioButton) {
-      if (!isChecked) {
-        return
-      }
-      when (id) {
-        R.id.radioAverage -> Store.dispatch(Action.SetGraphMetric(Metric.AVERAGE))
-        R.id.radioGrouped -> Store.dispatch(Action.SetGraphGrouping(true))
-        R.id.radioIndividual -> Store.dispatch(Action.SetGraphGrouping(false))
-        R.id.radioPercentage -> Store.dispatch(Action.SetGraphMetric(Metric.PERCENTAGE))
-        R.id.radioTotal -> Store.dispatch(Action.SetGraphMetric(Metric.TOTAL))
-      }
     }
   }
 
@@ -182,7 +94,7 @@ class PieActivity : BaseActivity() {
     val (rangeStart, rangeEnd) = getChartRange(history, graphSettings)
     val rangeSeconds = rangeEnd - rangeStart
     if (rangeSeconds <= 0) {
-      toast("No data to show!")
+      activity.toast("No data to show!")
       return
     }
 
@@ -229,7 +141,7 @@ class PieActivity : BaseActivity() {
     // Show data
     val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
-      colors = COLORS
+      colors = GraphActivity.COLORS
       valueLineColor = Color.TRANSPARENT
       valueLinePart1Length = 0.5f
       valueLinePart2Length = 0f
@@ -259,18 +171,5 @@ class PieActivity : BaseActivity() {
   companion object {
     /** Slices smaller than this will get bucketed into "Other" */
     private val MIN_SLICE_PERCENT = 0.015
-
-    private val COLORS by lazy {
-      listOf(
-        "#66BB6A",
-        "#388E3C",
-        "#81C784",
-        "#4CAF50",
-        "#2E7D32",
-        "#1B5E20",
-        "#A5D6A7",
-        "#43A047"
-      ).map { Color.parseColor(it) }
-    }
   }
 }

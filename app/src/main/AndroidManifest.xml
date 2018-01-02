@@ -27,11 +27,11 @@
       </intent-filter>
     </activity>
     <activity
-      android:name=".PieActivity"
+      android:name=".EditorActivity"
       android:parentActivityName=".MainActivity"
       android:screenOrientation="portrait" />
     <activity
-      android:name=".EditorActivity"
+      android:name=".GraphActivity"
       android:parentActivityName=".MainActivity"
       android:screenOrientation="portrait" />
 

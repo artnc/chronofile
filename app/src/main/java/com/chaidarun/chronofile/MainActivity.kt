@@ -49,7 +49,7 @@ class MainActivity : BaseActivity() {
         hydrateStoreFromFiles()
         toast("Reloaded history and config from disk")
       }
-      R.id.action_stats -> startActivity(Intent(this, PieActivity::class.java))
+      R.id.action_stats -> startActivity(Intent(this, GraphActivity::class.java))
       else -> return super.onOptionsItemSelected(item)
     }
     return true
