@@ -8,6 +8,6 @@
     android:id="@+id/time"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:alpha="0.25" />
+    android:textColor="@color/colorFadedText" />
 
 </LinearLayout>

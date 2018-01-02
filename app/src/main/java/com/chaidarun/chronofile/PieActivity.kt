@@ -103,7 +103,7 @@ class PieActivity : BaseActivity() {
         fragment.show(fragmentManager, "datePicker")
       })
       add(RxView.clicks(quickRange).subscribe {
-        with(AlertDialog.Builder(this@PieActivity)) {
+        with(AlertDialog.Builder(this@PieActivity, R.style.MyAlertDialogTheme)) {
           val options = arrayOf("Past week", "Past month", "All time")
           setSingleChoiceItems(options, 0, null)
           setPositiveButton("OK") { dialog, _ ->

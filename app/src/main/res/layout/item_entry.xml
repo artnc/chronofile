@@ -19,8 +19,8 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
-    android:alpha="0.25"
     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+    android:textColor="@color/colorFadedText"
     android:visibility="gone"
     tools:text="REM" />
 
