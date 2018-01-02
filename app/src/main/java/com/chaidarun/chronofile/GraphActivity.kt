@@ -1,6 +1,5 @@
 package com.chaidarun.chronofile
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.util.Log
@@ -10,7 +9,6 @@ import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_graph.*
 
-private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK }
 enum class Metric { AVERAGE, PERCENTAGE, TOTAL }
 data class GraphSettings(
   val grouped: Boolean = true,
@@ -20,6 +18,8 @@ data class GraphSettings(
 )
 
 class GraphActivity : BaseActivity() {
+
+  private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -113,21 +113,6 @@ class GraphActivity : BaseActivity() {
         R.id.radioPercentage -> Store.dispatch(Action.SetGraphMetric(Metric.PERCENTAGE))
         R.id.radioTotal -> Store.dispatch(Action.SetGraphMetric(Metric.TOTAL))
       }
-    }
-  }
-
-  companion object {
-    val COLORS by lazy {
-      listOf(
-        "#66BB6A",
-        "#388E3C",
-        "#81C784",
-        "#4CAF50",
-        "#2E7D32",
-        "#1B5E20",
-        "#A5D6A7",
-        "#43A047"
-      ).map { Color.parseColor(it) }
     }
   }
 }

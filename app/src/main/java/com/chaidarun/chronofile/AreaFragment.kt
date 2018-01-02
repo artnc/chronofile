@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 
-class AreaFragment : BaseFragment() {
+class AreaFragment : GraphFragment() {
 
   override fun onCreateView(
     inflater: LayoutInflater,
