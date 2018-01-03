@@ -30,8 +30,11 @@ class AreaFragment : GraphFragment() {
     super.onViewCreated(view, savedInstanceState)
 
     with(areaChart) {
-      axisLeft.axisMinimum = 0f
-      axisLeft.isEnabled = false
+      with(axisLeft) {
+        axisMinimum = 0f
+        axisMaximum = DAY_SECONDS.toFloat()
+        isEnabled = false
+      }
       axisRight.isEnabled = false
       description.isEnabled = false
       isScaleYEnabled = false
@@ -159,10 +162,12 @@ class AreaFragment : GraphFragment() {
         axisDependency = YAxis.AxisDependency.LEFT
         circleRadius = 0f
         color = mColor
+        cubicIntensity = 0.1f
         lineWidth = 0f
         fillAlpha = 255
         fillColor = mColor
         fillFormatter = IFillFormatter { _, _ -> areaChart.axisLeft.axisMinimum }
+        mode = LineDataSet.Mode.CUBIC_BEZIER
         setDrawCircles(false)
         setDrawCircleHole(false)
         setDrawFilled(true)
