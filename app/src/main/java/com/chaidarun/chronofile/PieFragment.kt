@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -25,7 +26,8 @@ class PieFragment : GraphFragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    with(chart) {
+    with(pieChart) {
+      animateY(800, Easing.EasingOption.EaseInOutQuad);
       description.isEnabled = false
       holeRadius = 50f
       legend.isEnabled = false
@@ -56,18 +58,18 @@ class PieFragment : GraphFragment() {
         .filter { it.config != null && it.history != null }
         .map { Triple(it.config!!, it.history!!, it.graphConfig) }
         .distinctUntilChanged()
-        .subscribe { update(it) }
+        .subscribe { render(it) }
       )
     }
   }
 
   /** (Re-)renders pie chart */
-  private fun update(state: Triple<Config, History, GraphConfig>) {
-    val (config, history, graphSettings) = state
+  private fun render(state: Triple<Config, History, GraphConfig>) {
+    val (config, history, graphConfig) = state
     val start = System.currentTimeMillis()
 
     // Determine date range
-    val (rangeStart, rangeEnd) = getChartRange(history, graphSettings)
+    val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
     val rangeSeconds = rangeEnd - rangeStart
     if (rangeSeconds <= 0) {
       activity.toast("No data to show!")
@@ -75,7 +77,7 @@ class PieFragment : GraphFragment() {
     }
 
     // Get data
-    val (grouped, metric) = graphSettings
+    val (grouped, metric) = graphConfig
     val sliceMap = mutableMapOf<String, Long>()
     with(history) {
       // Bucket entries into slices
@@ -135,7 +137,7 @@ class PieFragment : GraphFragment() {
       yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
     }
 
-    with(chart) {
+    with(pieChart) {
       centerText = "Total\n${formatDuration(rangeSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
