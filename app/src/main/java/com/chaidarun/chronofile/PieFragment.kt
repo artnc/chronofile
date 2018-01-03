@@ -2,7 +2,6 @@ package com.chaidarun.chronofile
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,8 +64,8 @@ class PieFragment : GraphFragment() {
 
   /** (Re-)renders pie chart */
   private fun render(state: Triple<Config, History, GraphConfig>) {
-    val (config, history, graphConfig) = state
     val start = System.currentTimeMillis()
+    val (config, history, graphConfig) = state
 
     // Determine date range
     val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
@@ -76,48 +75,10 @@ class PieFragment : GraphFragment() {
       return
     }
 
-    // Get data
-    val (grouped, metric) = graphConfig
-    val sliceMap = mutableMapOf<String, Long>()
-    with(history) {
-      // Bucket entries into slices
-      var endTime = rangeEnd
-      for (entry in entries.reversed()) {
-        // Skip entries from after date range
-        if (entry.startTime >= rangeEnd) {
-          continue
-        }
-
-        // Process entry
-        val startTime = Math.max(entry.startTime, rangeStart)
-        val seconds = endTime - startTime
-        val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-        sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
-        endTime = startTime
-
-        // Skip entries from before date range
-        if (startTime <= rangeStart) {
-          break
-        }
-      }
-    }
-
-    // Sort slices by size, consolidating small slices into "Other"
-    val sliceThresholdSeconds = rangeSeconds * MIN_SLICE_PERCENT
-    var bigSliceSeconds = 0L
-    val sliceList = sliceMap.entries
-      .sortedByDescending { it.value }
-      .takeWhile {
-        val shouldTake = it.value > sliceThresholdSeconds
-        if (shouldTake) bigSliceSeconds += it.value
-        shouldTake
-      }
-      .map { Pair(it.key, it.value) }
-      .toMutableList()
-    if (bigSliceSeconds < rangeSeconds) sliceList += Pair("Other", rangeSeconds - bigSliceSeconds)
-
     // Show data
+    val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd)
     val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
+    val metric = graphConfig.metric
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
       colors = COLORS
       valueLineColor = Color.TRANSPARENT
@@ -143,11 +104,7 @@ class PieFragment : GraphFragment() {
       invalidate()
     }
 
-    Log.d(TAG, "Rendered pie chart in ${System.currentTimeMillis() - start} ms")
-  }
-
-  companion object {
-    /** Slices smaller than this will get bucketed into "Other" */
-    private val MIN_SLICE_PERCENT = 0.015
+    val elapsed = System.currentTimeMillis() - start
+    logDW("Rendered pie chart in $elapsed ms", elapsed > 40)
   }
 }

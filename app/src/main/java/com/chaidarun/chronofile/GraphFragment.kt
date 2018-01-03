@@ -28,6 +28,57 @@ abstract class GraphFragment : BaseFragment() {
     return Pair(rangeStart, rangeEnd)
   }
 
+  protected fun getSliceList(
+    config: Config,
+    history: History,
+    graphConfig: GraphConfig,
+    rangeStart: Long,
+    rangeEnd: Long
+  ): MutableList<Pair<String, Long>> {
+    // Get data
+    val grouped = graphConfig.grouped
+    val sliceMap = mutableMapOf<String, Long>()
+    with(history) {
+      // Bucket entries into slices
+      var endTime = rangeEnd
+      for (entry in entries.reversed()) {
+        // Skip entries from after date range
+        if (entry.startTime >= rangeEnd) {
+          continue
+        }
+
+        // Process entry
+        val startTime = Math.max(entry.startTime, rangeStart)
+        val seconds = endTime - startTime
+        val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
+        sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
+        endTime = startTime
+
+        // Skip entries from before date range
+        if (startTime <= rangeStart) {
+          break
+        }
+      }
+    }
+
+    // Sort slices by size, consolidating small slices into "Other"
+    val rangeSeconds = rangeEnd - rangeStart
+    val sliceThresholdSeconds = rangeSeconds * MIN_SLICE_PERCENT
+    var bigSliceSeconds = 0L
+    val sliceList = sliceMap.entries
+      .sortedByDescending { it.value }
+      .takeWhile {
+        val shouldTake = it.value > sliceThresholdSeconds
+        if (shouldTake) bigSliceSeconds += it.value
+        shouldTake
+      }
+      .map { Pair(it.key, it.value) }
+      .toMutableList()
+    if (bigSliceSeconds < rangeSeconds) sliceList += Pair("Other", rangeSeconds - bigSliceSeconds)
+
+    return sliceList
+  }
+
   companion object {
     val COLORS by lazy {
       listOf(
@@ -41,5 +92,8 @@ abstract class GraphFragment : BaseFragment() {
         "#43A047"
       ).map { Color.parseColor(it) }
     }
+
+    /** Slices smaller than this will get bucketed into "Other" */
+    private val MIN_SLICE_PERCENT = 0.015
   }
 }
