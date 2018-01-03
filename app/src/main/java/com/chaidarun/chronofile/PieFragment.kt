@@ -40,7 +40,7 @@ class PieFragment : GraphFragment() {
     }
 
     // Populate form with current state
-    with(Store.state.value) {
+    with(Store.state) {
       (when (graphConfig.grouped) {
         true -> radioGrouped
         false -> radioIndividual
@@ -53,7 +53,7 @@ class PieFragment : GraphFragment() {
     }
 
     disposables = CompositeDisposable().apply {
-      add(Store.state
+      add(Store.observable
         .filter { it.config != null && it.history != null }
         .map { Triple(it.config!!, it.history!!, it.graphConfig) }
         .distinctUntilChanged()

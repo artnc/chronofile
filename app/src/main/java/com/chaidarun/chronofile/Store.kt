@@ -2,6 +2,7 @@ package com.chaidarun.chronofile
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
+import io.reactivex.Observable
 import org.jetbrains.anko.toast
 
 /** All actions must be immutable */
@@ -87,7 +88,6 @@ private val reducer: (State, Action) -> State = { state, action ->
     }
     val message = "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff"
     logDW(message, elapsed > 20)
-
     nextState
   }
 }
@@ -95,16 +95,19 @@ private val reducer: (State, Action) -> State = { state, action ->
 /** API heavily inspired by Redux */
 object Store {
 
-  /**
-   * This exposes `.value` (analogous to Redux `store.getState`) and `.subscribe` (analogous to
-   * Redux `store.subscribe`).
-   *
-   * TODO: Wrap this object to hide its `.accept` from public callers?
-   * */
-  val state: BehaviorRelay<State> = BehaviorRelay.create()
-  private val actions = PublishRelay.create<Action>().apply {
-    scan(State(), reducer).subscribe { state.accept(it) }
+  private val stateRelay: BehaviorRelay<State> = BehaviorRelay.create()
+  private val actionRelay = PublishRelay.create<Action>().apply {
+    scan(State(), reducer).subscribe { stateRelay.accept(it) }
   }
 
-  fun dispatch(action: Action) = actions.accept(action)
+  /** Analogous to `store.getState()` in Redux */
+  val state: State
+    get() = stateRelay.value
+
+  /** Analogous to `store.subscribe()` in Redux */
+  val observable: Observable<State>
+    get() = stateRelay
+
+  /** Analogous to `store.dispatch()` in Redux */
+  fun dispatch(action: Action) = actionRelay.accept(action)
 }

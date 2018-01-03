@@ -19,7 +19,7 @@ class GraphActivity : BaseActivity() {
     setSupportActionBar(graphToolbar)
     supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-    setPresetRange(Store.state.value.history!!, PresetRange.LAST_MONTH)
+    setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
 
     graphViewPager.adapter = GraphPagerAdapter(supportFragmentManager)
     graphTabs.setupWithViewPager(graphViewPager)
@@ -27,7 +27,7 @@ class GraphActivity : BaseActivity() {
     var startTime: Long? = null
     var endTime: Long? = null
     disposables = CompositeDisposable().apply {
-      add(Store.state
+      add(Store.observable
         .map { it.graphConfig.startTime }
         .distinctUntilChanged()
         .subscribe {
@@ -35,7 +35,7 @@ class GraphActivity : BaseActivity() {
           if (it != null) startDate.text = formatDate(it)
         }
       )
-      add(Store.state
+      add(Store.observable
         .map { it.graphConfig.endTime }
         .distinctUntilChanged()
         .subscribe {
@@ -67,7 +67,7 @@ class GraphActivity : BaseActivity() {
           setSingleChoiceItems(options, 0, null)
           setPositiveButton("OK") { dialog, _ ->
             val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
-            setPresetRange(Store.state.value.history!!, when (optionIndex) {
+            setPresetRange(Store.state.history!!, when (optionIndex) {
               0 -> PresetRange.LAST_WEEK
               1 -> PresetRange.LAST_MONTH
               2 -> PresetRange.ALL_TIME

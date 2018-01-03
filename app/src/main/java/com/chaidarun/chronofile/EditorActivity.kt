@@ -15,7 +15,7 @@ class EditorActivity : BaseActivity() {
     setSupportActionBar(editorToolbar)
     supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-    editorText.setText(Store.state.value.config?.serialize() ?: "")
+    editorText.setText(Store.state.config?.serialize() ?: "")
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {

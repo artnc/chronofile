@@ -104,7 +104,7 @@ class HistoryListAdapter(
   }
 
   init {
-    Store.state.map { it.history }.distinctUntilChanged().subscribe {
+    Store.observable.map { it.history }.distinctUntilChanged().subscribe {
       if (it == null) {
         Log.d(TAG, "History is null")
         return@subscribe
