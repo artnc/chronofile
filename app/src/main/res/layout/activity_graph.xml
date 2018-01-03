@@ -25,6 +25,7 @@
     android:id="@+id/graphTabs"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    app:tabMaxWidth="200dp"
     app:tabMode="fixed" />
 
   <android.support.v4.view.ViewPager
