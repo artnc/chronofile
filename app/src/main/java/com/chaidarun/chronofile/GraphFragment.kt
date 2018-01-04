@@ -54,7 +54,7 @@ abstract class GraphFragment : BaseFragment() {
         val startTime = Math.max(entry.startTime, rangeStart)
         val seconds = endTime - startTime
         val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-        if (includeSleep || !respectIncludeSleep || slice != "Sleep") {
+        if (includeSleep || !respectIncludeSleep || slice != SLEEP_SLICE_NAME) {
           sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
           totalSliceSeconds += seconds
         }
@@ -80,7 +80,7 @@ abstract class GraphFragment : BaseFragment() {
       .map { Pair(it.key, it.value) }
       .toMutableList()
     if (bigSliceSeconds < totalSliceSeconds) {
-      sliceList += Pair("Other", totalSliceSeconds - bigSliceSeconds)
+      sliceList += Pair(OTHER_SLICE_NAME, totalSliceSeconds - bigSliceSeconds)
     }
 
     return Pair(sliceList, totalSliceSeconds)
@@ -102,5 +102,8 @@ abstract class GraphFragment : BaseFragment() {
 
     /** Slices smaller than this will get bucketed into "Other" */
     private val MIN_SLICE_PERCENT = 0.01
+
+    val OTHER_SLICE_NAME = "Other"
+    private val SLEEP_SLICE_NAME = "Sleep"
   }
 }

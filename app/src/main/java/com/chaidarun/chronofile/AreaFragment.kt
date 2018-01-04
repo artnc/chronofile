@@ -115,7 +115,7 @@ class AreaFragment : GraphFragment() {
     val dateToActivityToDuration = mutableMapOf<String, MutableMap<String, Long>>()
     val add: (String, String, Long) -> Unit = { date, activity, duration ->
       val aToD = dateToActivityToDuration.getOrPut(date, { mutableMapOf() })
-      val slice = if (activity in groups) activity else "Other"
+      val slice = if (activity in groups) activity else OTHER_SLICE_NAME
       aToD[slice] = aToD.getOrDefault(slice, 0) + duration
     }
     val grouped = graphConfig.grouped
