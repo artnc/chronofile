@@ -70,16 +70,15 @@ class GraphActivity : BaseActivity() {
       add(RxView.clicks(quickRange).subscribe {
         with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
           val options = arrayOf("Today", "Past week", "Past month", "All time")
-          setSingleChoiceItems(options, 0, null)
+          setSingleChoiceItems(options, -1, null)
           setPositiveButton("OK") { dialog, _ ->
             val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
-            setPresetRange(Store.state.history!!, when (optionIndex) {
-              0 -> PresetRange.TODAY
-              1 -> PresetRange.LAST_WEEK
-              2 -> PresetRange.LAST_MONTH
-              3 -> PresetRange.ALL_TIME
-              else -> throw Exception("Invalid preset range")
-            })
+            when (optionIndex) {
+              0 -> setPresetRange(Store.state.history!!, PresetRange.TODAY)
+              1 -> setPresetRange(Store.state.history!!, PresetRange.LAST_WEEK)
+              2 -> setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
+              3 -> setPresetRange(Store.state.history!!, PresetRange.ALL_TIME)
+            }
           }
           setNegativeButton("Cancel", null)
           show()
@@ -93,9 +92,9 @@ class GraphActivity : BaseActivity() {
     val now = history.currentActivityStartTime
     val startTime = now - when (presetRange) {
       PresetRange.ALL_TIME -> now
-      PresetRange.LAST_MONTH -> now - 30 * DAY_SECONDS
-      PresetRange.LAST_WEEK -> now - 7 * DAY_SECONDS
-      PresetRange.TODAY -> now - DAY_SECONDS
+      PresetRange.LAST_MONTH -> 30 * DAY_SECONDS
+      PresetRange.LAST_WEEK -> 7 * DAY_SECONDS
+      PresetRange.TODAY -> DAY_SECONDS
     }
     Store.dispatch(Action.SetGraphRangeStart(Math.max(startTime, history.entries[0].startTime)))
     Store.dispatch(Action.SetGraphRangeEnd(now))

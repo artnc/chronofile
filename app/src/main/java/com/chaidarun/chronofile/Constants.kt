@@ -4,4 +4,4 @@ package com.chaidarun.chronofile
 const val TAG = "Chronofile"
 
 /** Number of seconds in a day */
-const val DAY_SECONDS = 86400
+const val DAY_SECONDS = 86400L
