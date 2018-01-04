@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.activity_graph.*
 
 class GraphActivity : BaseActivity() {
 
-  private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK }
+  private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK, TODAY }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -69,14 +69,15 @@ class GraphActivity : BaseActivity() {
       })
       add(RxView.clicks(quickRange).subscribe {
         with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
-          val options = arrayOf("Past week", "Past month", "All time")
+          val options = arrayOf("Today", "Past week", "Past month", "All time")
           setSingleChoiceItems(options, 0, null)
           setPositiveButton("OK") { dialog, _ ->
             val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
             setPresetRange(Store.state.history!!, when (optionIndex) {
-              0 -> PresetRange.LAST_WEEK
-              1 -> PresetRange.LAST_MONTH
-              2 -> PresetRange.ALL_TIME
+              0 -> PresetRange.TODAY
+              1 -> PresetRange.LAST_WEEK
+              2 -> PresetRange.LAST_MONTH
+              3 -> PresetRange.ALL_TIME
               else -> throw Exception("Invalid preset range")
             })
           }
@@ -94,6 +95,7 @@ class GraphActivity : BaseActivity() {
       PresetRange.ALL_TIME -> now
       PresetRange.LAST_MONTH -> now - 30 * DAY_SECONDS
       PresetRange.LAST_WEEK -> now - 7 * DAY_SECONDS
+      PresetRange.TODAY -> now - DAY_SECONDS
     }
     Store.dispatch(Action.SetGraphRangeStart(Math.max(startTime, history.entries[0].startTime)))
     Store.dispatch(Action.SetGraphRangeEnd(now))
