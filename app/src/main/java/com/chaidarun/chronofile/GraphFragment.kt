@@ -33,7 +33,8 @@ abstract class GraphFragment : BaseFragment() {
     history: History,
     graphConfig: GraphConfig,
     rangeStart: Long,
-    rangeEnd: Long
+    rangeEnd: Long,
+    respectIncludeSleep: Boolean = true
   ): Pair<MutableList<Pair<String, Long>>, Long> {
     // Get data
     val grouped = graphConfig.grouped
@@ -53,7 +54,7 @@ abstract class GraphFragment : BaseFragment() {
         val startTime = Math.max(entry.startTime, rangeStart)
         val seconds = endTime - startTime
         val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-        if (includeSleep || slice != "Sleep") {
+        if (includeSleep || !respectIncludeSleep || slice != "Sleep") {
           sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
           totalSliceSeconds += seconds
         }
