@@ -37,29 +37,6 @@
   <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="16dp">
-
-    <CheckBox
-      android:id="@+id/isGrouped"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:onClick="onCheckboxClicked"
-      android:text="Group similar" />
-
-    <CheckBox
-      android:id="@+id/includeSleep"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:onClick="onCheckboxClicked"
-      android:text="Include sleep" />
-
-  </LinearLayout>
-
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     android:padding="16dp">
 
     <Button

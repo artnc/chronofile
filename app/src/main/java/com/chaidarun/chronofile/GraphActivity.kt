@@ -9,6 +9,8 @@ import android.widget.RadioButton
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_graph.*
+import kotlinx.android.synthetic.main.fragment_area.*
+import kotlinx.android.synthetic.main.fragment_pie.*
 
 class GraphActivity : BaseActivity() {
 
@@ -28,16 +30,6 @@ class GraphActivity : BaseActivity() {
     var startTime: Long? = null
     var endTime: Long? = null
     disposables = CompositeDisposable().apply {
-      add(Store.observable
-        .map { it.graphConfig.grouped }
-        .distinctUntilChanged()
-        .subscribe { isGrouped.isChecked = it }
-      )
-      add(Store.observable
-        .map { it.graphConfig.includeSleep }
-        .distinctUntilChanged()
-        .subscribe { includeSleep.isChecked = it }
-      )
       add(Store.observable
         .map { it.graphConfig.startTime }
         .distinctUntilChanged()
@@ -108,8 +100,9 @@ class GraphActivity : BaseActivity() {
   fun onCheckboxClicked(view: View) {
     with(view as CheckBox) {
       when (id) {
+        R.id.areaIsGrouped -> Store.dispatch(Action.SetGraphGrouping(areaIsGrouped.isChecked))
         R.id.includeSleep -> Store.dispatch(Action.SetGraphIncludeSleep(includeSleep.isChecked))
-        R.id.isGrouped -> Store.dispatch(Action.SetGraphGrouping(isGrouped.isChecked))
+        R.id.pieIsGrouped -> Store.dispatch(Action.SetGraphGrouping(pieIsGrouped.isChecked))
       }
     }
   }

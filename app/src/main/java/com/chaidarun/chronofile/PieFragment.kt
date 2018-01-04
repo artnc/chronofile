@@ -55,6 +55,16 @@ class PieFragment : GraphFragment() {
         .distinctUntilChanged()
         .subscribe { render(it) }
       )
+      add(Store.observable
+        .map { it.graphConfig.grouped }
+        .distinctUntilChanged()
+        .subscribe { pieIsGrouped.isChecked = it }
+      )
+      add(Store.observable
+        .map { it.graphConfig.includeSleep }
+        .distinctUntilChanged()
+        .subscribe { includeSleep.isChecked = it }
+      )
     }
   }
 

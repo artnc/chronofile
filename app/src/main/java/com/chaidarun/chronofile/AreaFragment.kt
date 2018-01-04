@@ -92,6 +92,11 @@ class AreaFragment : GraphFragment() {
           if (visibleStart != null) areaChart.moveViewToX(visibleStart)
         }
       )
+      add(Store.observable
+        .map { it.graphConfig.grouped }
+        .distinctUntilChanged()
+        .subscribe { areaIsGrouped.isChecked = it }
+      )
     }
   }
 
