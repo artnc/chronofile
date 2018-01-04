@@ -16,7 +16,6 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_area.*
 import java.util.*
 
-
 class AreaFragment : GraphFragment() {
 
   override fun onCreateView(

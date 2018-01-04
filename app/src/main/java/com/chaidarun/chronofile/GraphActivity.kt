@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.RadioButton
+import android.widget.TextView
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_graph.*
@@ -21,14 +23,26 @@ class GraphActivity : BaseActivity() {
     setContentView(R.layout.activity_graph)
     setSupportActionBar(graphToolbar)
     supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-    setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
-
     graphViewPager.adapter = GraphPagerAdapter(supportFragmentManager)
     graphTabs.setupWithViewPager(graphViewPager)
 
+    // Set tab font
+    // https://stackoverflow.com/a/31067431
+    with(graphTabs.getChildAt(0) as ViewGroup) {
+      val tabsCount = childCount
+      for (i in 0 until tabsCount) {
+        with(getChildAt(i) as ViewGroup) {
+          val tabChildsCount = childCount
+          (0 until tabChildsCount)
+            .map { getChildAt(it) }
+            .forEach { (it as? TextView)?.typeface = App.instance.typeface }
+        }
+      }
+    }
+
     var startTime: Long? = null
     var endTime: Long? = null
+    setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
     disposables = CompositeDisposable().apply {
       add(Store.observable
         .map { it.graphConfig.startTime }

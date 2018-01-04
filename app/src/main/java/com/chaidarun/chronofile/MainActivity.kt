@@ -16,7 +16,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.toast
 
-
 class MainActivity : BaseActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
