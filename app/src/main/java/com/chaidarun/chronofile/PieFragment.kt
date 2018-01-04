@@ -101,13 +101,13 @@ class PieFragment : GraphFragment() {
           Metric.PERCENTAGE -> "${value.toLong() * 100 / totalSliceSeconds}%"
           Metric.TOTAL -> formatDuration(value.toLong())
         }
-        "${(entry as PieEntry).label} $num"
+        "${(entry as PieEntry).label}: $num"
       }
       yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
     }
 
     with(pieChart) {
-      centerText = "Total\n${formatDuration(totalSliceSeconds)}"
+      centerText = "Range:\n${formatDuration(totalSliceSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
     }
