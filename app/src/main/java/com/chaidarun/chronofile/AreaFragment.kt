@@ -101,8 +101,11 @@ class AreaFragment : GraphFragment() {
     val rangeStart = history.entries[0].startTime
     val rangeEnd = history.currentActivityStartTime
 
-    val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd)
+    // Get top groups
+    val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd).first
     val groups = sliceList.map { it.first }
+
+    // Calculate time per activity per day
     var lastSeenStartTime = history.currentActivityStartTime
     val dateToActivityToDuration = mutableMapOf<String, MutableMap<String, Long>>()
     val add: (String, String, Long) -> Unit = { date, activity, duration ->
@@ -134,6 +137,7 @@ class AreaFragment : GraphFragment() {
       lastSeenStartTime = it.startTime
     }
 
+    // Convert into data set lists
     val lines = groups.associateBy({ it }, { mutableListOf<Entry>() }).toMutableMap()
     val formattedRangeEnd = formatDate(rangeEnd)
     var dayStart = rangeStart
@@ -143,7 +147,7 @@ class AreaFragment : GraphFragment() {
 
       var seenSecondsToday = 0L
       for (group in groupsReversed) {
-        val seconds = dateToActivityToDuration.get(formattedDayStart)?.get(group) ?: 0L
+        val seconds = dateToActivityToDuration[formattedDayStart]?.get(group) ?: 0L
         seenSecondsToday += seconds
         lines[group]?.add(Entry(dayStart.toFloat(), seenSecondsToday.toFloat())) ?:
           throw Exception("$group missing from area chart data sets")

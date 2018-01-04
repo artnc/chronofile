@@ -72,7 +72,8 @@ class PieFragment : GraphFragment() {
     }
 
     // Show data
-    val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd)
+    val (sliceList, totalSliceSeconds) =
+      getSliceList(config, history, graphConfig, rangeStart, rangeEnd)
     val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
     val metric = graphConfig.metric
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
@@ -86,7 +87,7 @@ class PieFragment : GraphFragment() {
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {
           Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
-          Metric.PERCENTAGE -> "${value.toLong() * 100 / rangeSeconds}%"
+          Metric.PERCENTAGE -> "${value.toLong() * 100 / totalSliceSeconds}%"
           Metric.TOTAL -> formatDuration(value.toLong())
         }
         "${(entry as PieEntry).label} $num"
@@ -95,7 +96,7 @@ class PieFragment : GraphFragment() {
     }
 
     with(pieChart) {
-      centerText = "Total\n${formatDuration(rangeSeconds)}"
+      centerText = "Total\n${formatDuration(totalSliceSeconds)}"
       data = PieData(pieDataSet)
       invalidate()
     }

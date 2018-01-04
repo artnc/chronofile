@@ -34,6 +34,11 @@ class GraphActivity : BaseActivity() {
         .subscribe { isGrouped.isChecked = it }
       )
       add(Store.observable
+        .map { it.graphConfig.includeSleep }
+        .distinctUntilChanged()
+        .subscribe { includeSleep.isChecked = it }
+      )
+      add(Store.observable
         .map { it.graphConfig.startTime }
         .distinctUntilChanged()
         .subscribe {
@@ -103,6 +108,7 @@ class GraphActivity : BaseActivity() {
   fun onCheckboxClicked(view: View) {
     with(view as CheckBox) {
       when (id) {
+        R.id.includeSleep -> Store.dispatch(Action.SetGraphIncludeSleep(includeSleep.isChecked))
         R.id.isGrouped -> Store.dispatch(Action.SetGraphGrouping(isGrouped.isChecked))
       }
     }

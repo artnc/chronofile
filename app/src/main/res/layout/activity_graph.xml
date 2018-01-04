@@ -47,6 +47,14 @@
       android:onClick="onCheckboxClicked"
       android:text="Group similar" />
 
+    <CheckBox
+      android:id="@+id/includeSleep"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:onClick="onCheckboxClicked"
+      android:text="Include sleep" />
+
   </LinearLayout>
 
   <LinearLayout

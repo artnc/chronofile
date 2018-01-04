@@ -34,10 +34,12 @@ abstract class GraphFragment : BaseFragment() {
     graphConfig: GraphConfig,
     rangeStart: Long,
     rangeEnd: Long
-  ): MutableList<Pair<String, Long>> {
+  ): Pair<MutableList<Pair<String, Long>>, Long> {
     // Get data
     val grouped = graphConfig.grouped
+    val includeSleep = graphConfig.includeSleep
     val sliceMap = mutableMapOf<String, Long>()
+    var totalSliceSeconds = 0L
     with(history) {
       // Bucket entries into slices
       var endTime = rangeEnd
@@ -51,7 +53,10 @@ abstract class GraphFragment : BaseFragment() {
         val startTime = Math.max(entry.startTime, rangeStart)
         val seconds = endTime - startTime
         val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-        sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
+        if (includeSleep || slice != "Sleep") {
+          sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
+          totalSliceSeconds += seconds
+        }
         endTime = startTime
 
         // Skip entries from before date range
@@ -62,8 +67,7 @@ abstract class GraphFragment : BaseFragment() {
     }
 
     // Sort slices by size, consolidating small slices into "Other"
-    val rangeSeconds = rangeEnd - rangeStart
-    val sliceThresholdSeconds = rangeSeconds * MIN_SLICE_PERCENT
+    val sliceThresholdSeconds = totalSliceSeconds * MIN_SLICE_PERCENT
     var bigSliceSeconds = 0L
     val sliceList = sliceMap.entries
       .sortedByDescending { it.value }
@@ -74,9 +78,11 @@ abstract class GraphFragment : BaseFragment() {
       }
       .map { Pair(it.key, it.value) }
       .toMutableList()
-    if (bigSliceSeconds < rangeSeconds) sliceList += Pair("Other", rangeSeconds - bigSliceSeconds)
+    if (bigSliceSeconds < totalSliceSeconds) {
+      sliceList += Pair("Other", totalSliceSeconds - bigSliceSeconds)
+    }
 
-    return sliceList
+    return Pair(sliceList, totalSliceSeconds)
   }
 
   companion object {
@@ -94,6 +100,6 @@ abstract class GraphFragment : BaseFragment() {
     }
 
     /** Slices smaller than this will get bucketed into "Other" */
-    private val MIN_SLICE_PERCENT = 0.015
+    private val MIN_SLICE_PERCENT = 0.01
   }
 }
