@@ -100,18 +100,14 @@ object Store {
 
   private val stateRelay: BehaviorRelay<State> = BehaviorRelay.create()
   private val actionRelay = PublishRelay.create<Action>().apply {
-    scan(State(), reducer).subscribe { stateRelay.accept(it) }
+    scan(State(), reducer).distinctUntilChanged().subscribe { stateRelay.accept(it) }
   }
-  private val distinctStates = stateRelay.distinctUntilChanged()
 
-  /** Analogous to `store.getState()` in Redux */
   val state: State
     get() = stateRelay.value
 
-  /** Analogous to `store.subscribe()` in Redux */
   val observable: Observable<State>
-    get() = distinctStates
+    get() = stateRelay
 
-  /** Analogous to `store.dispatch()` in Redux */
   fun dispatch(action: Action) = actionRelay.accept(action)
 }
