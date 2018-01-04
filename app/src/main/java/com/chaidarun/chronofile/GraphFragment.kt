@@ -101,8 +101,13 @@ abstract class GraphFragment : BaseFragment() {
     }
 
     /** Slices smaller than this will get bucketed into "Other" */
-    private val MIN_SLICE_PERCENT = 0.01
+    private val MIN_SLICE_PERCENT = 0.015
 
+    /** TODO: Make this `protected` once Kotlin supports that */
+    val LABEL_COLOR = Color.WHITE
+    /** TODO: Make this `protected` once Kotlin supports that */
+    val LABEL_FONT_SIZE = 12f
+    /** TODO: Make this `protected` once Kotlin supports that */
     val OTHER_SLICE_NAME = "Other"
     private val SLEEP_SLICE_NAME = "Sleep"
   }

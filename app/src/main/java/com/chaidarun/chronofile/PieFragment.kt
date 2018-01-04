@@ -31,7 +31,8 @@ class PieFragment : GraphFragment() {
       holeRadius = 50f
       legend.isEnabled = false
       rotationAngle = 195f
-      setCenterTextColor(Color.WHITE)
+      setCenterTextColor(LABEL_COLOR)
+      setCenterTextSize(LABEL_FONT_SIZE)
       setCenterTextTypeface(App.instance.typeface)
       setDrawEntryLabels(false)
       setExtraOffsets(35f, 35f, 35f, 35f)
@@ -91,8 +92,8 @@ class PieFragment : GraphFragment() {
       valueLineColor = Color.TRANSPARENT
       valueLinePart1Length = 0.5f
       valueLinePart2Length = 0f
-      valueTextColor = Color.WHITE
-      valueTextSize = 12f
+      valueTextColor = LABEL_COLOR
+      valueTextSize = LABEL_FONT_SIZE
       valueTypeface = App.instance.typeface
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {

@@ -1,6 +1,5 @@
 package com.chaidarun.chronofile
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -40,8 +39,10 @@ class AreaFragment : GraphFragment() {
       isScaleYEnabled = false
       with(legend) {
         isWordWrapEnabled = true
-        textColor = Color.WHITE
+        textColor = LABEL_COLOR
+        textSize = LABEL_FONT_SIZE
         typeface = App.instance.typeface
+        xEntrySpace = 15f
       }
       onChartGestureListener = object : OnChartGestureListener {
         override fun onChartGestureEnd(
