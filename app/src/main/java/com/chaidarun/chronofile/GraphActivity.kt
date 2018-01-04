@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
+import android.widget.CheckBox
 import android.widget.RadioButton
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
@@ -27,6 +28,11 @@ class GraphActivity : BaseActivity() {
     var startTime: Long? = null
     var endTime: Long? = null
     disposables = CompositeDisposable().apply {
+      add(Store.observable
+        .map { it.graphConfig.grouped }
+        .distinctUntilChanged()
+        .subscribe { isGrouped.isChecked = it }
+      )
       add(Store.observable
         .map { it.graphConfig.startTime }
         .distinctUntilChanged()
@@ -93,15 +99,19 @@ class GraphActivity : BaseActivity() {
     Store.dispatch(Action.SetGraphRangeEnd(now))
   }
 
+  fun onCheckboxClicked(view: View) {
+    with(view as CheckBox) {
+      when (id) {
+        R.id.isGrouped -> Store.dispatch(Action.SetGraphGrouping(isGrouped.isChecked))
+      }
+    }
+  }
+
   fun onRadioButtonClicked(view: View) {
     with(view as RadioButton) {
-      if (!isChecked) {
-        return
-      }
+      if (!isChecked) return
       when (id) {
         R.id.radioAverage -> Store.dispatch(Action.SetGraphMetric(Metric.AVERAGE))
-        R.id.radioGrouped -> Store.dispatch(Action.SetGraphGrouping(true))
-        R.id.radioIndividual -> Store.dispatch(Action.SetGraphGrouping(false))
         R.id.radioPercentage -> Store.dispatch(Action.SetGraphMetric(Metric.PERCENTAGE))
         R.id.radioTotal -> Store.dispatch(Action.SetGraphMetric(Metric.TOTAL))
       }

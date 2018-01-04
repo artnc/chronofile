@@ -41,10 +41,6 @@ class PieFragment : GraphFragment() {
 
     // Populate form with current state
     with(Store.state) {
-      (when (graphConfig.grouped) {
-        true -> radioGrouped
-        false -> radioIndividual
-      }).isChecked = true
       (when (graphConfig.metric) {
         Metric.AVERAGE -> radioAverage
         Metric.PERCENTAGE -> radioPercentage
