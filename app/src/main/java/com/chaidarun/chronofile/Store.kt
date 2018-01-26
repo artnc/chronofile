@@ -42,10 +42,16 @@ private val reducer: (State, Action) -> State = { state, action ->
   with(state) {
     val start = System.currentTimeMillis()
     val nextState = when (action) {
-      is Action.AddEntry -> copy(history = history?.withNewEntry(
-        action.activity, action.note, action.latLong))
-      is Action.EditEntry -> copy(history = history?.withEditedEntry(
-        action.oldStartTime, action.newStartTime, action.activity, action.note))
+      is Action.AddEntry -> copy(
+        history = history?.withNewEntry(
+          action.activity, action.note, action.latLong
+        )
+      )
+      is Action.EditEntry -> copy(
+        history = history?.withEditedEntry(
+          action.oldStartTime, action.newStartTime, action.activity, action.note
+        )
+      )
       is Action.RemoveEntries -> copy(history = history?.withoutEntries(action.entries))
       is Action.SetConfigFromText -> {
         try {
@@ -59,9 +65,11 @@ private val reducer: (State, Action) -> State = { state, action ->
       }
       is Action.SetConfigFromFile -> copy(config = action.config)
       is Action.SetGraphGrouping -> copy(
-        graphConfig = graphConfig.copy(grouped = action.grouped))
+        graphConfig = graphConfig.copy(grouped = action.grouped)
+      )
       is Action.SetGraphIncludeSleep -> copy(
-        graphConfig = graphConfig.copy(includeSleep = action.includeSleep))
+        graphConfig = graphConfig.copy(includeSleep = action.includeSleep)
+      )
       is Action.SetGraphMetric -> copy(graphConfig = graphConfig.copy(metric = action.metric))
       is Action.SetGraphRangeEnd -> {
         val timestamp = action.timestamp

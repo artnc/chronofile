@@ -63,9 +63,12 @@ class HistoryListAdapter(
               view.formEntryNote.setText(entry.note ?: "")
               setView(view)
               setPositiveButton("OK", { _, _ ->
-                Store.dispatch(Action.EditEntry(
-                  entry.startTime, view.formEntryStartTime.text.toString(),
-                  view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()))
+                Store.dispatch(
+                  Action.EditEntry(
+                    entry.startTime, view.formEntryStartTime.text.toString(),
+                    view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
+                  )
+                )
               })
               setNegativeButton("Cancel", null)
               show()
@@ -151,14 +154,18 @@ class HistoryListAdapter(
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
     ViewType.DATE.id -> DateViewHolder(
-      LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false))
+      LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false)
+    )
     ViewType.ENTRY.id -> EntryViewHolder(
-      LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false))
+      LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false)
+    )
     ViewType.TIME.id -> TimeViewHolder(
-      LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false))
+      LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false)
+    )
     ViewType.SPACER.id -> SpacerViewHolder(LinearLayout(appActivity).apply {
       layoutParams = LinearLayout.LayoutParams(
-        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+      )
     })
     else -> null
   }

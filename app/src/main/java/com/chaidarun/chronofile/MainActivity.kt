@@ -27,8 +27,8 @@ class MainActivity : BaseActivity() {
 
     // Ensure required permissions are granted
     if (APP_PERMISSIONS.all {
-      ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-    }) {
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+      }) {
       init()
     } else {
       ActivityCompat.requestPermissions(this, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)

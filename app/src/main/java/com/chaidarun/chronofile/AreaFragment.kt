@@ -154,8 +154,9 @@ class AreaFragment : GraphFragment() {
       for (group in groupsReversed) {
         val seconds = dateToActivityToDuration[formattedDayStart]?.get(group) ?: 0L
         seenSecondsToday += seconds
-        lines[group]?.add(Entry(dayStart.toFloat(), seenSecondsToday.toFloat())) ?:
-          throw Exception("$group missing from area chart data sets")
+        lines[group]?.add(Entry(dayStart.toFloat(), seenSecondsToday.toFloat())) ?: throw Exception(
+          "$group missing from area chart data sets"
+        )
       }
 
       if (formattedDayStart == formattedRangeEnd) {

@@ -61,7 +61,9 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
   }
 
   fun withoutEntries(startTimes: Collection<Long>) = copy(entries = normalizeAndSave(
-    entries.filter { it.startTime !in startTimes }, currentActivityStartTime))
+    entries.filter { it.startTime !in startTimes }, currentActivityStartTime
+  )
+  )
 
   companion object {
     private val file = File("/storage/emulated/0/Sync/chronofile.jsonl")
@@ -149,7 +151,8 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       }
 
       return History(
-        normalizeAndSave(entries, currentActivityStartTime), currentActivityStartTime)
+        normalizeAndSave(entries, currentActivityStartTime), currentActivityStartTime
+      )
     }
   }
 }
