@@ -1,10 +1,12 @@
 package com.chaidarun.chronofile
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -30,12 +32,12 @@ class AreaFragment : GraphFragment() {
     with(areaChart) {
       with(axisLeft) {
         axisMinimum = 0f
-        axisMaximum = DAY_SECONDS.toFloat()
-        isEnabled = false
+        setDrawAxisLine(false)
+        setDrawGridLines(false)
+        setDrawLabels(false)
       }
       axisRight.isEnabled = false
       description.isEnabled = false
-      isScaleYEnabled = false
       with(legend) {
         isWordWrapEnabled = true
         textColor = LABEL_COLOR
@@ -153,6 +155,7 @@ class AreaFragment : GraphFragment() {
     var dayStart = rangeStart
     val groupsReversed = groups.reversed()
     val stacked = graphConfig.stacked
+    var maxEntrySeconds = 0L
     while (true) {
       val formattedDayStart = formatDate(dayStart)
 
@@ -160,6 +163,7 @@ class AreaFragment : GraphFragment() {
       for (group in groupsReversed) {
         val seconds = dateToActivityToDuration[formattedDayStart]?.get(group) ?: 0L
         seenSecondsToday += seconds
+        maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
         val entrySeconds = if (stacked) seenSecondsToday else seconds
         lines[group]?.add(Entry(dayStart.toFloat(), entrySeconds.toFloat())) ?: throw Exception(
           "$group missing from area chart data sets"
@@ -194,11 +198,25 @@ class AreaFragment : GraphFragment() {
     }
 
     with(areaChart) {
+      with(axisLeft) {
+        axisMaximum = if (stacked) DAY_SECONDS.toFloat() else maxEntrySeconds.toFloat()
+        removeAllLimitLines()
+        if (!stacked) addLimitLine(limitLine)
+      }
       data = LineData(dataSets)
+      isScaleYEnabled = !stacked
       invalidate()
     }
 
     val elapsed = System.currentTimeMillis() - start
     logDW("Rendered area chart in $elapsed ms", elapsed > 40)
+  }
+
+  companion object {
+    val limitLine = LimitLine(28800f).apply {
+      lineColor = Color.WHITE
+      lineWidth = 2f
+      enableDashedLine(5f, 5f, 0f)
+    }
   }
 }
