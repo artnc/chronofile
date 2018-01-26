@@ -28,7 +28,7 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
   }
 
   companion object {
-    val ENDPOINT = "endpoint"
-    val TIMESTAMP = "timestamp"
+    const val ENDPOINT = "endpoint"
+    const val TIMESTAMP = "timestamp"
   }
 }

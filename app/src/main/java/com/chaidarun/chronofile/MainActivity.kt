@@ -104,6 +104,6 @@ class MainActivity : BaseActivity() {
       Manifest.permission.READ_EXTERNAL_STORAGE,
       Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-    val PERMISSION_REQUEST_CODE = 1
+    const val PERMISSION_REQUEST_CODE = 1
   }
 }
