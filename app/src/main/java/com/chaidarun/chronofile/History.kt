@@ -17,7 +17,18 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     // Collect inputs
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
     val newStartTime = try {
-      val enteredTime = editedStartTime.trim().toLong()
+      val trimmedEditedStartTime = editedStartTime.trim()
+      val enteredTime = when {
+        ':' in trimmedEditedStartTime -> {
+          val now = epochSeconds()
+          val (hours, minutes) = trimmedEditedStartTime.split(':')
+          val time = getPreviousMidnight(now) + 3600 * hours.toInt() +
+            60 * minutes.toInt() + Math.round(Math.random() * 60)
+          if (time > now) time - DAY_SECONDS else time
+        }
+        trimmedEditedStartTime.length == 10 -> trimmedEditedStartTime.toLong() // Unix timestamp
+        else -> oldStartTime + parseTimeDelta(trimmedEditedStartTime) // Time delta
+      }
       if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else null
     } catch (e: Exception) {
       null

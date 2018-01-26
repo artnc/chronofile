@@ -48,8 +48,8 @@ class AreaFragment : GraphFragment() {
           me: MotionEvent?,
           lastPerformedGesture: ChartTouchListener.ChartGesture?
         ) {
-          Store.dispatch(Action.SetGraphRangeStart(getPreviousMidnight(lowestVisibleX)))
-          Store.dispatch(Action.SetGraphRangeEnd(getPreviousMidnight(highestVisibleX)))
+          Store.dispatch(Action.SetGraphRangeStart(getPreviousMidnight(lowestVisibleX.toLong())))
+          Store.dispatch(Action.SetGraphRangeEnd(getPreviousMidnight(highestVisibleX.toLong())))
         }
 
         override fun onChartFling(
@@ -194,14 +194,4 @@ class AreaFragment : GraphFragment() {
     val elapsed = System.currentTimeMillis() - start
     logDW("Rendered area chart in $elapsed ms", elapsed > 40)
   }
-
-  /** Gets the timestamp of the last midnight that occurred before the given timestamp */
-  private fun getPreviousMidnight(timestamp: Float) =
-    with(Calendar.getInstance().apply { timeInMillis = timestamp.toLong() * 1000 }) {
-      GregorianCalendar(
-        get(Calendar.YEAR),
-        get(Calendar.MONTH),
-        get(Calendar.DAY_OF_MONTH)
-      ).time.time / 1000
-    }
 }

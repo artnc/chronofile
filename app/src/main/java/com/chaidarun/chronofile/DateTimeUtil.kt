@@ -37,3 +37,25 @@ fun formatDuration(seconds: Long): String {
   }
   return pieces.joinToString(" ")
 }
+
+/** Converts a string like "11m" into 660 */
+fun parseTimeDelta(delta: String): Long = delta.split(' ').fold(0L) { acc, s ->
+  val num = s.substring(0, s.length - 1).toLong()
+  val unit = when (s.substring(s.length - 1)) {
+    "h" -> 3600
+    "m" -> 60
+    "s" -> 1
+    else -> 0
+  }
+  acc + num * unit
+}
+
+/** Gets the timestamp of the last midnight that occurred before the given timestamp */
+fun getPreviousMidnight(timestamp: Long) =
+  with(Calendar.getInstance().apply { timeInMillis = timestamp * 1000 }) {
+    GregorianCalendar(
+      get(Calendar.YEAR),
+      get(Calendar.MONTH),
+      get(Calendar.DAY_OF_MONTH)
+    ).time.time / 1000
+  }
