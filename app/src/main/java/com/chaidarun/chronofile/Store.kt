@@ -28,6 +28,7 @@ sealed class Action {
   data class SetGraphMetric(val metric: Metric) : Action()
   data class SetGraphRangeEnd(val timestamp: Long) : Action()
   data class SetGraphRangeStart(val timestamp: Long) : Action()
+  data class SetGraphStacking(val stacked: Boolean) : Action()
   data class SetHistory(val history: History) : Action()
 }
 
@@ -89,6 +90,9 @@ private val reducer: (State, Action) -> State = { state, action ->
         }
         copy(graphConfig = newSettings)
       }
+      is Action.SetGraphStacking -> copy(
+        graphConfig = graphConfig.copy(stacked = action.stacked)
+      )
       is Action.SetHistory -> copy(history = action.history)
     }
 

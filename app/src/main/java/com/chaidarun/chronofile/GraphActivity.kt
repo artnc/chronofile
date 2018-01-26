@@ -115,6 +115,7 @@ class GraphActivity : BaseActivity() {
     with(view as CheckBox) {
       when (id) {
         R.id.areaIsGrouped -> Store.dispatch(Action.SetGraphGrouping(areaIsGrouped.isChecked))
+        R.id.areaIsStacked -> Store.dispatch(Action.SetGraphStacking(areaIsStacked.isChecked))
         R.id.includeSleep -> Store.dispatch(Action.SetGraphIncludeSleep(includeSleep.isChecked))
         R.id.pieIsGrouped -> Store.dispatch(Action.SetGraphGrouping(pieIsGrouped.isChecked))
       }

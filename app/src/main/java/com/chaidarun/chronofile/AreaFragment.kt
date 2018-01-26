@@ -97,6 +97,11 @@ class AreaFragment : GraphFragment() {
         .distinctUntilChanged()
         .subscribe { areaIsGrouped.isChecked = it }
       )
+      add(Store.observable
+        .map { it.graphConfig.stacked }
+        .distinctUntilChanged()
+        .subscribe { areaIsStacked.isChecked = it }
+      )
     }
   }
 
@@ -147,6 +152,7 @@ class AreaFragment : GraphFragment() {
     val formattedRangeEnd = formatDate(rangeEnd)
     var dayStart = rangeStart
     val groupsReversed = groups.reversed()
+    val stacked = graphConfig.stacked
     while (true) {
       val formattedDayStart = formatDate(dayStart)
 
@@ -154,7 +160,8 @@ class AreaFragment : GraphFragment() {
       for (group in groupsReversed) {
         val seconds = dateToActivityToDuration[formattedDayStart]?.get(group) ?: 0L
         seenSecondsToday += seconds
-        lines[group]?.add(Entry(dayStart.toFloat(), seenSecondsToday.toFloat())) ?: throw Exception(
+        val entrySeconds = if (stacked) seenSecondsToday else seconds
+        lines[group]?.add(Entry(dayStart.toFloat(), entrySeconds.toFloat())) ?: throw Exception(
           "$group missing from area chart data sets"
         )
       }
@@ -170,11 +177,10 @@ class AreaFragment : GraphFragment() {
       LineDataSet(lines[group], group).apply {
         val mColor = COLORS[i % COLORS.size].apply { setCircleColor(this) }
         axisDependency = YAxis.AxisDependency.LEFT
-        circleRadius = 0f
         color = mColor
-        cubicIntensity = 0.1f
-        lineWidth = 0f
-        fillAlpha = 255
+        cubicIntensity = 0f
+        lineWidth = if (stacked) 0f else 1f
+        fillAlpha = if (stacked) 255 else 0
         fillColor = mColor
         fillFormatter = IFillFormatter { _, _ -> areaChart.axisLeft.axisMinimum }
         mode = LineDataSet.Mode.CUBIC_BEZIER

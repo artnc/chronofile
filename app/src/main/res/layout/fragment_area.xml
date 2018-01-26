@@ -15,12 +15,28 @@
     android:layout_marginTop="32dp"
     android:layout_weight="1" />
 
-  <CheckBox
-    android:id="@+id/areaIsGrouped"
+  <LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="16dp"
-    android:onClick="onCheckboxClicked"
-    android:text="Group similar" />
+    android:layout_height="wrap_content">
+
+    <CheckBox
+      android:id="@+id/areaIsGrouped"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_margin="16dp"
+      android:layout_weight="1"
+      android:onClick="onCheckboxClicked"
+      android:text="Group similar" />
+
+    <CheckBox
+      android:id="@+id/areaIsStacked"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_margin="16dp"
+      android:layout_weight="1"
+      android:onClick="onCheckboxClicked"
+      android:text="Stack activities" />
+
+  </LinearLayout>
 
 </LinearLayout>
