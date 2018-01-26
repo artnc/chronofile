@@ -35,7 +35,7 @@ class Config(
 
   fun getActivityGroup(activity: String) = activityGroups.getOrDefault(activity, activity)
 
-  fun serialize() = gson.toJson(this)
+  fun serialize(): String = gson.toJson(this)
 
   fun saveFile() {
     val textToWrite = serialize()

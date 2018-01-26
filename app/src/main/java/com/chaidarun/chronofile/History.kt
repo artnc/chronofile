@@ -18,9 +18,13 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
     val newStartTime = try {
       val enteredTime = editedStartTime.trim().toLong()
-      if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else oldStartTime
+      if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else null
     } catch (e: Exception) {
-      oldStartTime
+      null
+    }
+    if (newStartTime == null) {
+      App.ctx.toast("Invalid start time")
+      return this
     }
 
     // Edit entry
@@ -29,6 +33,8 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val newEntries = entries.toMutableList().apply {
       this[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLong, sanitizedNote)
     }
+
+    App.ctx.toast("Updated entry")
     return copy(entries = normalizeAndSave(newEntries, currentActivityStartTime))
   }
 
