@@ -58,7 +58,6 @@ class HistoryListAdapter(
             val view = LayoutInflater.from(appActivity).inflate(R.layout.form_entry, null)
             with(AlertDialog.Builder(appActivity, R.style.MyAlertDialogTheme)) {
               setTitle("Edit entry")
-              view.formEntryStartTime.setText(entry.startTime.toString())
               view.formEntryActivity.setText(entry.activity)
               view.formEntryNote.setText(entry.note ?: "")
               setView(view)
