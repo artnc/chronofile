@@ -182,12 +182,10 @@ class AreaFragment : GraphFragment() {
         val mColor = COLORS[i % COLORS.size].apply { setCircleColor(this) }
         axisDependency = YAxis.AxisDependency.LEFT
         color = mColor
-        cubicIntensity = 0f
         lineWidth = if (stacked) 0f else 1f
         fillAlpha = if (stacked) 255 else 0
         fillColor = mColor
         fillFormatter = IFillFormatter { _, _ -> areaChart.axisLeft.axisMinimum }
-        mode = LineDataSet.Mode.CUBIC_BEZIER
         setDrawCircles(false)
         setDrawCircleHole(false)
         setDrawFilled(true)
