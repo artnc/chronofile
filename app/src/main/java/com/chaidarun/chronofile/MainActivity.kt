@@ -60,13 +60,12 @@ class MainActivity : BaseActivity() {
     grantResults: IntArray
   ) {
     when (requestCode) {
-      PERMISSION_REQUEST_CODE -> {
+      PERMISSION_REQUEST_CODE ->
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
           init()
         } else {
           toast("Permission denied :(")
         }
-      }
     }
   }
 

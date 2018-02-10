@@ -42,11 +42,11 @@ class PieFragment : GraphFragment() {
 
     // Populate form with current state
     with(Store.state) {
-      (when (graphConfig.metric) {
+      when (graphConfig.metric) {
         Metric.AVERAGE -> radioAverage
         Metric.PERCENTAGE -> radioPercentage
         Metric.TOTAL -> radioTotal
-      }).isChecked = true
+      }.isChecked = true
     }
 
     disposables = CompositeDisposable().apply {
@@ -101,7 +101,7 @@ class PieFragment : GraphFragment() {
           Metric.PERCENTAGE -> "${value.toLong() * 100 / totalSliceSeconds}%"
           Metric.TOTAL -> formatDuration(value.toLong())
         }
-        "${(entry as PieEntry).label}: $num"
+        "${(entry as? PieEntry)?.label}: $num"
       }
       yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
     }

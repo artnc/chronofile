@@ -9,7 +9,12 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.*
+import android.view.ActionMode
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.form_entry.view.*
@@ -112,7 +117,7 @@ class HistoryListAdapter(
       }
 
       val elapsedMs = measureTimeMillis {
-        itemList = (mutableListOf<ListItem>()).apply {
+        itemList = mutableListOf<ListItem>().apply {
           add(SpacerItem(32))
           var lastSeenStartTime = it.currentActivityStartTime
           it.entries.reversed().forEach {
@@ -179,7 +184,7 @@ class HistoryListAdapter(
 
   class DateViewHolder(view: View) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
-      itemView.date.text = formatDate((listItem as DateItem).date)
+      itemView.date.text = (listItem as? DateItem)?.date?.let { formatDate(it) } ?: ""
     }
   }
 

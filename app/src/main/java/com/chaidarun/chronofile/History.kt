@@ -108,7 +108,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     private fun sanitizeActivityAndNote(
       activity: String,
       note: String?
-    ) = Pair(activity.trim(), if (note.isNullOrBlank()) null else note!!.trim())
+    ) = Pair(activity.trim(), if (note.isNullOrBlank()) null else note?.trim())
 
     private fun getLocation(callback: (Pair<Double, Double>?) -> Unit) {
       try {

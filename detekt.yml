@@ -1,0 +1,22 @@
+autoCorrect: true
+failFast: true
+
+# Rules
+comments:
+  CommentOverPrivateFunction: { active: false }
+  CommentOverPrivateProperty: { active: false }
+  EndOfSentenceFormat: { active: false }
+  UndocumentedPublicClass: { active: false }
+  UndocumentedPublicFunction: { active: false }
+complexity: { active: false }
+exceptions: { active: false }
+potential-bugs:
+  LateinitUsage: { active: false }
+  UnsafeCallOnNullableType: { active: false }
+  UnsafeCast: { active: false }
+style:
+  DataClassContainsFunctions: { active: false }
+  LoopWithTooManyJumpStatements: { active: false }
+  MagicNumber: { active: false }
+  ReturnCount: { active: false }
+  UnnecessaryAbstractClass: { active: false }

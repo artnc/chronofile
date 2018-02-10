@@ -54,7 +54,7 @@ private val reducer: (State, Action) -> State = { state, action ->
         )
       )
       is Action.RemoveEntries -> copy(history = history?.withoutEntries(action.entries))
-      is Action.SetConfigFromText -> {
+      is Action.SetConfigFromText ->
         try {
           val config = Config.fromText(action.text)
           App.ctx.toast("Saved config")
@@ -63,7 +63,6 @@ private val reducer: (State, Action) -> State = { state, action ->
           App.ctx.toast("Failed to save invalid config")
           this
         }
-      }
       is Action.SetConfigFromFile -> copy(config = action.config)
       is Action.SetGraphGrouping -> copy(
         graphConfig = graphConfig.copy(grouped = action.grouped)
@@ -74,7 +73,7 @@ private val reducer: (State, Action) -> State = { state, action ->
       is Action.SetGraphMetric -> copy(graphConfig = graphConfig.copy(metric = action.metric))
       is Action.SetGraphRangeEnd -> {
         val timestamp = action.timestamp
-        val newSettings = if (timestamp >= (state.graphConfig.startTime ?: 0)) {
+        val newSettings = if (timestamp >= state.graphConfig.startTime ?: 0) {
           graphConfig.copy(endTime = timestamp)
         } else {
           graphConfig.copy(endTime = timestamp, startTime = timestamp)
@@ -83,7 +82,7 @@ private val reducer: (State, Action) -> State = { state, action ->
       }
       is Action.SetGraphRangeStart -> {
         val timestamp = action.timestamp
-        val newSettings = if (timestamp <= (state.graphConfig.endTime ?: Long.MAX_VALUE)) {
+        val newSettings = if (timestamp <= state.graphConfig.endTime ?: Long.MAX_VALUE) {
           graphConfig.copy(startTime = timestamp)
         } else {
           graphConfig.copy(endTime = timestamp, startTime = timestamp)
