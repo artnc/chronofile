@@ -28,7 +28,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
           if (time > now) time - DAY_SECONDS else time
         }
         trimmedEditedStartTime.length == 10 -> trimmedEditedStartTime.toLong() // Unix timestamp
-        else -> oldStartTime + parseTimeDelta(trimmedEditedStartTime) // Time delta
+        else -> oldStartTime + trimmedEditedStartTime.toInt() * 60 // Minute delta
       }
       if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else null
     } catch (e: Exception) {
