@@ -19,6 +19,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val newStartTime = try {
       val trimmedEditedStartTime = editedStartTime.trim()
       val enteredTime = when {
+        trimmedEditedStartTime == "" -> oldStartTime
         ':' in trimmedEditedStartTime -> {
           val now = epochSeconds()
           val (hours, minutes) = trimmedEditedStartTime.split(':')
