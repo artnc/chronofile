@@ -65,6 +65,6 @@ abstract class BaseActivity : AppCompatActivity() {
   }
 
   private fun logLifecycleEvent(event: String) {
-    Log.d(TAG, "${this.javaClass.simpleName} $event")
+    Log.i(TAG, "${this.javaClass.simpleName} $event")
   }
 }

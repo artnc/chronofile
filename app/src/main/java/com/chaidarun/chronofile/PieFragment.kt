@@ -116,6 +116,6 @@ class PieFragment : GraphFragment() {
     }
 
     val elapsed = System.currentTimeMillis() - start
-    Log.d(TAG, "Rendered pie chart in $elapsed ms")
+    Log.i(TAG, "Rendered pie chart in $elapsed ms")
   }
 }

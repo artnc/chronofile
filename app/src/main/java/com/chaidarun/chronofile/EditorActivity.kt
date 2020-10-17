@@ -24,10 +24,10 @@ class EditorActivity : BaseActivity() {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     when (item.itemId) {
-      R.id.action_editor_cancel -> Log.d(TAG, "Canceled config file edit")
+      R.id.action_editor_cancel -> Log.i(TAG, "Canceled config file edit")
       R.id.action_editor_save -> {
         Store.dispatch(Action.SetConfigFromText(editorText.text.toString()))
-        Log.d(TAG, "Edited config file")
+        Log.i(TAG, "Edited config file")
       }
       else -> return super.onOptionsItemSelected(item)
     }

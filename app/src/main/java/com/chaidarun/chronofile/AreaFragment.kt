@@ -211,7 +211,7 @@ class AreaFragment : GraphFragment() {
     }
 
     val elapsed = System.currentTimeMillis() - start
-    Log.d(TAG, "Rendered area chart in $elapsed ms")
+    Log.i(TAG, "Rendered area chart in $elapsed ms")
   }
 
   companion object {

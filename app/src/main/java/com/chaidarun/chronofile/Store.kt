@@ -101,7 +101,7 @@ private val reducer: (State, Action) -> State = { state, action ->
       val stateDiff = with(dumbDiff(this, nextState)) {
         "`${ellipsize(this.first)}` => `${ellipsize(this.second)}`"
       }
-      Log.d(TAG, "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff")
+      Log.i(TAG, "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff")
     }
 
     nextState

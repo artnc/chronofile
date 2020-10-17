@@ -114,7 +114,7 @@ class HistoryListAdapter(
 
   private val subscription = Store.observable.map { it.history }.distinctUntilChanged().subscribe { history ->
     if (history == null) {
-      Log.d(TAG, "History is null")
+      Log.i(TAG, "History is null")
       return@subscribe
     }
 
@@ -151,7 +151,7 @@ class HistoryListAdapter(
       notifyDataSetChanged()
       appActivity.historyList.scrollToPosition(itemList.size - 1)
     }
-    Log.d(TAG, "Rendered history view in $elapsedMs ms")
+    Log.i(TAG, "Rendered history view in $elapsedMs ms")
   }
 
   override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

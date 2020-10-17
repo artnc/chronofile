@@ -105,7 +105,7 @@ class GraphActivity : BaseActivity() {
   }
 
   private fun setPresetRange(history: History, presetRange: PresetRange) {
-    Log.d(TAG, "Setting range to $presetRange")
+    Log.i(TAG, "Setting range to $presetRange")
     val now = history.currentActivityStartTime
     val startTime = now - when (presetRange) {
       PresetRange.ALL_TIME -> now

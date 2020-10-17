@@ -31,7 +31,7 @@ class Config(
   fun saveFile() {
     val textToWrite = serialize()
     if (file.exists() && file.readText() == textToWrite) {
-      Log.d(TAG, "File unchanged; skipping write")
+      Log.i(TAG, "File unchanged; skipping write")
     } else {
       file.writeText(textToWrite)
     }

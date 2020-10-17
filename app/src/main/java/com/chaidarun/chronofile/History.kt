@@ -77,7 +77,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       currentActivityStartTime: Long
     ) = entries.toMutableList().apply {
       // Normalize
-      Log.d(TAG, "Normalizing entries")
+      Log.i(TAG, "Normalizing entries")
       sortBy { it.startTime }
       var lastSeenActivity: String? = null
       var lastSeenNote: String? = null
@@ -94,13 +94,13 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
 
     private fun save(text: String) {
       AsyncTask.execute {
-        Log.d(TAG, "Saving history")
+        Log.i(TAG, "Saving history")
         if (file.exists() && file.readText() == text) {
-          Log.d(TAG, "File unchanged; skipping write")
+          Log.i(TAG, "File unchanged; skipping write")
         } else {
           val start = System.currentTimeMillis()
           file.writeText(text)
-          Log.d(TAG, "Wrote file in ${System.currentTimeMillis() - start} ms")
+          Log.i(TAG, "Wrote file in ${System.currentTimeMillis() - start} ms")
         }
       }
     }
