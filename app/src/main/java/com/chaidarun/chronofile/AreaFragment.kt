@@ -2,6 +2,7 @@ package com.chaidarun.chronofile
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -210,7 +211,7 @@ class AreaFragment : GraphFragment() {
     }
 
     val elapsed = System.currentTimeMillis() - start
-    logDW("Rendered area chart in $elapsed ms", elapsed > 40)
+    Log.d(TAG, "Rendered area chart in $elapsed ms")
   }
 
   companion object {

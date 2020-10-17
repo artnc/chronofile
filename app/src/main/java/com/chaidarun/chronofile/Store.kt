@@ -1,5 +1,6 @@
 package com.chaidarun.chronofile
 
+import android.util.Log
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
@@ -95,12 +96,14 @@ private val reducer: (State, Action) -> State = { state, action ->
     }
 
     // Print reduction stats
-    val elapsed = System.currentTimeMillis() - start
-    val stateDiff = with(dumbDiff(this, nextState)) {
-      "`${ellipsize(this.first)}` => `${ellipsize(this.second)}`"
+    if (BuildConfig.DEBUG) {
+      val elapsed = System.currentTimeMillis() - start
+      val stateDiff = with(dumbDiff(this, nextState)) {
+        "`${ellipsize(this.first)}` => `${ellipsize(this.second)}`"
+      }
+      Log.d(TAG, "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff")
     }
-    val message = "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff"
-    logDW(message, elapsed > 20)
+
     nextState
   }
 }

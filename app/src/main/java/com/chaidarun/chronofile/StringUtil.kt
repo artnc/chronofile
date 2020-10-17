@@ -1,7 +1,5 @@
 package com.chaidarun.chronofile
 
-import android.util.Log
-
 private const val ELLIPSIS = "..."
 
 /**
@@ -21,6 +19,10 @@ fun ellipsize(obj: Any, maxLength: Int = 64) = with(obj.toString()) {
  * string representations, returning the resulting substrings as the diff
  */
 fun dumbDiff(objA: Any, objB: Any): Pair<String, String> {
+  if (!BuildConfig.DEBUG) {
+    error("This method is slow and should only be called in debug")
+  }
+
   var a = objA.toString()
   var b = objB.toString()
   if (a == b) {
@@ -43,7 +45,3 @@ fun dumbDiff(objA: Any, objB: Any): Pair<String, String> {
 
   return Pair(a, b)
 }
-
-/** Log a message at warning level if given boolean is true, else at debug level */
-fun logDW(message: String, warnIf: Boolean = true) =
-  if (warnIf) Log.w(TAG, message) else Log.d(TAG, message)

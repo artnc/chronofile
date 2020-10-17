@@ -151,7 +151,7 @@ class HistoryListAdapter(
       notifyDataSetChanged()
       appActivity.historyList.scrollToPosition(itemList.size - 1)
     }
-    logDW("Rendered history view in $elapsedMs ms", elapsedMs > 20)
+    Log.d(TAG, "Rendered history view in $elapsedMs ms")
   }
 
   override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

@@ -2,6 +2,7 @@ package com.chaidarun.chronofile
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -115,6 +116,6 @@ class PieFragment : GraphFragment() {
     }
 
     val elapsed = System.currentTimeMillis() - start
-    logDW("Rendered pie chart in $elapsed ms", elapsed > 40)
+    Log.d(TAG, "Rendered pie chart in $elapsed ms")
   }
 }
