@@ -95,15 +95,7 @@ private val reducer: (State, Action) -> State = { state, action ->
       is Action.SetHistory -> copy(history = action.history)
     }
 
-    // Print reduction stats
-    if (BuildConfig.DEBUG) {
-      val elapsed = System.currentTimeMillis() - start
-      val stateDiff = with(dumbDiff(this, nextState)) {
-        "`${ellipsize(this.first)}` => `${ellipsize(this.second)}`"
-      }
-      Log.i(TAG, "Reduced ${ellipsize(action)} in $elapsed ms. State diff: $stateDiff")
-    }
-
+    Log.i(TAG, "Reduced $action in ${System.currentTimeMillis() - start} ms")
     nextState
   }
 }
