@@ -14,7 +14,6 @@ import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.toast
 
 class MainActivity : BaseActivity() {
 
@@ -47,7 +46,7 @@ class MainActivity : BaseActivity() {
         startActivity(Intent(this, EditorActivity::class.java))
       R.id.action_refresh -> {
         hydrateStoreFromFiles()
-        toast("Reloaded history and config from disk")
+        App.toast("Reloaded history and config from disk")
       }
       R.id.action_stats -> startActivity(Intent(this, GraphActivity::class.java))
       else -> return super.onOptionsItemSelected(item)
@@ -65,7 +64,7 @@ class MainActivity : BaseActivity() {
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
           init()
         } else {
-          toast("Permission denied :(")
+          App.toast("Permission denied :(")
         }
     }
   }

@@ -23,7 +23,6 @@ import kotlinx.android.synthetic.main.form_entry.view.*
 import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
 import kotlinx.android.synthetic.main.item_time.view.*
-import org.jetbrains.anko.toast
 
 private enum class ViewType(val id: Int) { DATE(0), ENTRY(1), SPACER(2), TIME(3) }
 sealed class ListItem(val typeCode: Int)
@@ -48,7 +47,7 @@ class HistoryListAdapter(
     object : ResultReceiver(Handler()) {
       override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
         if (resultCode == FetchAddressIntentService.SUCCESS_CODE) {
-          resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY)?.let { App.ctx.toast(it) }
+          resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY)?.let { App.toast(it) }
         }
       }
     }
@@ -83,7 +82,7 @@ class HistoryListAdapter(
           R.id.location -> {
             val entry = selectedEntries.getOrNull(0)
             if (entry?.latLong == null) {
-              App.ctx.toast("No location data available")
+              App.toast("No location data available")
             } else {
               val location = Location("dummyprovider").apply {
                 latitude = entry.latLong[0]
@@ -95,7 +94,7 @@ class HistoryListAdapter(
               App.ctx.startService(intent)
             }
           }
-          else -> App.ctx.toast("Unknown action!")
+          else -> App.toast("Unknown action!")
         }
         mode.finish()
         return true

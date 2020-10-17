@@ -3,6 +3,7 @@ package com.chaidarun.chronofile
 import android.app.Application
 import android.content.Context
 import android.graphics.Typeface
+import android.widget.Toast
 import io.github.inflationx.calligraphy3.CalligraphyConfig
 import io.github.inflationx.calligraphy3.CalligraphyInterceptor
 import io.github.inflationx.viewpump.ViewPump
@@ -35,5 +36,7 @@ class App : Application() {
       private set
     lateinit var ctx: Context
       private set
+
+    fun toast(message: String) = Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
   }
 }

@@ -3,7 +3,6 @@ package com.chaidarun.chronofile
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
-import org.jetbrains.anko.toast
 
 /** All actions must be immutable */
 sealed class Action {
@@ -57,10 +56,10 @@ private val reducer: (State, Action) -> State = { state, action ->
       is Action.SetConfigFromText ->
         try {
           val config = Config.fromText(action.text)
-          App.ctx.toast("Saved config")
+          App.toast("Saved config")
           copy(config = config)
         } catch (e: Throwable) {
-          App.ctx.toast("Failed to save invalid config")
+          App.toast("Failed to save invalid config")
           this
         }
       is Action.SetConfigFromFile -> copy(config = action.config)

@@ -38,6 +38,5 @@ dependencies {
   implementation 'io.github.inflationx:calligraphy3:3.1.1'
   implementation 'io.github.inflationx:viewpump:2.0.3'
   implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
-  implementation "org.jetbrains.anko:anko-commons:$anko_version"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

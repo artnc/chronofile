@@ -12,7 +12,6 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_pie.*
-import org.jetbrains.anko.toast
 
 class PieFragment : GraphFragment() {
 
@@ -81,7 +80,7 @@ class PieFragment : GraphFragment() {
     val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
     val rangeSeconds = rangeEnd - rangeStart
     if (rangeSeconds <= 0) {
-      activity?.toast("No data to show!")
+      App.toast("No data to show!")
       return
     }
 

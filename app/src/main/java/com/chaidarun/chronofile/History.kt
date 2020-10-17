@@ -4,7 +4,6 @@ import android.os.AsyncTask
 import android.util.Log
 import com.google.android.gms.location.LocationServices
 import java.io.File
-import org.jetbrains.anko.toast
 
 data class History(val entries: List<Entry>, val currentActivityStartTime: Long) {
 
@@ -35,7 +34,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       null
     }
     if (newStartTime == null) {
-      App.ctx.toast("Invalid start time")
+      App.toast("Invalid start time")
       return this
     }
 
@@ -46,7 +45,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       this[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLong, sanitizedNote)
     }
 
-    App.ctx.toast("Updated entry")
+    App.toast("Updated entry")
     return copy(entries = normalizeAndSave(newEntries, currentActivityStartTime))
   }
 
@@ -128,7 +127,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     fun addEntry(activity: String, note: String?) {
       getLocation {
         Store.dispatch(Action.AddEntry(activity, note, it?.toList()))
-        App.ctx.toast("Recorded $activity")
+        App.toast("Recorded $activity")
       }
     }
 
