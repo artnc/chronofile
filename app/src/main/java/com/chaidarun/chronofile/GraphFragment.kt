@@ -87,29 +87,19 @@ abstract class GraphFragment : BaseFragment() {
   }
 
   companion object {
-    /** Ripped from D3.js: d3.scale.category20 */
+    /** Ripped from D3.js: d3.schemeTableau10 */
     val COLORS by lazy {
       listOf(
-        "#1f77b4",
-        "#aec7e8",
-        "#ff7f0e",
-        "#ffbb78",
-        "#2ca02c",
-        "#98df8a",
-        "#d62728",
-        "#ff9896",
-        "#9467bd",
-        "#c5b0d5",
-        "#8c564b",
-        "#c49c94",
-        "#e377c2",
-        "#f7b6d2",
-        "#7f7f7f",
-        "#c7c7c7",
-        "#bcbd22",
-        "#dbdb8d",
-        "#17becf",
-        "#9edae5"
+        "#4e79a7",
+        "#f28e2c",
+        "#e15759",
+        "#76b7b2",
+        "#59a14f",
+        "#edc949",
+        "#af7aa1",
+        "#ff9da7",
+        "#9c755f",
+        "#bab0ab"
       ).map { Color.parseColor(it) }
     }
 
