@@ -10,9 +10,10 @@ import io.github.inflationx.viewpump.ViewPump
 
 class App : Application() {
 
-  val typeface: Typeface by lazy { Typeface.createFromAsset(assets, "fonts/Exo2-Regular.otf") }
+  val typeface: Typeface by lazy { Typeface.createFromAsset(assets, FONT_PATH) }
 
   override fun onCreate() {
+    instance = this
     super.onCreate()
 
     // Set global default font
@@ -20,22 +21,21 @@ class App : Application() {
       ViewPump.builder().addInterceptor(
         CalligraphyInterceptor(
           CalligraphyConfig.Builder()
-            .setDefaultFontPath("fonts/Exo2-Regular.otf")
+            .setDefaultFontPath(FONT_PATH)
             .setFontAttrId(R.attr.fontPath)
             .build()
         )
       ).build()
     )
-
-    ctx = this.applicationContext
-    instance = this
   }
 
   companion object {
     lateinit var instance: App
       private set
-    lateinit var ctx: Context
-      private set
+    val ctx: Context
+      get() = instance.applicationContext
+
+    private const val FONT_PATH = "fonts/Exo2-Regular.otf"
 
     fun toast(message: String) = Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
   }
