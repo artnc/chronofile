@@ -30,13 +30,6 @@
         android:onClick="onCheckboxClicked"
         android:text="Group similar" />
 
-      <CheckBox
-        android:id="@+id/includeSleep"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="onCheckboxClicked"
-        android:text="Include sleep" />
-
     </LinearLayout>
 
     <RadioGroup
@@ -51,14 +44,6 @@
         android:layout_weight="1"
         android:onClick="onRadioButtonClicked"
         android:text="Average daily" />
-
-      <RadioButton
-        android:id="@+id/radioPercentage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:onClick="onRadioButtonClicked"
-        android:text="Percent recorded" />
 
       <RadioButton
         android:id="@+id/radioTotal"

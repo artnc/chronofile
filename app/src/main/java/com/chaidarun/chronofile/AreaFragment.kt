@@ -88,7 +88,7 @@ class AreaFragment : GraphFragment() {
 
     // Get top groups
     val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
-    val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd, false).first
+    val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd).first
     val groups = sliceList.map { it.first }
 
     // Calculate time per activity per day

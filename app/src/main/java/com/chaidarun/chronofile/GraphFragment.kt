@@ -34,11 +34,9 @@ abstract class GraphFragment : BaseFragment() {
     graphConfig: GraphConfig,
     rangeStart: Long,
     rangeEnd: Long,
-    respectIncludeSleep: Boolean = true
   ): Pair<MutableList<Pair<String, Long>>, Long> {
     // Get data
     val grouped = graphConfig.grouped
-    val includeSleep = graphConfig.includeSleep
     val sliceMap = mutableMapOf<String, Long>()
     var totalSliceSeconds = 0L
     with(history) {
@@ -54,10 +52,8 @@ abstract class GraphFragment : BaseFragment() {
         val startTime = Math.max(entry.startTime, rangeStart)
         val seconds = endTime - startTime
         val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-        if (includeSleep || !respectIncludeSleep || slice != SLEEP_SLICE_NAME) {
-          sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
-          totalSliceSeconds += seconds
-        }
+        sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
+        totalSliceSeconds += seconds
         endTime = startTime
 
         // Skip entries from before date range
@@ -112,6 +108,5 @@ abstract class GraphFragment : BaseFragment() {
     const val LABEL_FONT_SIZE = 12f
     /** TODO: Make this `protected` once Kotlin supports that */
     const val OTHER_SLICE_NAME = "Other"
-    private const val SLEEP_SLICE_NAME = "Sleep"
   }
 }

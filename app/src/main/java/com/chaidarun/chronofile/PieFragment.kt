@@ -33,7 +33,7 @@ class PieFragment : GraphFragment() {
       setCenterTextSize(LABEL_FONT_SIZE)
       setCenterTextTypeface(App.instance.typeface)
       setDrawEntryLabels(false)
-      setExtraOffsets(35f, 35f, 35f, 35f)
+      setExtraOffsets(50f, 0f, 50f, 0f)
       setHoleColor(Color.TRANSPARENT)
       setTouchEnabled(false)
       setTransparentCircleAlpha(0)
@@ -43,7 +43,6 @@ class PieFragment : GraphFragment() {
     with(Store.state) {
       when (graphConfig.metric) {
         Metric.AVERAGE -> radioAverage
-        Metric.PERCENTAGE -> radioPercentage
         Metric.TOTAL -> radioTotal
       }.isChecked = true
     }
@@ -61,12 +60,6 @@ class PieFragment : GraphFragment() {
           .map { it.graphConfig.grouped }
           .distinctUntilChanged()
           .subscribe { pieIsGrouped.isChecked = it }
-      )
-      add(
-        Store.observable
-          .map { it.graphConfig.includeSleep }
-          .distinctUntilChanged()
-          .subscribe { includeSleep.isChecked = it }
       )
     }
   }
@@ -92,7 +85,7 @@ class PieFragment : GraphFragment() {
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
       colors = COLORS
       valueLineColor = Color.TRANSPARENT
-      valueLinePart1Length = 0.5f
+      valueLinePart1Length = 0.45f
       valueLinePart2Length = 0f
       valueTextColor = LABEL_COLOR
       valueTextSize = LABEL_FONT_SIZE
@@ -100,7 +93,6 @@ class PieFragment : GraphFragment() {
       valueFormatter = IValueFormatter { value, entry, _, _ ->
         val num: String = when (metric) {
           Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
-          Metric.PERCENTAGE -> "${value.toLong() * 100 / totalSliceSeconds}%"
           Metric.TOTAL -> formatDuration(value.toLong())
         }
         "${(entry as? PieEntry)?.label}: $num"

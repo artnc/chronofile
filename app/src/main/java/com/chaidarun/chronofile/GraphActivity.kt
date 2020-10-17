@@ -123,7 +123,6 @@ class GraphActivity : BaseActivity() {
       when (id) {
         R.id.areaIsGrouped -> Store.dispatch(Action.SetGraphGrouping(areaIsGrouped.isChecked))
         R.id.areaIsStacked -> Store.dispatch(Action.SetGraphStacking(areaIsStacked.isChecked))
-        R.id.includeSleep -> Store.dispatch(Action.SetGraphIncludeSleep(includeSleep.isChecked))
         R.id.pieIsGrouped -> Store.dispatch(Action.SetGraphGrouping(pieIsGrouped.isChecked))
       }
     }
@@ -134,7 +133,6 @@ class GraphActivity : BaseActivity() {
       if (!isChecked) return
       when (id) {
         R.id.radioAverage -> Store.dispatch(Action.SetGraphMetric(Metric.AVERAGE))
-        R.id.radioPercentage -> Store.dispatch(Action.SetGraphMetric(Metric.PERCENTAGE))
         R.id.radioTotal -> Store.dispatch(Action.SetGraphMetric(Metric.TOTAL))
       }
     }

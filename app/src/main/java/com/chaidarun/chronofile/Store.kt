@@ -24,7 +24,6 @@ sealed class Action {
   data class SetConfigFromText(val text: String) : Action()
   data class SetConfigFromFile(val config: Config) : Action()
   data class SetGraphGrouping(val grouped: Boolean) : Action()
-  data class SetGraphIncludeSleep(val includeSleep: Boolean) : Action()
   data class SetGraphMetric(val metric: Metric) : Action()
   data class SetGraphRangeEnd(val timestamp: Long) : Action()
   data class SetGraphRangeStart(val timestamp: Long) : Action()
@@ -66,9 +65,6 @@ private val reducer: (State, Action) -> State = { state, action ->
       is Action.SetConfigFromFile -> copy(config = action.config)
       is Action.SetGraphGrouping -> copy(
         graphConfig = graphConfig.copy(grouped = action.grouped)
-      )
-      is Action.SetGraphIncludeSleep -> copy(
-        graphConfig = graphConfig.copy(includeSleep = action.includeSleep)
       )
       is Action.SetGraphMetric -> copy(graphConfig = graphConfig.copy(metric = action.metric))
       is Action.SetGraphRangeEnd -> {
