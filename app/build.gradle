@@ -2,7 +2,19 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+// https://developer.android.com/studio/publish/app-signing#secure_key
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
+
 android {
+  signingConfigs {
+    config {
+      keyAlias keystoreProperties['keyAlias']
+      keyPassword keystoreProperties['keyPassword']
+      storeFile file(keystoreProperties['storeFile'])
+      storePassword keystoreProperties['storePassword']
+    }
+  }
   compileSdkVersion 29
 
   defaultConfig {
@@ -14,9 +26,13 @@ android {
   }
 
   buildTypes {
-    release {
+    debug {
       minifyEnabled false
+    }
+    release {
+      minifyEnabled true
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.config
     }
   }
 }

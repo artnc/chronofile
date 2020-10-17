@@ -1,4 +1,6 @@
 *.iml
+*.jks
+*.pepk
 .DS_Store
 .externalNativeBuild
 .gradle
@@ -8,3 +10,4 @@
 /build
 /captures
 /local.properties
+/keystore.properties
