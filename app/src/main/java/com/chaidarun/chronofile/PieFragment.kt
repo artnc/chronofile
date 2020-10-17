@@ -26,7 +26,7 @@ class PieFragment : GraphFragment() {
     super.onViewCreated(view, savedInstanceState)
 
     with(pieChart) {
-      animateY(800, Easing.EasingOption.EaseInOutQuad);
+      animateY(800, Easing.EasingOption.EaseInOutQuad)
       description.isEnabled = false
       holeRadius = 50f
       legend.isEnabled = false
@@ -50,21 +50,24 @@ class PieFragment : GraphFragment() {
     }
 
     disposables = CompositeDisposable().apply {
-      add(Store.observable
-        .filter { it.config != null && it.history != null }
-        .map { Triple(it.config!!, it.history!!, it.graphConfig) }
-        .distinctUntilChanged()
-        .subscribe { render(it) }
+      add(
+        Store.observable
+          .filter { it.config != null && it.history != null }
+          .map { Triple(it.config!!, it.history!!, it.graphConfig) }
+          .distinctUntilChanged()
+          .subscribe { render(it) }
       )
-      add(Store.observable
-        .map { it.graphConfig.grouped }
-        .distinctUntilChanged()
-        .subscribe { pieIsGrouped.isChecked = it }
+      add(
+        Store.observable
+          .map { it.graphConfig.grouped }
+          .distinctUntilChanged()
+          .subscribe { pieIsGrouped.isChecked = it }
       )
-      add(Store.observable
-        .map { it.graphConfig.includeSleep }
-        .distinctUntilChanged()
-        .subscribe { includeSleep.isChecked = it }
+      add(
+        Store.observable
+          .map { it.graphConfig.includeSleep }
+          .distinctUntilChanged()
+          .subscribe { includeSleep.isChecked = it }
       )
     }
   }

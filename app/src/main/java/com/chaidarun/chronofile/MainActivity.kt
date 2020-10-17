@@ -27,8 +27,9 @@ class MainActivity : BaseActivity() {
 
     // Ensure required permissions are granted
     if (APP_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-      }) {
+      ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+    }
+    ) {
       init()
     } else {
       ActivityCompat.requestPermissions(this, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
@@ -83,16 +84,19 @@ class MainActivity : BaseActivity() {
 
     // Set up listeners
     disposables = CompositeDisposable().apply {
-      add(RxView.clicks(addEntry)
-        .subscribe {
-          History.addEntry(addEntryActivity.text.toString(), addEntryNote.text.toString())
-          addEntryActivity.text.clear()
-          addEntryNote.text.clear()
-          currentFocus?.clearFocus()
-        }
+      add(
+        RxView.clicks(addEntry)
+          .subscribe {
+            History.addEntry(addEntryActivity.text.toString(), addEntryNote.text.toString())
+            addEntryActivity.text.clear()
+            addEntryNote.text.clear()
+            currentFocus?.clearFocus()
+          }
       )
-      add(RxTextView.afterTextChangeEvents(addEntryActivity)
-        .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() })
+      add(
+        RxTextView.afterTextChangeEvents(addEntryActivity)
+          .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() }
+      )
     }
   }
 

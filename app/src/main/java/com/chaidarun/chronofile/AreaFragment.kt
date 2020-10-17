@@ -15,8 +15,8 @@ import com.github.mikephil.charting.formatter.IFillFormatter
 import com.github.mikephil.charting.listener.ChartTouchListener
 import com.github.mikephil.charting.listener.OnChartGestureListener
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_area.*
 import java.util.*
+import kotlinx.android.synthetic.main.fragment_area.*
 
 class AreaFragment : GraphFragment() {
 
@@ -84,25 +84,28 @@ class AreaFragment : GraphFragment() {
     }
 
     disposables = CompositeDisposable().apply {
-      add(Store.observable
-        .filter { it.config != null && it.history != null }
-        .map { Triple(it.config!!, it.history!!, it.graphConfig) }
-        .distinctUntilChanged()
-        .subscribe {
-          render(it)
-          val visibleStart = it.third.startTime?.toFloat()
-          if (visibleStart != null) areaChart.moveViewToX(visibleStart)
-        }
+      add(
+        Store.observable
+          .filter { it.config != null && it.history != null }
+          .map { Triple(it.config!!, it.history!!, it.graphConfig) }
+          .distinctUntilChanged()
+          .subscribe {
+            render(it)
+            val visibleStart = it.third.startTime?.toFloat()
+            if (visibleStart != null) areaChart.moveViewToX(visibleStart)
+          }
       )
-      add(Store.observable
-        .map { it.graphConfig.grouped }
-        .distinctUntilChanged()
-        .subscribe { areaIsGrouped.isChecked = it }
+      add(
+        Store.observable
+          .map { it.graphConfig.grouped }
+          .distinctUntilChanged()
+          .subscribe { areaIsGrouped.isChecked = it }
       )
-      add(Store.observable
-        .map { it.graphConfig.stacked }
-        .distinctUntilChanged()
-        .subscribe { areaIsStacked.isChecked = it }
+      add(
+        Store.observable
+          .map { it.graphConfig.stacked }
+          .distinctUntilChanged()
+          .subscribe { areaIsStacked.isChecked = it }
       )
     }
   }

@@ -44,57 +44,65 @@ class GraphActivity : BaseActivity() {
     var endTime: Long? = null
     setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
     disposables = CompositeDisposable().apply {
-      add(Store.observable
-        .map { it.graphConfig.startTime }
-        .distinctUntilChanged()
-        .subscribe {
-          startTime = it
-          if (it != null) startDate.text = formatDate(it)
-        }
-      )
-      add(Store.observable
-        .map { it.graphConfig.endTime }
-        .distinctUntilChanged()
-        .subscribe {
-          endTime = it
-          if (it != null) endDate.text = formatDate(it)
-        }
-      )
-      add(RxView.clicks(startDate).subscribe {
-        val fragment = DatePickerFragment().apply {
-          arguments = Bundle().apply {
-            putString(DatePickerFragment.ENDPOINT, "start")
-            putLong(DatePickerFragment.TIMESTAMP, startTime ?: epochSeconds())
+      add(
+        Store.observable
+          .map { it.graphConfig.startTime }
+          .distinctUntilChanged()
+          .subscribe {
+            startTime = it
+            if (it != null) startDate.text = formatDate(it)
           }
-        }
-        fragment.show(fragmentManager, "datePicker")
-      })
-      add(RxView.clicks(endDate).subscribe {
-        val fragment = DatePickerFragment().apply {
-          arguments = Bundle().apply {
-            putString(DatePickerFragment.ENDPOINT, "end")
-            putLong(DatePickerFragment.TIMESTAMP, endTime ?: epochSeconds())
+      )
+      add(
+        Store.observable
+          .map { it.graphConfig.endTime }
+          .distinctUntilChanged()
+          .subscribe {
+            endTime = it
+            if (it != null) endDate.text = formatDate(it)
           }
-        }
-        fragment.show(fragmentManager, "datePicker")
-      })
-      add(RxView.clicks(quickRange).subscribe {
-        with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
-          val options = arrayOf("Today", "Past week", "Past month", "All time")
-          setSingleChoiceItems(options, -1, null)
-          setPositiveButton("OK") { dialog, _ ->
-            val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
-            when (optionIndex) {
-              0 -> setPresetRange(Store.state.history!!, PresetRange.TODAY)
-              1 -> setPresetRange(Store.state.history!!, PresetRange.LAST_WEEK)
-              2 -> setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
-              3 -> setPresetRange(Store.state.history!!, PresetRange.ALL_TIME)
+      )
+      add(
+        RxView.clicks(startDate).subscribe {
+          val fragment = DatePickerFragment().apply {
+            arguments = Bundle().apply {
+              putString(DatePickerFragment.ENDPOINT, "start")
+              putLong(DatePickerFragment.TIMESTAMP, startTime ?: epochSeconds())
             }
           }
-          setNegativeButton("Cancel", null)
-          show()
+          fragment.show(fragmentManager, "datePicker")
         }
-      })
+      )
+      add(
+        RxView.clicks(endDate).subscribe {
+          val fragment = DatePickerFragment().apply {
+            arguments = Bundle().apply {
+              putString(DatePickerFragment.ENDPOINT, "end")
+              putLong(DatePickerFragment.TIMESTAMP, endTime ?: epochSeconds())
+            }
+          }
+          fragment.show(fragmentManager, "datePicker")
+        }
+      )
+      add(
+        RxView.clicks(quickRange).subscribe {
+          with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
+            val options = arrayOf("Today", "Past week", "Past month", "All time")
+            setSingleChoiceItems(options, -1, null)
+            setPositiveButton("OK") { dialog, _ ->
+              val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
+              when (optionIndex) {
+                0 -> setPresetRange(Store.state.history!!, PresetRange.TODAY)
+                1 -> setPresetRange(Store.state.history!!, PresetRange.LAST_WEEK)
+                2 -> setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
+                3 -> setPresetRange(Store.state.history!!, PresetRange.ALL_TIME)
+              }
+            }
+            setNegativeButton("Cancel", null)
+            show()
+          }
+        }
+      )
     }
   }
 

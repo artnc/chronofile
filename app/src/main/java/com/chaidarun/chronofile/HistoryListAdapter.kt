@@ -16,14 +16,14 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import java.util.*
+import kotlin.system.measureTimeMillis
 import kotlinx.android.synthetic.main.content_main.*
 import kotlinx.android.synthetic.main.form_entry.view.*
 import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
 import kotlinx.android.synthetic.main.item_time.view.*
 import org.jetbrains.anko.toast
-import java.util.*
-import kotlin.system.measureTimeMillis
 
 private enum class ViewType(val id: Int) { DATE(0), ENTRY(1), SPACER(2), TIME(3) }
 sealed class ListItem(val typeCode: Int)
@@ -66,14 +66,17 @@ class HistoryListAdapter(
               view.formEntryActivity.setText(entry.activity)
               view.formEntryNote.setText(entry.note ?: "")
               setView(view)
-              setPositiveButton("OK", { _, _ ->
-                Store.dispatch(
-                  Action.EditEntry(
-                    entry.startTime, view.formEntryStartTime.text.toString(),
-                    view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
+              setPositiveButton(
+                "OK",
+                { _, _ ->
+                  Store.dispatch(
+                    Action.EditEntry(
+                      entry.startTime, view.formEntryStartTime.text.toString(),
+                      view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
+                    )
                   )
-                )
-              })
+                }
+              )
               setNegativeButton("Cancel", null)
               show()
             }
@@ -166,11 +169,13 @@ class HistoryListAdapter(
     ViewType.TIME.id -> TimeViewHolder(
       LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false)
     )
-    ViewType.SPACER.id -> SpacerViewHolder(LinearLayout(appActivity).apply {
-      layoutParams = LinearLayout.LayoutParams(
-        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-      )
-    })
+    ViewType.SPACER.id -> SpacerViewHolder(
+      LinearLayout(appActivity).apply {
+        layoutParams = LinearLayout.LayoutParams(
+          LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+      }
+    )
     else -> null
   }
 

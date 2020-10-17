@@ -4,8 +4,8 @@ import android.os.AsyncTask
 import android.util.Log
 import com.google.android.gms.location.LocationServices
 import com.google.gson.GsonBuilder
-import org.jetbrains.anko.toast
 import java.io.File
+import org.jetbrains.anko.toast
 
 data class History(val entries: List<Entry>, val currentActivityStartTime: Long) {
 
@@ -62,9 +62,10 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     )
   }
 
-  fun withoutEntries(startTimes: Collection<Long>) = copy(entries = normalizeAndSave(
-    entries.filter { it.startTime !in startTimes }, currentActivityStartTime
-  )
+  fun withoutEntries(startTimes: Collection<Long>) = copy(
+    entries = normalizeAndSave(
+      entries.filter { it.startTime !in startTimes }, currentActivityStartTime
+    )
   )
 
   companion object {
