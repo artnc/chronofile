@@ -5,7 +5,7 @@ import android.graphics.Color
 abstract class GraphFragment : BaseFragment() {
 
   /**
-   * Determines the date range that should be used to render the pie chart.
+   * Determines the date range that should be used to render each chart.
    *
    * This takes into account the earliest recorded entry, the last recorded entry, the
    * user-selected start date, the user-selected end date, and the graph metric.

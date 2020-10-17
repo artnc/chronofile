@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.github.mikephil.charting.components.LimitLine
@@ -13,8 +12,6 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IFillFormatter
-import com.github.mikephil.charting.listener.ChartTouchListener
-import com.github.mikephil.charting.listener.OnChartGestureListener
 import io.reactivex.disposables.CompositeDisposable
 import java.util.*
 import kotlinx.android.synthetic.main.fragment_area.*
@@ -46,34 +43,6 @@ class AreaFragment : GraphFragment() {
         typeface = App.instance.typeface
         xEntrySpace = 15f
       }
-      onChartGestureListener = object : OnChartGestureListener {
-        override fun onChartGestureEnd(
-          me: MotionEvent?,
-          lastPerformedGesture: ChartTouchListener.ChartGesture?
-        ) {
-          Store.dispatch(Action.SetGraphRangeStart(getPreviousMidnight(lowestVisibleX.toLong())))
-          Store.dispatch(Action.SetGraphRangeEnd(getPreviousMidnight(highestVisibleX.toLong())))
-        }
-
-        override fun onChartFling(
-          me1: MotionEvent?,
-          me2: MotionEvent?,
-          velocityX: Float,
-          velocityY: Float
-        ) = Unit
-
-        override fun onChartSingleTapped(me: MotionEvent?) = Unit
-
-        override fun onChartGestureStart(
-          me: MotionEvent?,
-          lastPerformedGesture: ChartTouchListener.ChartGesture?
-        ) = Unit
-
-        override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) = Unit
-        override fun onChartLongPressed(me: MotionEvent?) = Unit
-        override fun onChartDoubleTapped(me: MotionEvent?) = Unit
-        override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) = Unit
-      }
 
       setDrawBorders(false)
       setDrawGridBackground(false)
@@ -82,6 +51,8 @@ class AreaFragment : GraphFragment() {
         setDrawGridLines(false)
         setDrawLabels(false)
       }
+
+      setTouchEnabled(false)
     }
 
     disposables = CompositeDisposable().apply {
@@ -114,10 +85,9 @@ class AreaFragment : GraphFragment() {
   private fun render(state: Triple<Config, History, GraphConfig>) {
     val start = System.currentTimeMillis()
     val (config, history, graphConfig) = state
-    val rangeStart = history.entries[0].startTime
-    val rangeEnd = history.currentActivityStartTime
 
     // Get top groups
+    val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
     val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd, false).first
     val groups = sliceList.map { it.first }
 
@@ -130,11 +100,16 @@ class AreaFragment : GraphFragment() {
       aToD[slice] = aToD.getOrDefault(slice, 0) + duration
     }
     val grouped = graphConfig.grouped
-    history.entries.reversed().forEach {
-      val formattedStart = formatDate(it.startTime)
+    for (entry in history.entries.reversed()) {
+      // Skip entries from after date range
+      if (entry.startTime >= rangeEnd) {
+        continue
+      }
+
+      val formattedStart = formatDate(entry.startTime)
       val formattedEnd = formatDate(lastSeenStartTime)
       val entryCrossesMidnight = formattedStart != formattedEnd
-      val slice = if (grouped) config.getActivityGroup(it.activity) else it.activity
+      val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
       if (entryCrossesMidnight) {
         val midnight = with(Calendar.getInstance()) {
           apply { timeInMillis = lastSeenStartTime * 1000 }
@@ -145,12 +120,17 @@ class AreaFragment : GraphFragment() {
           ).time.time / 1000
         }
         add(formatDate(midnight), slice, lastSeenStartTime - midnight)
-        add(formattedStart, slice, midnight - it.startTime)
+        add(formattedStart, slice, midnight - entry.startTime)
       } else {
-        add(formattedStart, slice, lastSeenStartTime - it.startTime)
+        add(formattedStart, slice, lastSeenStartTime - entry.startTime)
       }
 
-      lastSeenStartTime = it.startTime
+      lastSeenStartTime = entry.startTime
+
+      // Skip entries from before date range
+      if (entry.startTime <= rangeStart) {
+        break
+      }
     }
 
     // Convert into data set lists
