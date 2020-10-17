@@ -28,13 +28,14 @@ class PieFragment : GraphFragment() {
       description.isEnabled = false
       holeRadius = 50f
       legend.isEnabled = false
-      rotationAngle = 195f
+      rotationAngle = 225f
       setCenterTextColor(LABEL_COLOR)
       setCenterTextSize(LABEL_FONT_SIZE)
       setCenterTextTypeface(App.instance.typeface)
       setDrawEntryLabels(false)
       setExtraOffsets(35f, 35f, 35f, 35f)
       setHoleColor(Color.TRANSPARENT)
+      setTouchEnabled(false)
       setTransparentCircleAlpha(0)
     }
 
