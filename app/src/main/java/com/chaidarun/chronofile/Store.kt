@@ -19,7 +19,7 @@ sealed class Action {
     val note: String
   ) : Action()
 
-  data class RemoveEntries(val entries: Collection<Long>) : Action()
+  data class RemoveEntry(val entry: Long) : Action()
   data class SetConfigFromText(val text: String) : Action()
   data class SetConfigFromFile(val config: Config) : Action()
   data class SetGraphGrouping(val grouped: Boolean) : Action()
@@ -52,7 +52,7 @@ private val reducer: (State, Action) -> State = { state, action ->
           action.oldStartTime, action.newStartTime, action.activity, action.note
         )
       )
-      is Action.RemoveEntries -> copy(history = history?.withoutEntries(action.entries))
+      is Action.RemoveEntry -> copy(history = history?.withoutEntry(action.entry))
       is Action.SetConfigFromText ->
         try {
           val config = Config.fromText(action.text)

@@ -60,9 +60,9 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     )
   }
 
-  fun withoutEntries(startTimes: Collection<Long>) = copy(
+  fun withoutEntry(startTime: Long) = copy(
     entries = normalizeAndSave(
-      entries.filter { it.startTime !in startTimes }, currentActivityStartTime
+      entries.filter { it.startTime != startTime }, currentActivityStartTime
     )
   )
 

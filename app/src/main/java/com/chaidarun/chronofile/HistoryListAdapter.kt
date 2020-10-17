@@ -42,7 +42,7 @@ class HistoryListAdapter(
 
   private var itemList = listOf<ListItem>()
   private var itemListLength = 0
-  private val selectedEntries = mutableListOf<Entry>()
+  private var selectedEntry: Entry? = null
   private val receiver by lazy {
     object : ResultReceiver(Handler()) {
       override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
@@ -55,47 +55,49 @@ class HistoryListAdapter(
   private val actionModeCallback by lazy {
     object : ActionMode.Callback {
       override fun onActionItemClicked(mode: ActionMode, item: MenuItem?): Boolean {
-        when (item?.itemId) {
-          R.id.delete -> Store.dispatch(Action.RemoveEntries(selectedEntries.map { it.startTime }))
-          R.id.edit -> {
-            val entry = selectedEntries[0]
-            val view = LayoutInflater.from(appActivity).inflate(R.layout.form_entry, null)
-            with(AlertDialog.Builder(appActivity, R.style.MyAlertDialogTheme)) {
-              setTitle("Edit entry")
-              view.formEntryActivity.setText(entry.activity)
-              view.formEntryNote.setText(entry.note ?: "")
-              setView(view)
-              setPositiveButton(
-                "OK"
-              ) { _, _ ->
-                Store.dispatch(
-                  Action.EditEntry(
-                    entry.startTime, view.formEntryStartTime.text.toString(),
-                    view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
+        val entry = selectedEntry
+        if (entry != null) {
+          when (item?.itemId) {
+            R.id.delete -> Store.dispatch(Action.RemoveEntry(entry.startTime))
+            R.id.edit -> {
+              val view = LayoutInflater.from(appActivity).inflate(R.layout.form_entry, null)
+              with(AlertDialog.Builder(appActivity, R.style.MyAlertDialogTheme)) {
+                setTitle("Edit entry")
+                view.formEntryActivity.setText(entry.activity)
+                view.formEntryNote.setText(entry.note ?: "")
+                setView(view)
+                setPositiveButton(
+                  "OK"
+                ) { _, _ ->
+                  Store.dispatch(
+                    Action.EditEntry(
+                      entry.startTime, view.formEntryStartTime.text.toString(),
+                      view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
+                    )
                   )
-                )
+                }
+                setNegativeButton("Cancel", null)
+                show()
               }
-              setNegativeButton("Cancel", null)
-              show()
             }
-          }
-          R.id.location -> {
-            val entry = selectedEntries.getOrNull(0)
-            if (entry?.latLong == null) {
-              App.toast("No location data available")
-            } else {
-              val location = Location("dummyprovider").apply {
-                latitude = entry.latLong[0]
-                longitude = entry.latLong[1]
+            R.id.location -> {
+              if (entry.latLong == null) {
+                App.toast("No location data available")
+              } else {
+                val location = Location("dummyprovider").apply {
+                  latitude = entry.latLong[0]
+                  longitude = entry.latLong[1]
+                }
+                val intent = Intent(App.ctx, FetchAddressIntentService::class.java)
+                intent.putExtra(FetchAddressIntentService.RECEIVER, receiver)
+                intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location)
+                App.ctx.startService(intent)
               }
-              val intent = Intent(App.ctx, FetchAddressIntentService::class.java)
-              intent.putExtra(FetchAddressIntentService.RECEIVER, receiver)
-              intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location)
-              App.ctx.startService(intent)
             }
+            else -> App.toast("Unknown action!")
           }
-          else -> App.toast("Unknown action!")
         }
+        selectedEntry = null
         mode.finish()
         return true
       }
@@ -208,8 +210,7 @@ class HistoryListAdapter(
         setOnClickListener { History.addEntry(activity, note) }
         setOnLongClickListener {
           (context as AppCompatActivity).startActionMode(actionModeCallback)
-          selectedEntries.clear()
-          selectedEntries.add(entry)
+          selectedEntry = entry
           true
         }
       }
