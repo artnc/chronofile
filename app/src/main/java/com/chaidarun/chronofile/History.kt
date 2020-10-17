@@ -1,5 +1,6 @@
 package com.chaidarun.chronofile
 
+import android.os.AsyncTask
 import android.util.Log
 import com.google.android.gms.location.LocationServices
 import com.google.gson.GsonBuilder
@@ -93,15 +94,17 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       }
 
       // Save
-      Log.d(TAG, "Saving history")
-      val lines = mutableListOf<String>()
-      forEach { lines += gson.toJson(it) }
-      lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
-      val textToWrite = lines.joinToString("") { "$it\n" }
-      if (file.exists() && file.readText() == textToWrite) {
-        Log.d(TAG, "File unchanged; skipping write")
-      } else {
-        file.writeText(textToWrite)
+      AsyncTask.execute {
+        Log.d(TAG, "Saving history")
+        val lines = mutableListOf<String>()
+        forEach { lines += gson.toJson(it) }
+        lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
+        val textToWrite = lines.joinToString("") { "$it\n" }
+        if (file.exists() && file.readText() == textToWrite) {
+          Log.d(TAG, "File unchanged; skipping write")
+        } else {
+          file.writeText(textToWrite)
+        }
       }
     }.toList()
 
