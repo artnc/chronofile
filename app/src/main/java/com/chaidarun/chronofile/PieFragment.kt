@@ -101,7 +101,7 @@ class PieFragment : GraphFragment() {
     }
 
     with(pieChart) {
-      centerText = "Range:\n${formatDuration(totalSliceSeconds)}"
+      centerText = "Range:\n${formatDuration(totalSliceSeconds, showDays = true)}"
       data = PieData(pieDataSet)
       invalidate()
     }

@@ -14,7 +14,7 @@ fun formatDate(seconds: Long) = formatDate(Date(seconds * 1000))
 fun formatTime(date: Date): String = timeFormat.format(date)
 
 /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
-fun formatDuration(seconds: Long): String {
+fun formatDuration(seconds: Long, showDays: Boolean = false): String {
   if (seconds < 30) return "0m"
 
   // Rounds to nearest minute
@@ -27,13 +27,15 @@ fun formatDuration(seconds: Long): String {
     pieces.add(0, "${minutes}m")
   }
   val totalHours = totalMinutes / 60
-  val hours = totalHours % 24
+  val hours = if (showDays) totalHours % 24 else totalHours
   if (hours != 0L) {
     pieces.add(0, "${hours}h")
   }
-  val days = totalHours / 24
-  if (days != 0L) {
-    pieces.add(0, "${days}d")
+  if (showDays) {
+    val days = totalHours / 24
+    if (days != 0L) {
+      pieces.add(0, "${days}d")
+    }
   }
   return pieces.joinToString(" ")
 }
