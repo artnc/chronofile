@@ -15,15 +15,6 @@ class Config(
   @Expose
   @SerializedName("activityGroups")
   private val unnormalizedActivityGroups: Map<String, List<String>>? = null,
-  /**
-   * Known coordinates to which nearby locations should snap.
-   *
-   * This is used to ensure that all activities occurring in the same physical location always get
-   * assigned the same coordinates.
-   */
-  @Expose
-  @SerializedName("locations")
-  val locations: Map<String, List<Double>>? = null
 ) {
   private val activityGroups by lazy {
     mutableMapOf<String, String>().apply {
@@ -47,8 +38,6 @@ class Config(
   }
 
   companion object {
-    /** 0.0005 degrees latitude is roughly 182 ft */
-    val LOCATION_SNAP_RADIUS_SQUARED = Math.pow(0.0005, 2.0)
     private val gson by lazy {
       GsonBuilder()
         .disableHtmlEscaping()

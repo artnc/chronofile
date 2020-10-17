@@ -79,8 +79,6 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     ) = entries.toMutableList().apply {
       // Normalize
       Log.d(TAG, "Normalizing entries")
-      val config = Store.state.config
-      replaceAll { it.snapToKnownLocation(config) }
       sortBy { it.startTime }
       var lastSeenActivityAndNote: Pair<String, String?>? = null
       removeAll {
