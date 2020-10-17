@@ -23,7 +23,7 @@ class GraphActivity : BaseActivity() {
     setContentView(R.layout.activity_graph)
     setSupportActionBar(graphToolbar)
     graphViewPager.adapter = GraphPagerAdapter(supportFragmentManager)
-    graphViewPager.currentItem = GraphPagerAdapter.Tab.values().indexOf(GraphPagerAdapter.Tab.PIE)
+    graphViewPager.currentItem = GraphPagerAdapter.Tab.PIE.ordinal
     graphTabs.setupWithViewPager(graphViewPager)
 
     // Set tab font

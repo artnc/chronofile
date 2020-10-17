@@ -24,17 +24,17 @@ import kotlinx.android.synthetic.main.item_date.view.*
 import kotlinx.android.synthetic.main.item_entry.view.*
 import kotlinx.android.synthetic.main.item_time.view.*
 
-private enum class ViewType(val id: Int) { DATE(0), ENTRY(1), SPACER(2), TIME(3) }
-sealed class ListItem(val typeCode: Int)
-private data class DateItem(val date: Date) : ListItem(ViewType.DATE.id)
+private enum class ViewType { DATE, ENTRY, SPACER, TIME }
+sealed class ListItem(val viewType: ViewType)
+private data class DateItem(val date: Date) : ListItem(ViewType.DATE)
 private data class EntryItem(
   val entry: Entry,
   val itemStart: Long,
   val itemEnd: Long
-) : ListItem(ViewType.ENTRY.id)
+) : ListItem(ViewType.ENTRY)
 
-private data class SpacerItem(val height: Int) : ListItem(ViewType.SPACER.id)
-private data class TimeItem(val time: Date) : ListItem(ViewType.TIME.id)
+private data class SpacerItem(val height: Int) : ListItem(ViewType.SPACER)
+private data class TimeItem(val time: Date) : ListItem(ViewType.TIME)
 
 class HistoryListAdapter(
   private val appActivity: AppCompatActivity
@@ -160,26 +160,25 @@ class HistoryListAdapter(
   }
 
   override fun getItemCount() = itemListLength
-  override fun getItemViewType(position: Int) = itemList[position].typeCode
+  override fun getItemViewType(position: Int) = itemList[position].viewType.ordinal
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
-    ViewType.DATE.id -> DateViewHolder(
+  override fun onCreateViewHolder(parent: ViewGroup, viewTypeOrdinal: Int) = when (ViewType.values()[viewTypeOrdinal]) {
+    ViewType.DATE -> DateViewHolder(
       LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false)
     )
-    ViewType.ENTRY.id -> EntryViewHolder(
+    ViewType.ENTRY -> EntryViewHolder(
       LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false)
     )
-    ViewType.TIME.id -> TimeViewHolder(
+    ViewType.TIME -> TimeViewHolder(
       LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false)
     )
-    ViewType.SPACER.id -> SpacerViewHolder(
+    ViewType.SPACER -> SpacerViewHolder(
       LinearLayout(appActivity).apply {
         layoutParams = LinearLayout.LayoutParams(
           LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
         )
       }
     )
-    else -> error("Invalid view type")
   }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
