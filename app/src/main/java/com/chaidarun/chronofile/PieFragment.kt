@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -26,7 +25,6 @@ class PieFragment : GraphFragment() {
     super.onViewCreated(view, savedInstanceState)
 
     with(pieChart) {
-      animateY(800, Easing.EasingOption.EaseInOutQuad)
       description.isEnabled = false
       holeRadius = 50f
       legend.isEnabled = false
