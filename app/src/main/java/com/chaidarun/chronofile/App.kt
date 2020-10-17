@@ -3,6 +3,7 @@ package com.chaidarun.chronofile
 import android.app.Application
 import android.content.Context
 import android.graphics.Typeface
+import android.view.Gravity
 import android.widget.Toast
 import io.github.inflationx.calligraphy3.CalligraphyConfig
 import io.github.inflationx.calligraphy3.CalligraphyInterceptor
@@ -37,6 +38,11 @@ class App : Application() {
 
     private const val FONT_PATH = "fonts/Exo2-Regular.otf"
 
-    fun toast(message: String) = Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+    fun toast(message: String) = Toast.makeText(ctx, message, Toast.LENGTH_SHORT).apply {
+      val dpOffset = 3.5
+      // https://developer.android.com/training/multiscreen/screendensities#dips-pels
+      val pxOffset = (dpOffset * ctx.resources.displayMetrics.density + 0.5f).toInt()
+      setGravity(Gravity.TOP, 0, pxOffset)
+    }.show()
   }
 }
