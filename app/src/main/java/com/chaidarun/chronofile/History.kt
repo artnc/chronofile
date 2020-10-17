@@ -79,33 +79,36 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       // Normalize
       Log.d(TAG, "Normalizing entries")
       sortBy { it.startTime }
-      var lastSeenActivityAndNote: Pair<String, String?>? = null
+      var lastSeenActivity: String? = null
+      var lastSeenNote: String? = null
       removeAll {
-        val activityAndNote = Pair(it.activity, it.note)
-        val shouldRemove = activityAndNote == lastSeenActivityAndNote
-        lastSeenActivityAndNote = activityAndNote
+        val shouldRemove = it.activity == lastSeenActivity && it.note == lastSeenNote
+        lastSeenActivity = it.activity
+        lastSeenNote = it.note
         shouldRemove
       }
 
       // Save
+      save(joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n")
+    }.toList()
+
+    private fun save(text: String) {
       AsyncTask.execute {
         Log.d(TAG, "Saving history")
-        val lines = mutableListOf<String>()
-        forEach { lines += it.toTsvRow() }
-        lines += "\t\t\t\t$currentActivityStartTime\n"
-        val textToWrite = lines.joinToString("")
-        if (file.exists() && file.readText() == textToWrite) {
+        if (file.exists() && file.readText() == text) {
           Log.d(TAG, "File unchanged; skipping write")
         } else {
-          file.writeText(textToWrite)
+          val start = System.currentTimeMillis()
+          file.writeText(text)
+          Log.d(TAG, "Wrote file in ${System.currentTimeMillis() - start} ms")
         }
       }
-    }.toList()
+    }
 
     private fun sanitizeActivityAndNote(
       activity: String,
       note: String?
-    ) = Pair(activity.trim(), if (note.isNullOrBlank()) null else note?.trim())
+    ) = Pair(activity.trim(), if (note.isNullOrBlank()) null else note.trim())
 
     private fun getLocation(callback: (Pair<Double, Double>?) -> Unit) {
       try {
@@ -132,11 +135,9 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     }
 
     fun fromFile(): History {
-      // Ensure file exists
+      // Read lines
       var currentActivityStartTime = epochSeconds()
-      val lines = if (file.exists()) file.readLines() else listOf(
-        "\t\t\t\t$currentActivityStartTime\n".also { file.writeText(it) }
-      )
+      val lines = if (file.exists()) file.readLines() else listOf("\t\t\t\t$currentActivityStartTime\n")
 
       // Parse lines
       val entries = mutableListOf<Entry>()
