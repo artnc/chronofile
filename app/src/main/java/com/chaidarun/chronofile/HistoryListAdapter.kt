@@ -5,9 +5,6 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.ResultReceiver
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.ActionMode
 import android.view.LayoutInflater
@@ -16,6 +13,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 import kotlin.system.measureTimeMillis
 import kotlinx.android.synthetic.main.content_main.*
@@ -48,7 +48,7 @@ class HistoryListAdapter(
     object : ResultReceiver(Handler()) {
       override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
         if (resultCode == FetchAddressIntentService.SUCCESS_CODE) {
-          App.ctx.toast(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY))
+          resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY)?.let { App.ctx.toast(it) }
         }
       }
     }
@@ -153,7 +153,7 @@ class HistoryListAdapter(
     logDW("Rendered history view in $elapsedMs ms", elapsedMs > 20)
   }
 
-  override fun onDetachedFromRecyclerView(recyclerView: RecyclerView?) {
+  override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
     subscription.dispose()
     super.onDetachedFromRecyclerView(recyclerView)
   }
@@ -178,7 +178,7 @@ class HistoryListAdapter(
         )
       }
     )
-    else -> null
+    else -> error("Invalid view type")
   }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {

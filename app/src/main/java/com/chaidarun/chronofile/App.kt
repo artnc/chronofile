@@ -3,7 +3,9 @@ package com.chaidarun.chronofile
 import android.app.Application
 import android.content.Context
 import android.graphics.Typeface
-import uk.co.chrisjenx.calligraphy.CalligraphyConfig
+import io.github.inflationx.calligraphy3.CalligraphyConfig
+import io.github.inflationx.calligraphy3.CalligraphyInterceptor
+import io.github.inflationx.viewpump.ViewPump
 
 class App : Application() {
 
@@ -13,11 +15,15 @@ class App : Application() {
     super.onCreate()
 
     // Set global default font
-    CalligraphyConfig.initDefault(
-      CalligraphyConfig.Builder()
-        .setDefaultFontPath("fonts/Exo2-Regular.otf")
-        .setFontAttrId(R.attr.fontPath)
-        .build()
+    ViewPump.init(
+      ViewPump.builder().addInterceptor(
+        CalligraphyInterceptor(
+          CalligraphyConfig.Builder()
+            .setDefaultFontPath("fonts/Exo2-Regular.otf")
+            .setFontAttrId(R.attr.fontPath)
+            .build()
+        )
+      ).build()
     )
 
     ctx = this.applicationContext

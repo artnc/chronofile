@@ -2,11 +2,11 @@ package com.chaidarun.chronofile
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import io.reactivex.disposables.CompositeDisposable
 
 abstract class BaseFragment : Fragment() {
@@ -18,7 +18,7 @@ abstract class BaseFragment : Fragment() {
    */
   protected var disposables: CompositeDisposable? = null
 
-  override fun onAttach(context: Context?) {
+  override fun onAttach(context: Context) {
     logLifecycleEvent("onAttach")
     super.onAttach(context)
   }

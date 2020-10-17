@@ -5,7 +5,7 @@
   android:gravity="center"
   android:paddingVertical="16dp">
 
-  <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+  <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:textAlignment="center"
@@ -20,5 +20,5 @@
       android:alpha="0.4"
       android:paddingHorizontal="12dp"
       android:paddingVertical="4dp" />
-  </android.support.v7.widget.CardView>
+  </androidx.cardview.widget.CardView>
 </LinearLayout>

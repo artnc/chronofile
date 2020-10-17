@@ -1,10 +1,10 @@
 package com.chaidarun.chronofile
 
 import android.os.Bundle
-import android.support.v4.app.NavUtils
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.core.app.NavUtils
 import kotlinx.android.synthetic.main.activity_editor.*
 
 class EditorActivity : BaseActivity() {

@@ -11,10 +11,11 @@ import java.util.*
 /** https://developer.android.com/training/location/display-address.html */
 class FetchAddressIntentService : IntentService(TAG) {
 
-  override fun onHandleIntent(intent: Intent) {
+  override fun onHandleIntent(intent: Intent?) {
+    intent ?: return
     val receiver = intent.getParcelableExtra(RECEIVER) as? ResultReceiver
     try {
-      val location = intent.getParcelableExtra<Location>(LOCATION_DATA_EXTRA)
+      val location = intent.getParcelableExtra<Location>(LOCATION_DATA_EXTRA) ?: return
       val geocoder = Geocoder(this, Locale.US)
       val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)[0]
       val text = address.getAddressLine(0)

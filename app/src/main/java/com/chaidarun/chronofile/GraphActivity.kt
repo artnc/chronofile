@@ -1,13 +1,13 @@
 package com.chaidarun.chronofile
 
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.RadioButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_graph.*

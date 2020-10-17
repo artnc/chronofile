@@ -81,7 +81,7 @@ class PieFragment : GraphFragment() {
     val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
     val rangeSeconds = rangeEnd - rangeStart
     if (rangeSeconds <= 0) {
-      activity.toast("No data to show!")
+      activity?.toast("No data to show!")
       return
     }
 
