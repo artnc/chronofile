@@ -49,7 +49,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     return copy(entries = normalizeAndSave(newEntries, currentActivityStartTime))
   }
 
-  fun withNewEntry(activity: String, note: String?, latLong: List<Double>?): History {
+  fun withNewEntry(activity: String, note: String?, latLong: Pair<Double, Double>?): History {
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
     val entry = Entry(currentActivityStartTime, sanitizedActivity, latLong, sanitizedNote)
     val newEntries = entries.toMutableList().apply { add(entry) }
@@ -126,7 +126,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     /** Acquires current location before dispatching action to create new entry */
     fun addEntry(activity: String, note: String?) {
       getLocation {
-        Store.dispatch(Action.AddEntry(activity, note, it?.toList()))
+        Store.dispatch(Action.AddEntry(activity, note, it))
         App.toast("Recorded $activity")
       }
     }
@@ -146,7 +146,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
         }
 
         val (activity, lat, long, note, startTime) = it.split("\t")
-        val latLong = if (lat.isNotEmpty() && long.isNotEmpty()) listOf(lat.toDouble(), long.toDouble()) else null
+        val latLong = if (lat.isNotEmpty() && long.isNotEmpty()) Pair(lat.toDouble(), long.toDouble()) else null
         if (activity.isNotEmpty()) {
           entries += Entry(startTime.toLong(), activity, latLong, if (note.isEmpty()) null else note)
         } else {

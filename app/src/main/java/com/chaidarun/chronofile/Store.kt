@@ -9,7 +9,7 @@ sealed class Action {
   data class AddEntry(
     val activity: String,
     val note: String?,
-    val latLong: List<Double>?
+    val latLong: Pair<Double, Double>?
   ) : Action()
 
   data class EditEntry(

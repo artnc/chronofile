@@ -85,8 +85,8 @@ class HistoryListAdapter(
                 App.toast("No location data available")
               } else {
                 val location = Location("dummyprovider").apply {
-                  latitude = entry.latLong[0]
-                  longitude = entry.latLong[1]
+                  latitude = entry.latLong.first
+                  longitude = entry.latLong.second
                 }
                 val intent = Intent(App.ctx, FetchAddressIntentService::class.java)
                 intent.putExtra(FetchAddressIntentService.RECEIVER, receiver)
@@ -219,7 +219,7 @@ class HistoryListAdapter(
 
   class SpacerViewHolder(view: View) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
-      if (itemView != null) with(itemView as LinearLayout) {
+      with(itemView as LinearLayout) {
         layoutParams.height = (listItem as SpacerItem).height
         requestLayout()
       }
