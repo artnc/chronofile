@@ -188,7 +188,7 @@ class HistoryListAdapter(
 
   companion object {
     /** We limit shown entries because showing all can be slow */
-    private const val MAX_ENTRIES_SHOWN = 2000
+    private const val MAX_ENTRIES_SHOWN = 1000
   }
 
   abstract class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
