@@ -25,8 +25,10 @@
     android:id="@+id/graphTabs"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:tabMaxWidth="200dp"
-    app:tabMode="fixed" />
+    app:tabGravity="center"
+    app:tabIndicatorFullWidth="false"
+    app:tabMode="fixed"
+    app:tabRippleColor="@null" />
 
   <androidx.viewpager.widget.ViewPager
     android:id="@+id/graphViewPager"
