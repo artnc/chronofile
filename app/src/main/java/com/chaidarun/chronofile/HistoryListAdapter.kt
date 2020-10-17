@@ -126,16 +126,8 @@ class HistoryListAdapter(
         items.add(TimeItem(Date(lastSeenStartTime * 1000)))
 
         // Use either one or two items for entry depending on whether it crosses midnight
-        val entryCrossesMidnight = formatDate(entry.startTime) != formatDate(lastSeenStartTime)
-        if (entryCrossesMidnight) {
-          val midnight = with(Calendar.getInstance()) {
-            apply { timeInMillis = lastSeenStartTime * 1000 }
-            GregorianCalendar(
-              get(Calendar.YEAR),
-              get(Calendar.MONTH),
-              get(Calendar.DAY_OF_MONTH)
-            ).time.time / 1000
-          }
+        if (formatDate(entry.startTime) != formatDate(lastSeenStartTime)) {
+          val midnight = getPreviousMidnight(lastSeenStartTime)
           items.add(EntryItem(entry, midnight, lastSeenStartTime))
           items.add(DateItem(Date(lastSeenStartTime * 1000)))
           items.add(EntryItem(entry, entry.startTime, midnight))

@@ -107,18 +107,9 @@ class AreaFragment : GraphFragment() {
       }
 
       val formattedStart = formatDate(entry.startTime)
-      val formattedEnd = formatDate(lastSeenStartTime)
-      val entryCrossesMidnight = formattedStart != formattedEnd
       val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-      if (entryCrossesMidnight) {
-        val midnight = with(Calendar.getInstance()) {
-          apply { timeInMillis = lastSeenStartTime * 1000 }
-          GregorianCalendar(
-            get(Calendar.YEAR),
-            get(Calendar.MONTH),
-            get(Calendar.DAY_OF_MONTH)
-          ).time.time / 1000
-        }
+      if (formattedStart != formatDate(lastSeenStartTime)) {
+        val midnight = getPreviousMidnight(lastSeenStartTime)
         add(formatDate(midnight), slice, lastSeenStartTime - midnight)
         add(formattedStart, slice, midnight - entry.startTime)
       } else {
