@@ -13,7 +13,6 @@ class EditorActivity : BaseActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_editor)
     setSupportActionBar(editorToolbar)
-    supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
     editorText.setText(Store.state.config?.serialize() ?: "")
   }

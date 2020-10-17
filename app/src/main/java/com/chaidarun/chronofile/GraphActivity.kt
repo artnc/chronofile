@@ -22,7 +22,6 @@ class GraphActivity : BaseActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_graph)
     setSupportActionBar(graphToolbar)
-    supportActionBar?.setDisplayHomeAsUpEnabled(true)
     graphViewPager.adapter = GraphPagerAdapter(supportFragmentManager)
     graphTabs.setupWithViewPager(graphViewPager)
 
