@@ -3,7 +3,6 @@ package com.chaidarun.chronofile
 import android.os.AsyncTask
 import android.util.Log
 import com.google.android.gms.location.LocationServices
-import com.google.gson.GsonBuilder
 import java.io.File
 import org.jetbrains.anko.toast
 
@@ -69,10 +68,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
   )
 
   companion object {
-    private val file = File("/storage/emulated/0/Sync/chronofile.jsonl")
-    private val gson by lazy {
-      GsonBuilder().disableHtmlEscaping().excludeFieldsWithoutExposeAnnotation().create()
-    }
+    private val file = File("/storage/emulated/0/Sync/chronofile.tsv")
     private val locationClient by lazy {
       LocationServices.getFusedLocationProviderClient(App.ctx)
     }
@@ -98,9 +94,9 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       AsyncTask.execute {
         Log.d(TAG, "Saving history")
         val lines = mutableListOf<String>()
-        forEach { lines += gson.toJson(it) }
-        lines += gson.toJson(PlaceholderEntry(currentActivityStartTime))
-        val textToWrite = lines.joinToString("") { "$it\n" }
+        forEach { lines += it.toTsvRow() }
+        lines += "\t\t\t\t$currentActivityStartTime\n"
+        val textToWrite = lines.joinToString("")
         if (file.exists() && file.readText() == textToWrite) {
           Log.d(TAG, "File unchanged; skipping write")
         } else {
@@ -142,16 +138,22 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       // Ensure file exists
       var currentActivityStartTime = epochSeconds()
       val lines = if (file.exists()) file.readLines() else listOf(
-        gson.toJson(PlaceholderEntry(currentActivityStartTime)).apply { file.writeText(this) }
+        "\t\t\t\t$currentActivityStartTime\n".also { file.writeText(it) }
       )
 
       // Parse lines
       val entries = mutableListOf<Entry>()
       lines.forEach {
-        if (',' in it) {
-          entries += gson.fromJson(it, Entry::class.java)
-        } else if (it.trim().isNotEmpty()) {
-          currentActivityStartTime = gson.fromJson(it, PlaceholderEntry::class.java).startTime
+        if (it.isEmpty()) {
+          return@forEach
+        }
+
+        val (activity, lat, long, note, startTime) = it.split("\t")
+        val latLong = if (lat.isNotEmpty() && long.isNotEmpty()) listOf(lat.toDouble(), long.toDouble()) else null
+        if (activity.isNotEmpty()) {
+          entries += Entry(startTime.toLong(), activity, latLong, if (note.isEmpty()) null else note)
+        } else {
+          currentActivityStartTime = startTime.toLong()
         }
       }
 
