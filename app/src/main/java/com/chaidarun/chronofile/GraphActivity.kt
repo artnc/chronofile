@@ -90,8 +90,7 @@ class GraphActivity : BaseActivity() {
             val options = arrayOf("Today", "Past week", "Past month", "All time")
             setSingleChoiceItems(options, -1, null)
             setPositiveButton("OK") { dialog, _ ->
-              val optionIndex = (dialog as AlertDialog).listView.checkedItemPosition
-              when (optionIndex) {
+              when ((dialog as AlertDialog).listView.checkedItemPosition) {
                 0 -> setPresetRange(Store.state.history!!, PresetRange.TODAY)
                 1 -> setPresetRange(Store.state.history!!, PresetRange.LAST_WEEK)
                 2 -> setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)

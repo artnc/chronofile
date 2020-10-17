@@ -28,8 +28,8 @@ class FetchAddressIntentService : IntentService(TAG) {
     private const val PACKAGE_NAME = "com.google.android.gms.location.sample.locationaddress"
     const val SUCCESS_CODE = 1
     const val FAILURE_CODE = 0
-    const val RECEIVER = PACKAGE_NAME + ".RECEIVER"
-    const val RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY"
-    const val LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA"
+    const val RECEIVER = "$PACKAGE_NAME.RECEIVER"
+    const val RESULT_DATA_KEY = "$PACKAGE_NAME.RESULT_DATA_KEY"
+    const val LOCATION_DATA_EXTRA = "$PACKAGE_NAME.LOCATION_DATA_EXTRA"
   }
 }

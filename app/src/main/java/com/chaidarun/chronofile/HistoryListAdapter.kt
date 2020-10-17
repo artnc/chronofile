@@ -67,16 +67,15 @@ class HistoryListAdapter(
               view.formEntryNote.setText(entry.note ?: "")
               setView(view)
               setPositiveButton(
-                "OK",
-                { _, _ ->
-                  Store.dispatch(
-                    Action.EditEntry(
-                      entry.startTime, view.formEntryStartTime.text.toString(),
-                      view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
-                    )
+                "OK"
+              ) { _, _ ->
+                Store.dispatch(
+                  Action.EditEntry(
+                    entry.startTime, view.formEntryStartTime.text.toString(),
+                    view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
                   )
-                }
-              )
+                )
+              }
               setNegativeButton("Cancel", null)
               show()
             }
@@ -112,48 +111,51 @@ class HistoryListAdapter(
     }
   }
 
-  init {
-    Store.observable.map { it.history }.distinctUntilChanged().subscribe {
-      if (it == null) {
-        Log.d(TAG, "History is null")
-        return@subscribe
-      }
-
-      val elapsedMs = measureTimeMillis {
-        itemList = mutableListOf<ListItem>().apply {
-          add(SpacerItem(32))
-          var lastSeenStartTime = it.currentActivityStartTime
-          it.entries.reversed().forEach {
-            add(TimeItem(Date(lastSeenStartTime * 1000)))
-
-            // Use either one or two items for entry depending on whether it crosses midnight
-            val entryCrossesMidnight = formatDate(it.startTime) != formatDate(lastSeenStartTime)
-            if (entryCrossesMidnight) {
-              val midnight = with(Calendar.getInstance()) {
-                apply { timeInMillis = lastSeenStartTime * 1000 }
-                GregorianCalendar(
-                  get(Calendar.YEAR),
-                  get(Calendar.MONTH),
-                  get(Calendar.DAY_OF_MONTH)
-                ).time.time / 1000
-              }
-              add(EntryItem(it, midnight, lastSeenStartTime))
-              add(DateItem(Date(lastSeenStartTime * 1000)))
-              add(EntryItem(it, it.startTime, midnight))
-            } else {
-              add(EntryItem(it, it.startTime, lastSeenStartTime))
-            }
-
-            lastSeenStartTime = it.startTime
-          }
-          add(SpacerItem(32))
-        }.reversed()
-        itemListLength = itemList.size
-        notifyDataSetChanged()
-        appActivity.historyList.scrollToPosition(itemList.size - 1)
-      }
-      logDW("Rendered history view in $elapsedMs ms", elapsedMs > 20)
+  private val subscription = Store.observable.map { it.history }.distinctUntilChanged().subscribe {
+    if (it == null) {
+      Log.d(TAG, "History is null")
+      return@subscribe
     }
+
+    val elapsedMs = measureTimeMillis {
+      itemList = mutableListOf<ListItem>().apply {
+        add(SpacerItem(32))
+        var lastSeenStartTime = it.currentActivityStartTime
+        it.entries.reversed().forEach { entry ->
+          add(TimeItem(Date(lastSeenStartTime * 1000)))
+
+          // Use either one or two items for entry depending on whether it crosses midnight
+          val entryCrossesMidnight = formatDate(entry.startTime) != formatDate(lastSeenStartTime)
+          if (entryCrossesMidnight) {
+            val midnight = with(Calendar.getInstance()) {
+              apply { timeInMillis = lastSeenStartTime * 1000 }
+              GregorianCalendar(
+                get(Calendar.YEAR),
+                get(Calendar.MONTH),
+                get(Calendar.DAY_OF_MONTH)
+              ).time.time / 1000
+            }
+            add(EntryItem(entry, midnight, lastSeenStartTime))
+            add(DateItem(Date(lastSeenStartTime * 1000)))
+            add(EntryItem(entry, entry.startTime, midnight))
+          } else {
+            add(EntryItem(entry, entry.startTime, lastSeenStartTime))
+          }
+
+          lastSeenStartTime = entry.startTime
+        }
+        add(SpacerItem(32))
+      }.reversed()
+      itemListLength = itemList.size
+      notifyDataSetChanged()
+      appActivity.historyList.scrollToPosition(itemList.size - 1)
+    }
+    logDW("Rendered history view in $elapsedMs ms", elapsedMs > 20)
+  }
+
+  override fun onDetachedFromRecyclerView(recyclerView: RecyclerView?) {
+    subscription.dispose()
+    super.onDetachedFromRecyclerView(recyclerView)
   }
 
   override fun getItemCount() = itemListLength

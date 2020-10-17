@@ -6,8 +6,8 @@ import java.util.*
 /** Gets current Unix timestamp in seconds */
 fun epochSeconds() = System.currentTimeMillis() / 1000
 
-private val dateFormat by lazy { SimpleDateFormat("EE, d MMM yyyy", Locale.getDefault()) }
-private val timeFormat by lazy { SimpleDateFormat("H:mm", Locale.getDefault()) }
+private val dateFormat by lazy { SimpleDateFormat("EE, d MMM yyyy", Locale.US) }
+private val timeFormat by lazy { SimpleDateFormat("H:mm", Locale.US) }
 
 fun formatDate(date: Date): String = dateFormat.format(date)
 fun formatDate(seconds: Long) = formatDate(Date(seconds * 1000))
