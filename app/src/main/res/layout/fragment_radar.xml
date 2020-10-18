@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  tools:context="com.chaidarun.chronofile.GraphActivity">
+
+  <com.github.mikephil.charting.charts.RadarChart
+    android:id="@+id/radarChart"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_marginBottom="8dp"
+    android:layout_marginHorizontal="2dp"
+    android:layout_marginTop="32dp"
+    android:layout_weight="1" />
+
+  <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+    <CheckBox
+        android:id="@+id/radarIsGrouped"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_weight="1"
+        android:onClick="onCheckboxClicked"
+        android:text="Group similar" />
+
+  </LinearLayout>
+
+</LinearLayout>

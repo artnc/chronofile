@@ -11,6 +11,7 @@ class GraphPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
   override fun getItem(position: Int) = Tab.get(position).create()
 
   enum class Tab(val title: String, val create: () -> GraphFragment) {
+    RADAR("Radar", { RadarFragment() }),
     PIE("Pie", { PieFragment() }),
     AREA("Area", { AreaFragment() });
 

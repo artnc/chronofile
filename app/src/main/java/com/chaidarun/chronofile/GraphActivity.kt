@@ -13,6 +13,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_graph.*
 import kotlinx.android.synthetic.main.fragment_area.*
 import kotlinx.android.synthetic.main.fragment_pie.*
+import kotlinx.android.synthetic.main.fragment_radar.*
 
 class GraphActivity : BaseActivity() {
 
@@ -22,8 +23,11 @@ class GraphActivity : BaseActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_graph)
     setSupportActionBar(graphToolbar)
-    graphViewPager.adapter = GraphPagerAdapter(supportFragmentManager)
-    graphViewPager.currentItem = GraphPagerAdapter.Tab.PIE.ordinal
+    graphViewPager.run {
+      adapter = GraphPagerAdapter(supportFragmentManager)
+      currentItem = GraphPagerAdapter.Tab.PIE.ordinal
+      offscreenPageLimit = GraphPagerAdapter.Tab.values().size
+    }
     graphTabs.setupWithViewPager(graphViewPager)
 
     // Set tab font
@@ -124,6 +128,7 @@ class GraphActivity : BaseActivity() {
         R.id.areaIsGrouped -> Store.dispatch(Action.SetGraphGrouping(areaIsGrouped.isChecked))
         R.id.areaIsStacked -> Store.dispatch(Action.SetGraphStacking(areaIsStacked.isChecked))
         R.id.pieIsGrouped -> Store.dispatch(Action.SetGraphGrouping(pieIsGrouped.isChecked))
+        R.id.radarIsGrouped -> Store.dispatch(Action.SetGraphGrouping(radarIsGrouped.isChecked))
       }
     }
   }

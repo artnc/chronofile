@@ -13,7 +13,6 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IFillFormatter
 import io.reactivex.disposables.CompositeDisposable
-import java.util.*
 import kotlinx.android.synthetic.main.fragment_area.*
 
 class AreaFragment : GraphFragment() {
