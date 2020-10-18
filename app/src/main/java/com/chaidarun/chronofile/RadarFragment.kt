@@ -33,6 +33,7 @@ class RadarFragment : GraphFragment() {
         typeface = App.instance.typeface
         xEntrySpace = 15f
       }
+      setDrawWeb(false)
       setTouchEnabled(false)
       xAxis.run {
         setValueFormatter { value, _ ->
@@ -86,10 +87,10 @@ class RadarFragment : GraphFragment() {
       val radarEntries = (1L until 8L).map { dayOfWeek ->
         val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
         maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
-        RadarEntry(seconds.toFloat())
+        RadarEntry(Math.sqrt(seconds.toDouble()).toFloat())
       }
       RadarDataSet(radarEntries, slice).apply {
-        color = COLORS[i]
+        color = COLORS[i % COLORS.size]
         setDrawValues(false)
       }
     }
