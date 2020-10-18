@@ -88,67 +88,24 @@ class AreaFragment : GraphFragment() {
 
     // Get top groups
     val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
-    val sliceList = getSliceList(config, history, graphConfig, rangeStart, rangeEnd).first
+    val (buckets, sliceList) = aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.DAY)
     val groups = sliceList.map { it.first }
 
-    // Calculate time per activity per day
-    var lastSeenStartTime = history.currentActivityStartTime
-    val dateToActivityToDuration = mutableMapOf<String, MutableMap<String, Long>>()
-    val add: (String, String, Long) -> Unit = { date, activity, duration ->
-      val aToD = dateToActivityToDuration.getOrPut(date, { mutableMapOf() })
-      val slice = if (activity in groups) activity else OTHER_SLICE_NAME
-      aToD[slice] = aToD.getOrDefault(slice, 0) + duration
-    }
-    val grouped = graphConfig.grouped
-    for (entry in history.entries.reversed()) {
-      // Skip entries from after date range
-      if (entry.startTime >= rangeEnd) {
-        continue
-      }
-
-      val formattedStart = formatDate(entry.startTime)
-      val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-      if (formattedStart != formatDate(lastSeenStartTime)) {
-        val midnight = getPreviousMidnight(lastSeenStartTime)
-        add(formatDate(midnight), slice, lastSeenStartTime - midnight)
-        add(formattedStart, slice, midnight - entry.startTime)
-      } else {
-        add(formattedStart, slice, lastSeenStartTime - entry.startTime)
-      }
-
-      lastSeenStartTime = entry.startTime
-
-      // Skip entries from before date range
-      if (entry.startTime <= rangeStart) {
-        break
-      }
-    }
-
     // Convert into data set lists
-    val lines = groups.associateBy({ it }, { mutableListOf<Entry>() }).toMutableMap()
-    val formattedRangeEnd = formatDate(rangeEnd)
-    var dayStart = rangeStart
+    val lines = groups.associateWith { mutableListOf<Entry>() }.toMutableMap()
     val groupsReversed = groups.reversed()
     val stacked = graphConfig.stacked
     var maxEntrySeconds = 0L
-    while (true) {
-      val formattedDayStart = formatDate(dayStart)
-
+    for ((dayStart, dayGroups) in buckets.toList().sortedBy { it.first }) {
       var seenSecondsToday = 0L
       for (group in groupsReversed) {
-        val seconds = dateToActivityToDuration[formattedDayStart]?.get(group) ?: 0L
+        val seconds = dayGroups.getOrDefault(group, 0L)
         seenSecondsToday += seconds
         maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
         val entrySeconds = if (stacked) seenSecondsToday else seconds
-        lines[group]?.add(Entry(dayStart.toFloat(), entrySeconds.toFloat())) ?: throw Exception(
+        lines[group]?.add(Entry(dayStart.toFloat(), entrySeconds.toFloat())) ?: error(
           "$group missing from area chart data sets"
         )
-      }
-
-      if (formattedDayStart == formattedRangeEnd) {
-        break
-      } else {
-        dayStart += DAY_SECONDS
       }
     }
 

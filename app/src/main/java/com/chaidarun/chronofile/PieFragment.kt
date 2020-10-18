@@ -78,8 +78,7 @@ class PieFragment : GraphFragment() {
     }
 
     // Show data
-    val (sliceList, totalSliceSeconds) =
-      getSliceList(config, history, graphConfig, rangeStart, rangeEnd)
+    val (_, sliceList) = aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.TOTAL)
     val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
     val metric = graphConfig.metric
     val pieDataSet = PieDataSet(pieEntries, "Time").apply {
@@ -101,7 +100,7 @@ class PieFragment : GraphFragment() {
     }
 
     with(pieChart) {
-      centerText = "Range:\n${formatDuration(totalSliceSeconds, showDays = true)}"
+      centerText = "Range:\n${formatDuration(sliceList.map { it.second }.sum(), showDays = true)}"
       data = PieData(pieDataSet)
       invalidate()
     }

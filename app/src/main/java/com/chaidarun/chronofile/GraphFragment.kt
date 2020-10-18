@@ -28,58 +28,82 @@ abstract class GraphFragment : BaseFragment() {
     return Pair(rangeStart, rangeEnd)
   }
 
-  protected fun getSliceList(
+  protected enum class Aggregation { DAY, DAY_OF_WEEK, TOTAL }
+
+  /**
+   * Returns a ({ bucket: { slice: duration } }, { slice: total duration })
+   */
+  protected fun aggregateEntries(
     config: Config,
     history: History,
     graphConfig: GraphConfig,
     rangeStart: Long,
     rangeEnd: Long,
-  ): Pair<MutableList<Pair<String, Long>>, Long> {
-    // Get data
+    aggregation: Aggregation
+  ): Pair<Map<Long, Map<String, Long>>, List<Pair<String, Long>>> {
     val grouped = graphConfig.grouped
+    var endTime = rangeEnd
+    val buckets = mutableMapOf<Long, MutableMap<String, Long>>()
     val sliceMap = mutableMapOf<String, Long>()
-    var totalSliceSeconds = 0L
-    with(history) {
-      // Bucket entries into slices
-      var endTime = rangeEnd
-      for (entry in entries.reversed()) {
-        // Skip entries from after date range
-        if (entry.startTime >= rangeEnd) {
-          continue
-        }
+    for (entry in history.entries.reversed()) {
+      // Skip entries from after date range
+      if (entry.startTime >= rangeEnd) {
+        continue
+      }
 
-        // Process entry
-        val startTime = Math.max(entry.startTime, rangeStart)
-        val seconds = endTime - startTime
-        val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
-        sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + seconds
-        totalSliceSeconds += seconds
-        endTime = startTime
+      // Get slice(s) depending on whether entry crosses midnight
+      val startTime = Math.max(entry.startTime, rangeStart)
+      val bucketIncrements: Map<Long, Long> = when (aggregation) {
+        Aggregation.DAY, Aggregation.DAY_OF_WEEK -> {
+          val midnightBeforeStart = getPreviousMidnight(startTime)
+          val midnightBeforeEnd = getPreviousMidnight(endTime)
+          val pieces = if (midnightBeforeStart != midnightBeforeEnd) {
+            mapOf(
+              midnightBeforeEnd to (endTime - midnightBeforeEnd),
+              midnightBeforeStart to (midnightBeforeEnd - startTime)
+            )
+          } else {
+            mapOf(midnightBeforeStart to (endTime - startTime))
+          }
 
-        // Skip entries from before date range
-        if (startTime <= rangeStart) {
-          break
+          when (aggregation) {
+            Aggregation.DAY -> pieces
+            Aggregation.DAY_OF_WEEK -> pieces.mapKeys { getDayOfWeek(it.key).value.toLong() }
+            else -> error("Unhandled aggregation")
+          }
         }
+        Aggregation.TOTAL -> mapOf(0L to (endTime - startTime))
+      }
+
+      // Record slices
+      val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
+      bucketIncrements.forEach { (bucket, increment) ->
+        val bucketGractivities = buckets.getOrPut(bucket) { mutableMapOf() }
+        bucketGractivities[slice] = bucketGractivities.getOrDefault(slice, 0) + increment
+        sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + increment
+      }
+      endTime = startTime
+
+      // Skip entries from before date range
+      if (entry.startTime <= rangeStart) {
+        break
       }
     }
 
-    // Sort slices by size, consolidating small slices into "Other"
-    val sliceThresholdSeconds = totalSliceSeconds * MIN_SLICE_PERCENT
-    var bigSliceSeconds = 0L
-    val sliceList = sliceMap.entries
-      .sortedByDescending { it.value }
-      .takeWhile {
-        val shouldTake = it.value > sliceThresholdSeconds
-        if (shouldTake) bigSliceSeconds += it.value
-        shouldTake
-      }
-      .map { Pair(it.key, it.value) }
-      .toMutableList()
-    if (bigSliceSeconds < totalSliceSeconds) {
-      sliceList += Pair(OTHER_SLICE_NAME, totalSliceSeconds - bigSliceSeconds)
+    // Consolidate small slices into "Other" slice
+    val totalDuration = sliceMap.values.sum()
+    val sliceList = sliceMap.toList().sortedByDescending { it.second }.takeWhile {
+      it.second >= totalDuration * MIN_SLICE_PERCENT
+    }.toMutableList()
+    sliceList.add(OTHER_SLICE_NAME to sliceMap.values.sum() - sliceList.map { it.second }.sum())
+    val nonOtherSlices = sliceList.map { it.first }.toSet()
+    val bucketsWithOther = buckets.mapValues { (_, value) ->
+      val newMap = value.filter { it.key in nonOtherSlices }.toMutableMap()
+      newMap[OTHER_SLICE_NAME] = value.filter { it.key !in nonOtherSlices }.map { it.value }.sum()
+      newMap
     }
 
-    return Pair(sliceList, totalSliceSeconds)
+    return Pair(bucketsWithOther, sliceList)
   }
 
   companion object {
