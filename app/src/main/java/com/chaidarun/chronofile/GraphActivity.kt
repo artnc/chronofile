@@ -17,7 +17,12 @@ import kotlinx.android.synthetic.main.fragment_radar.*
 
 class GraphActivity : BaseActivity() {
 
-  private enum class PresetRange { ALL_TIME, LAST_MONTH, LAST_WEEK, TODAY }
+  private enum class PresetRange(val text: String, val duration: Long) {
+    TODAY("Today", DAY_SECONDS),
+    PAST_WEEK("Past week", 7 * DAY_SECONDS),
+    PAST_MONTH("Past month", 30 * DAY_SECONDS),
+    ALL_TIME("All time", Long.MAX_VALUE)
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -46,7 +51,7 @@ class GraphActivity : BaseActivity() {
 
     var startTime: Long? = null
     var endTime: Long? = null
-    setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
+    setPresetRange(Store.state.history!!, PresetRange.PAST_MONTH)
     disposables = CompositeDisposable().apply {
       add(
         Store.observable
@@ -91,15 +96,10 @@ class GraphActivity : BaseActivity() {
       add(
         RxView.clicks(quickRange).subscribe {
           with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
-            val options = arrayOf("Today", "Past week", "Past month", "All time")
-            setSingleChoiceItems(options, -1, null)
+            setSingleChoiceItems(PresetRange.values().map { it.text }.toTypedArray(), -1, null)
             setPositiveButton("OK") { dialog, _ ->
-              when ((dialog as AlertDialog).listView.checkedItemPosition) {
-                0 -> setPresetRange(Store.state.history!!, PresetRange.TODAY)
-                1 -> setPresetRange(Store.state.history!!, PresetRange.LAST_WEEK)
-                2 -> setPresetRange(Store.state.history!!, PresetRange.LAST_MONTH)
-                3 -> setPresetRange(Store.state.history!!, PresetRange.ALL_TIME)
-              }
+              val position = (dialog as AlertDialog).listView.checkedItemPosition
+              setPresetRange(Store.state.history!!, PresetRange.values()[position])
             }
             setNegativeButton("Cancel", null)
             show()
@@ -112,13 +112,8 @@ class GraphActivity : BaseActivity() {
   private fun setPresetRange(history: History, presetRange: PresetRange) {
     Log.i(TAG, "Setting range to $presetRange")
     val now = history.currentActivityStartTime
-    val startTime = now - when (presetRange) {
-      PresetRange.ALL_TIME -> now
-      PresetRange.LAST_MONTH -> 30 * DAY_SECONDS
-      PresetRange.LAST_WEEK -> 7 * DAY_SECONDS
-      PresetRange.TODAY -> DAY_SECONDS
-    }
-    Store.dispatch(Action.SetGraphRangeStart(Math.max(startTime, history.entries[0].startTime)))
+    val startTime = Math.max(now - presetRange.duration, history.entries[0].startTime)
+    Store.dispatch(Action.SetGraphRangeStart(startTime))
     Store.dispatch(Action.SetGraphRangeEnd(now))
   }
 
