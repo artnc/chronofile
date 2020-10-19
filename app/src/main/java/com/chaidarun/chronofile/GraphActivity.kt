@@ -73,24 +73,22 @@ class GraphActivity : BaseActivity() {
       )
       add(
         RxView.clicks(startDate).subscribe {
-          val fragment = DatePickerFragment().apply {
+          DatePickerFragment().apply {
             arguments = Bundle().apply {
               putString(DatePickerFragment.ENDPOINT, "start")
               putLong(DatePickerFragment.TIMESTAMP, startTime ?: epochSeconds())
             }
-          }
-          fragment.show(fragmentManager, "datePicker")
+          }.show(supportFragmentManager, "datePicker")
         }
       )
       add(
         RxView.clicks(endDate).subscribe {
-          val fragment = DatePickerFragment().apply {
+          DatePickerFragment().apply {
             arguments = Bundle().apply {
               putString(DatePickerFragment.ENDPOINT, "end")
               putLong(DatePickerFragment.TIMESTAMP, endTime ?: epochSeconds())
             }
-          }
-          fragment.show(fragmentManager, "datePicker")
+          }.show(supportFragmentManager, "datePicker")
         }
       )
       add(
