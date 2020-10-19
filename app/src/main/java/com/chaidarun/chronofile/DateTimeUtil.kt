@@ -1,9 +1,7 @@
 package com.chaidarun.chronofile
 
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.util.*
 
 /** Gets current Unix timestamp in seconds */
@@ -45,9 +43,9 @@ fun formatDuration(seconds: Long, showDays: Boolean = false): String {
 
 private val LOCAL_TZ = ZoneId.systemDefault()
 
-/** Gets the timestamp of the last midnight that occurred before the given timestamp */
-fun getPreviousMidnight(timestamp: Long) =
-  LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), LOCAL_TZ).toLocalDate().atStartOfDay(LOCAL_TZ).toEpochSecond()
+private fun getDate(timestamp: Long): LocalDate = LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), LOCAL_TZ).toLocalDate()
 
-fun getDayOfWeek(timestamp: Long) =
-  LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), LOCAL_TZ).toLocalDate().dayOfWeek
+/** Gets the timestamp of the last midnight that occurred before the given timestamp */
+fun getPreviousMidnight(timestamp: Long) = getDate(timestamp).atStartOfDay(LOCAL_TZ).toEpochSecond()
+
+fun getDayOfWeek(timestamp: Long): DayOfWeek = getDate(timestamp).dayOfWeek
