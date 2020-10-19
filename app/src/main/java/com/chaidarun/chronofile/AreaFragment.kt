@@ -13,7 +13,9 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IFillFormatter
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_area.*
+import kotlinx.android.synthetic.main.fragment_area.areaChart
+import kotlinx.android.synthetic.main.fragment_area.areaIsGrouped
+import kotlinx.android.synthetic.main.fragment_area.areaIsStacked
 
 class AreaFragment : GraphFragment() {
 

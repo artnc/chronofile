@@ -12,8 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.RxView
 import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.activity_main.toolbar
+import kotlinx.android.synthetic.main.content_main.addEntry
+import kotlinx.android.synthetic.main.content_main.addEntryActivity
+import kotlinx.android.synthetic.main.content_main.addEntryNote
+import kotlinx.android.synthetic.main.content_main.historyList
 
 class MainActivity : BaseActivity() {
 

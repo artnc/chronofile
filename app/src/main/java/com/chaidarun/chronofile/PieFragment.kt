@@ -11,7 +11,10 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IValueFormatter
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_pie.*
+import kotlinx.android.synthetic.main.fragment_pie.pieChart
+import kotlinx.android.synthetic.main.fragment_pie.pieIsGrouped
+import kotlinx.android.synthetic.main.fragment_pie.radioAverage
+import kotlinx.android.synthetic.main.fragment_pie.radioTotal
 
 class PieFragment : GraphFragment() {
 

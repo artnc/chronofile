@@ -16,13 +16,17 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import java.util.*
+import java.util.Date
 import kotlin.system.measureTimeMillis
-import kotlinx.android.synthetic.main.content_main.*
-import kotlinx.android.synthetic.main.form_entry.view.*
-import kotlinx.android.synthetic.main.item_date.view.*
-import kotlinx.android.synthetic.main.item_entry.view.*
-import kotlinx.android.synthetic.main.item_time.view.*
+import kotlinx.android.synthetic.main.content_main.historyList
+import kotlinx.android.synthetic.main.form_entry.view.formEntryActivity
+import kotlinx.android.synthetic.main.form_entry.view.formEntryNote
+import kotlinx.android.synthetic.main.form_entry.view.formEntryStartTime
+import kotlinx.android.synthetic.main.item_date.view.date
+import kotlinx.android.synthetic.main.item_entry.view.entryActivity
+import kotlinx.android.synthetic.main.item_entry.view.entryDuration
+import kotlinx.android.synthetic.main.item_entry.view.entryNote
+import kotlinx.android.synthetic.main.item_time.view.time
 
 private enum class ViewType { DATE, ENTRY, SPACER, TIME }
 sealed class ListItem(val viewType: ViewType)

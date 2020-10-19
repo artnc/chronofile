@@ -6,7 +6,7 @@ import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.os.ResultReceiver
-import java.util.*
+import java.util.Locale
 
 /** https://developer.android.com/training/location/display-address.html */
 class FetchAddressIntentService : IntentService(TAG) {

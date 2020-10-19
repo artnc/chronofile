@@ -10,8 +10,9 @@ import com.github.mikephil.charting.data.RadarDataSet
 import com.github.mikephil.charting.data.RadarEntry
 import io.reactivex.disposables.CompositeDisposable
 import java.text.DateFormatSymbols
-import java.util.*
-import kotlinx.android.synthetic.main.fragment_radar.*
+import java.util.Locale
+import kotlinx.android.synthetic.main.fragment_radar.radarChart
+import kotlinx.android.synthetic.main.fragment_radar.radarIsGrouped
 
 class RadarFragment : GraphFragment() {
 

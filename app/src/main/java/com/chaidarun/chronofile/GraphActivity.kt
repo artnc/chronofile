@@ -10,10 +10,16 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_graph.*
-import kotlinx.android.synthetic.main.fragment_area.*
-import kotlinx.android.synthetic.main.fragment_pie.*
-import kotlinx.android.synthetic.main.fragment_radar.*
+import kotlinx.android.synthetic.main.activity_graph.endDate
+import kotlinx.android.synthetic.main.activity_graph.graphTabs
+import kotlinx.android.synthetic.main.activity_graph.graphToolbar
+import kotlinx.android.synthetic.main.activity_graph.graphViewPager
+import kotlinx.android.synthetic.main.activity_graph.quickRange
+import kotlinx.android.synthetic.main.activity_graph.startDate
+import kotlinx.android.synthetic.main.fragment_area.areaIsGrouped
+import kotlinx.android.synthetic.main.fragment_area.areaIsStacked
+import kotlinx.android.synthetic.main.fragment_pie.pieIsGrouped
+import kotlinx.android.synthetic.main.fragment_radar.radarIsGrouped
 
 class GraphActivity : BaseActivity() {
 

@@ -5,7 +5,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.NavUtils
-import kotlinx.android.synthetic.main.activity_editor.*
+import kotlinx.android.synthetic.main.activity_editor.editorText
+import kotlinx.android.synthetic.main.activity_editor.editorToolbar
 
 class EditorActivity : BaseActivity() {
 
