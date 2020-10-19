@@ -87,7 +87,8 @@ class AreaFragment : GraphFragment() {
 
     // Get top groups
     val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
-    val (buckets, sliceList) = aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.DAY)
+    val (buckets, sliceList) =
+      aggregateEntries(config, history, graphConfig, getPreviousMidnight(rangeStart), rangeEnd, Aggregation.DAY)
     val groups = sliceList.map { it.first }
 
     // Convert into data set lists
