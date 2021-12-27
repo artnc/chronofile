@@ -1,6 +1,6 @@
 # Chronofile
 
-This is a personal time tracking app designed and developed by and for myself.
+This is a personal time tracking app designed and developed by and for myself. More info at my [blog](https://chaidarun.com/ten-years-of-logging-my-life) and [Hacker News](https://news.ycombinator.com/item?id=29692087).
 
 You're welcome to try it out for yourself by installing an APK from the [releases](https://github.com/artnc/chronofile/releases) page, but be warned that the app requires Android 10+ and has undergone essentially zero QA! Feel free to open a GitHub issue if you're having problems.
 
