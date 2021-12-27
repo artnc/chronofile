@@ -18,16 +18,11 @@
     android:id="@+id/entryNote"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_weight="1"
     android:layout_marginStart="8dp"
     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
     android:textColor="@color/colorFadedText"
-    android:visibility="gone"
     tools:text="REM" />
-
-  <Space
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_weight="1" />
 
   <TextView
     android:id="@+id/entryDuration"

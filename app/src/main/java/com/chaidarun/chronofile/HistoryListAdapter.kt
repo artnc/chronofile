@@ -205,7 +205,6 @@ class HistoryListAdapter(
       with(itemView) {
         entryActivity.text = activity
         entryNote.text = note
-        entryNote.visibility = if (note == null) View.GONE else View.VISIBLE
         entryDuration.text = formatDuration(itemEnd - itemStart)
         setOnClickListener { History.addEntry(activity, note) }
         setOnLongClickListener {
