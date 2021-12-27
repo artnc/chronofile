@@ -95,7 +95,11 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     private fun save(text: String) {
       AsyncTask.execute {
         Log.i(TAG, "Saving history")
-        if (file.exists() && file.readText() == text) {
+        if (!file.exists()) {
+          file.parentFile.mkdirs()
+          file.createNewFile()
+        }
+        if (file.readText() == text) {
           Log.i(TAG, "File unchanged; skipping write")
         } else {
           val start = System.currentTimeMillis()
@@ -137,7 +141,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     fun fromFile(): History {
       // Read lines
       var currentActivityStartTime = epochSeconds()
-      val lines = if (file.exists()) file.readLines() else listOf("\t\t\t\t$currentActivityStartTime\n")
+      val lines = if (file.exists()) file.readLines() else listOf("\t\t\t\t$currentActivityStartTime")
 
       // Parse lines
       val entries = mutableListOf<Entry>()

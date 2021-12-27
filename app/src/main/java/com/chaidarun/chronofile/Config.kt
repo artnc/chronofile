@@ -30,7 +30,11 @@ class Config(
 
   fun saveFile() {
     val textToWrite = serialize()
-    if (file.exists() && file.readText() == textToWrite) {
+    if (!file.exists()) {
+      file.parentFile.mkdirs()
+      file.createNewFile()
+    }
+    if (file.readText() == textToWrite) {
       Log.i(TAG, "File unchanged; skipping write")
     } else {
       file.writeText(textToWrite)
