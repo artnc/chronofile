@@ -1,6 +1,5 @@
 package com.chaidarun.chronofile
 
-import android.util.Log
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
@@ -28,18 +27,7 @@ class Config(
 
   fun serialize(): String = gson.toJson(this)
 
-  fun saveFile() {
-    val textToWrite = serialize()
-    if (!file.exists()) {
-      file.parentFile.mkdirs()
-      file.createNewFile()
-    }
-    if (file.readText() == textToWrite) {
-      Log.i(TAG, "File unchanged; skipping write")
-    } else {
-      file.writeText(textToWrite)
-    }
-  }
+  private fun save() = IOUtils.writeFile(file, serialize())
 
   companion object {
     private val gson by lazy {
@@ -53,12 +41,8 @@ class Config(
 
     private fun deserialize(text: String) = gson.fromJson(text, Config::class.java)
 
-    fun fromText(text: String): Config = deserialize(text).apply { saveFile() }
+    fun fromText(text: String): Config = deserialize(text).apply { save() }
 
-    fun fromFile(): Config {
-      val config = if (file.exists()) deserialize(file.readText()) else Config()
-      config.saveFile()
-      return config
-    }
+    fun fromFile(): Config = (if (file.exists()) deserialize(file.readText()) else Config()).apply { save() }
   }
 }

@@ -1,6 +1,5 @@
 package com.chaidarun.chronofile
 
-import android.os.AsyncTask
 import android.util.Log
 import com.google.android.gms.location.LocationServices
 import java.io.File
@@ -89,25 +88,8 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
       }
 
       // Save
-      save(joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n")
+      IOUtils.writeFile(file, joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n")
     }.toList()
-
-    private fun save(text: String) {
-      AsyncTask.execute {
-        Log.i(TAG, "Saving history")
-        if (!file.exists()) {
-          file.parentFile.mkdirs()
-          file.createNewFile()
-        }
-        if (file.readText() == text) {
-          Log.i(TAG, "File unchanged; skipping write")
-        } else {
-          val start = System.currentTimeMillis()
-          file.writeText(text)
-          Log.i(TAG, "Wrote file in ${System.currentTimeMillis() - start} ms")
-        }
-      }
-    }
 
     private fun sanitizeActivityAndNote(
       activity: String,
