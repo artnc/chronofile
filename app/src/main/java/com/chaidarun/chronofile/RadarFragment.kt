@@ -5,9 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.data.RadarData
 import com.github.mikephil.charting.data.RadarDataSet
 import com.github.mikephil.charting.data.RadarEntry
+import com.github.mikephil.charting.formatter.ValueFormatter
 import io.reactivex.disposables.CompositeDisposable
 import java.text.DateFormatSymbols
 import java.util.Locale
@@ -37,9 +39,11 @@ class RadarFragment : GraphFragment() {
       setDrawWeb(false)
       setTouchEnabled(false)
       xAxis.run {
-        setValueFormatter { value, _ ->
-          DateFormatSymbols(Locale.US).shortWeekdays[((value.toInt() + 1) % 7) + 1]
-        }
+        valueFormatter =
+          object : ValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?) =
+              DateFormatSymbols(Locale.US).shortWeekdays[((value.toInt() + 1) % 7) + 1]
+          }
         textColor = LABEL_COLOR
         textSize = LABEL_FONT_SIZE
         typeface = App.instance.typeface

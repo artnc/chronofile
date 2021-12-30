@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.formatter.IValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_pie.pieChart
 import kotlinx.android.synthetic.main.fragment_pie.pieIsGrouped
@@ -95,13 +95,15 @@ class PieFragment : GraphFragment() {
         valueTextSize = LABEL_FONT_SIZE
         valueTypeface = App.instance.typeface
         valueFormatter =
-          IValueFormatter { value, entry, _, _ ->
-            val num: String =
-              when (metric) {
-                Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
-                Metric.TOTAL -> formatDuration(value.toLong())
-              }
-            "${(entry as? PieEntry)?.label}: $num"
+          object : ValueFormatter() {
+            override fun getPieLabel(value: Float, pieEntry: PieEntry?): String {
+              val num: String =
+                when (metric) {
+                  Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
+                  Metric.TOTAL -> formatDuration(value.toLong())
+                }
+              return "${pieEntry?.label}: $num"
+            }
           }
         yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
       }

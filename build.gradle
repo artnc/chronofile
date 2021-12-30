@@ -1,15 +1,15 @@
 buildscript {
   ext.anko_version = '0.10.3'
-  ext.kotlin_version = '1.4.10'
+  ext.kotlin_version = '1.4.32'
   ext.support_version = '26.1.0'
 
   repositories {
     google()
-    jcenter()
+    mavenCentral()
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:7.0.0'
+    classpath 'com.android.tools.build:gradle:7.0.4'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
   }
 }
@@ -21,7 +21,7 @@ plugins {
 allprojects {
   repositories {
     google()
-    jcenter()
+    mavenCentral()
     maven { url "https://jitpack.io" }
   }
 }
