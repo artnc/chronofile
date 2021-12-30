@@ -19,14 +19,16 @@ class App : Application() {
 
     // Set global default font
     ViewPump.init(
-      ViewPump.builder().addInterceptor(
-        CalligraphyInterceptor(
-          CalligraphyConfig.Builder()
-            .setDefaultFontPath(FONT_PATH)
-            .setFontAttrId(R.attr.fontPath)
-            .build()
+      ViewPump.builder()
+        .addInterceptor(
+          CalligraphyInterceptor(
+            CalligraphyConfig.Builder()
+              .setDefaultFontPath(FONT_PATH)
+              .setFontAttrId(R.attr.fontPath)
+              .build()
+          )
         )
-      ).build()
+        .build()
     )
   }
 
@@ -38,11 +40,14 @@ class App : Application() {
 
     private const val FONT_PATH = "fonts/Exo2-Regular.otf"
 
-    fun toast(message: String) = Toast.makeText(ctx, message, Toast.LENGTH_SHORT).apply {
-      val dpOffset = 3.5
-      // https://developer.android.com/training/multiscreen/screendensities#dips-pels
-      val pxOffset = (dpOffset * ctx.resources.displayMetrics.density + 0.5f).toInt()
-      setGravity(Gravity.TOP, 0, pxOffset)
-    }.show()
+    fun toast(message: String) =
+      Toast.makeText(ctx, message, Toast.LENGTH_SHORT)
+        .apply {
+          val dpOffset = 3.5
+          // https://developer.android.com/training/multiscreen/screendensities#dips-pels
+          val pxOffset = (dpOffset * ctx.resources.displayMetrics.density + 0.5f).toInt()
+          setGravity(Gravity.TOP, 0, pxOffset)
+        }
+        .show()
   }
 }

@@ -10,5 +10,6 @@ data class Entry(
   /** Free-form metadata */
   val note: String? = null
 ) {
-  fun toTsvRow() = "${activity}\t${latLong?.first ?: ""}\t${latLong?.second ?: ""}\t${note ?: ""}\t${startTime}\n"
+  fun toTsvRow() =
+    "${activity}\t${latLong?.first ?: ""}\t${latLong?.second ?: ""}\t${note ?: ""}\t${startTime}\n"
 }

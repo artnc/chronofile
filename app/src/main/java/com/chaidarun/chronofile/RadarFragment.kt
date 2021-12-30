@@ -50,21 +50,21 @@ class RadarFragment : GraphFragment() {
       }
     }
 
-    disposables = CompositeDisposable().apply {
-      add(
-        Store.observable
-          .filter { it.config != null && it.history != null }
-          .map { Triple(it.config!!, it.history!!, it.graphConfig) }
-          .distinctUntilChanged()
-          .subscribe { render(it) }
-      )
-      add(
-        Store.observable
-          .map { it.graphConfig.grouped }
-          .distinctUntilChanged()
-          .subscribe { radarIsGrouped.isChecked = it }
-      )
-    }
+    disposables =
+      CompositeDisposable().apply {
+        add(
+          Store.observable
+            .filter { it.config != null && it.history != null }
+            .map { Triple(it.config!!, it.history!!, it.graphConfig) }
+            .distinctUntilChanged()
+            .subscribe { render(it) }
+        )
+        add(
+          Store.observable.map { it.graphConfig.grouped }.distinctUntilChanged().subscribe {
+            radarIsGrouped.isChecked = it
+          }
+        )
+      }
   }
 
   /** (Re-)renders radar chart */
@@ -84,17 +84,19 @@ class RadarFragment : GraphFragment() {
     val (buckets, sliceList) =
       aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.DAY_OF_WEEK)
     var maxEntrySeconds = 0L
-    val radarDataSets = sliceList.mapIndexed { i, (slice, _) ->
-      val radarEntries = (1L until 8L).map { dayOfWeek ->
-        val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
-        maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
-        RadarEntry(Math.sqrt(seconds.toDouble()).toFloat())
+    val radarDataSets =
+      sliceList.mapIndexed { i, (slice, _) ->
+        val radarEntries =
+          (1L until 8L).map { dayOfWeek ->
+            val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
+            maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
+            RadarEntry(Math.sqrt(seconds.toDouble()).toFloat())
+          }
+        RadarDataSet(radarEntries, slice).apply {
+          color = COLORS[i % COLORS.size]
+          setDrawValues(false)
+        }
       }
-      RadarDataSet(radarEntries, slice).apply {
-        color = COLORS[i % COLORS.size]
-        setDrawValues(false)
-      }
-    }
     radarChart.run {
       data = RadarData(radarDataSets)
       invalidate()

@@ -50,21 +50,21 @@ class PieFragment : GraphFragment() {
       }.isChecked = true
     }
 
-    disposables = CompositeDisposable().apply {
-      add(
-        Store.observable
-          .filter { it.config != null && it.history != null }
-          .map { Triple(it.config!!, it.history!!, it.graphConfig) }
-          .distinctUntilChanged()
-          .subscribe { render(it) }
-      )
-      add(
-        Store.observable
-          .map { it.graphConfig.grouped }
-          .distinctUntilChanged()
-          .subscribe { pieIsGrouped.isChecked = it }
-      )
-    }
+    disposables =
+      CompositeDisposable().apply {
+        add(
+          Store.observable
+            .filter { it.config != null && it.history != null }
+            .map { Triple(it.config!!, it.history!!, it.graphConfig) }
+            .distinctUntilChanged()
+            .subscribe { render(it) }
+        )
+        add(
+          Store.observable.map { it.graphConfig.grouped }.distinctUntilChanged().subscribe {
+            pieIsGrouped.isChecked = it
+          }
+        )
+      }
   }
 
   /** (Re-)renders pie chart */
@@ -81,26 +81,30 @@ class PieFragment : GraphFragment() {
     }
 
     // Show data
-    val (_, sliceList) = aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.TOTAL)
+    val (_, sliceList) =
+      aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.TOTAL)
     val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
     val metric = graphConfig.metric
-    val pieDataSet = PieDataSet(pieEntries, "Time").apply {
-      colors = COLORS
-      valueLineColor = Color.TRANSPARENT
-      valueLinePart1Length = 0.45f
-      valueLinePart2Length = 0f
-      valueTextColor = LABEL_COLOR
-      valueTextSize = LABEL_FONT_SIZE
-      valueTypeface = App.instance.typeface
-      valueFormatter = IValueFormatter { value, entry, _, _ ->
-        val num: String = when (metric) {
-          Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
-          Metric.TOTAL -> formatDuration(value.toLong())
-        }
-        "${(entry as? PieEntry)?.label}: $num"
+    val pieDataSet =
+      PieDataSet(pieEntries, "Time").apply {
+        colors = COLORS
+        valueLineColor = Color.TRANSPARENT
+        valueLinePart1Length = 0.45f
+        valueLinePart2Length = 0f
+        valueTextColor = LABEL_COLOR
+        valueTextSize = LABEL_FONT_SIZE
+        valueTypeface = App.instance.typeface
+        valueFormatter =
+          IValueFormatter { value, entry, _, _ ->
+            val num: String =
+              when (metric) {
+                Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
+                Metric.TOTAL -> formatDuration(value.toLong())
+              }
+            "${(entry as? PieEntry)?.label}: $num"
+          }
+        yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
       }
-      yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
-    }
 
     with(pieChart) {
       centerText = "Range:\n${formatDuration(sliceList.map { it.second }.sum(), showDays = true)}"

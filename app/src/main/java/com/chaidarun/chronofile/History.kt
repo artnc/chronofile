@@ -14,24 +14,29 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
   ): History {
     // Collect inputs
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
-    val newStartTime = try {
-      val trimmedEditedStartTime = editedStartTime.trim()
-      val enteredTime = when {
-        trimmedEditedStartTime == "" -> oldStartTime
-        ':' in trimmedEditedStartTime -> {
-          val now = epochSeconds()
-          val (hours, minutes) = trimmedEditedStartTime.split(':')
-          val time = getPreviousMidnight(now) + 3600 * hours.toInt() +
-            60 * minutes.toInt() + Math.round(Math.random() * 60)
-          if (time > now) time - DAY_SECONDS else time
-        }
-        trimmedEditedStartTime.length == 10 -> trimmedEditedStartTime.toLong() // Unix timestamp
-        else -> oldStartTime + trimmedEditedStartTime.toInt() * 60 // Minute delta
+    val newStartTime =
+      try {
+        val trimmedEditedStartTime = editedStartTime.trim()
+        val enteredTime =
+          when {
+            trimmedEditedStartTime == "" -> oldStartTime
+            ':' in trimmedEditedStartTime -> {
+              val now = epochSeconds()
+              val (hours, minutes) = trimmedEditedStartTime.split(':')
+              val time =
+                getPreviousMidnight(now) +
+                  3600 * hours.toInt() +
+                  60 * minutes.toInt() +
+                  Math.round(Math.random() * 60)
+              if (time > now) time - DAY_SECONDS else time
+            }
+            trimmedEditedStartTime.length == 10 -> trimmedEditedStartTime.toLong() // Unix timestamp
+            else -> oldStartTime + trimmedEditedStartTime.toInt() * 60 // Minute delta
+          }
+        if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else null
+      } catch (e: Exception) {
+        null
       }
-      if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else null
-    } catch (e: Exception) {
-      null
-    }
     if (newStartTime == null) {
       App.toast("Invalid start time")
       return this
@@ -40,9 +45,10 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     // Edit entry
     val entryIndex = entries.indexOfFirst { it.startTime == oldStartTime }
     val oldEntry = entries[entryIndex]
-    val newEntries = entries.toMutableList().apply {
-      this[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLong, sanitizedNote)
-    }
+    val newEntries =
+      entries.toMutableList().apply {
+        this[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLong, sanitizedNote)
+      }
 
     App.toast("Updated entry")
     return copy(entries = normalizeAndSave(newEntries, currentActivityStartTime))
@@ -59,42 +65,42 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     )
   }
 
-  fun withoutEntry(startTime: Long) = copy(
-    entries = normalizeAndSave(
-      entries.filter { it.startTime != startTime }, currentActivityStartTime
+  fun withoutEntry(startTime: Long) =
+    copy(
+      entries =
+        normalizeAndSave(entries.filter { it.startTime != startTime }, currentActivityStartTime)
     )
-  )
 
   companion object {
     private val file = File("/storage/emulated/0/Sync/chronofile.tsv")
-    private val locationClient by lazy {
-      LocationServices.getFusedLocationProviderClient(App.ctx)
-    }
+    private val locationClient by lazy { LocationServices.getFusedLocationProviderClient(App.ctx) }
 
-    private fun normalizeAndSave(
-      entries: Collection<Entry>,
-      currentActivityStartTime: Long
-    ) = entries.toMutableList().apply {
-      // Normalize
-      Log.i(TAG, "Normalizing entries")
-      sortBy { it.startTime }
-      var lastSeenActivity: String? = null
-      var lastSeenNote: String? = null
-      removeAll {
-        val shouldRemove = it.activity == lastSeenActivity && it.note == lastSeenNote
-        lastSeenActivity = it.activity
-        lastSeenNote = it.note
-        shouldRemove
-      }
+    private fun normalizeAndSave(entries: Collection<Entry>, currentActivityStartTime: Long) =
+      entries
+        .toMutableList()
+        .apply {
+          // Normalize
+          Log.i(TAG, "Normalizing entries")
+          sortBy { it.startTime }
+          var lastSeenActivity: String? = null
+          var lastSeenNote: String? = null
+          removeAll {
+            val shouldRemove = it.activity == lastSeenActivity && it.note == lastSeenNote
+            lastSeenActivity = it.activity
+            lastSeenNote = it.note
+            shouldRemove
+          }
 
-      // Save
-      IOUtils.writeFile(file, joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n")
-    }.toList()
+          // Save
+          IOUtils.writeFile(
+            file,
+            joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n"
+          )
+        }
+        .toList()
 
-    private fun sanitizeActivityAndNote(
-      activity: String,
-      note: String?
-    ) = Pair(activity.trim(), if (note.isNullOrBlank()) null else note.trim())
+    private fun sanitizeActivityAndNote(activity: String, note: String?) =
+      Pair(activity.trim(), if (note.isNullOrBlank()) null else note.trim())
 
     private fun getLocation(callback: (Pair<Double, Double>?) -> Unit) {
       try {
@@ -123,7 +129,8 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     fun fromFile(): History {
       // Read lines
       var currentActivityStartTime = epochSeconds()
-      val lines = if (file.exists()) file.readLines() else listOf("\t\t\t\t$currentActivityStartTime")
+      val lines =
+        if (file.exists()) file.readLines() else listOf("\t\t\t\t$currentActivityStartTime")
 
       // Parse lines
       val entries = mutableListOf<Entry>()
@@ -133,17 +140,17 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
         }
 
         val (activity, lat, long, note, startTime) = it.split("\t")
-        val latLong = if (lat.isNotEmpty() && long.isNotEmpty()) Pair(lat.toDouble(), long.toDouble()) else null
+        val latLong =
+          if (lat.isNotEmpty() && long.isNotEmpty()) Pair(lat.toDouble(), long.toDouble()) else null
         if (activity.isNotEmpty()) {
-          entries += Entry(startTime.toLong(), activity, latLong, if (note.isEmpty()) null else note)
+          entries +=
+            Entry(startTime.toLong(), activity, latLong, if (note.isEmpty()) null else note)
         } else {
           currentActivityStartTime = startTime.toLong()
         }
       }
 
-      return History(
-        normalizeAndSave(entries, currentActivityStartTime), currentActivityStartTime
-      )
+      return History(normalizeAndSave(entries, currentActivityStartTime), currentActivityStartTime)
     }
   }
 }

@@ -29,8 +29,8 @@ class MainActivity : BaseActivity() {
 
     // Ensure required permissions are granted
     if (APP_PERMISSIONS.all {
-      ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-    }
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+      }
     ) {
       init()
     } else {
@@ -45,8 +45,7 @@ class MainActivity : BaseActivity() {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     when (item.itemId) {
-      R.id.action_edit_config_file ->
-        startActivity(Intent(this, EditorActivity::class.java))
+      R.id.action_edit_config_file -> startActivity(Intent(this, EditorActivity::class.java))
       R.id.action_refresh -> {
         hydrateStoreFromFiles()
         App.toast("Reloaded history and config from disk")
@@ -85,30 +84,32 @@ class MainActivity : BaseActivity() {
     historyList.adapter = HistoryListAdapter(this)
 
     // Set up listeners
-    disposables = CompositeDisposable().apply {
-      add(
-        RxView.clicks(addEntry)
-          .subscribe {
+    disposables =
+      CompositeDisposable().apply {
+        add(
+          RxView.clicks(addEntry).subscribe {
             History.addEntry(addEntryActivity.text.toString(), addEntryNote.text.toString())
             addEntryActivity.text.clear()
             addEntryNote.text.clear()
             currentFocus?.clearFocus()
           }
-      )
-      add(
-        RxTextView.afterTextChangeEvents(addEntryActivity)
-          .subscribe { addEntry.isEnabled = !addEntryActivity.text.toString().isBlank() }
-      )
-    }
+        )
+        add(
+          RxTextView.afterTextChangeEvents(addEntryActivity).subscribe {
+            addEntry.isEnabled = !addEntryActivity.text.toString().isBlank()
+          }
+        )
+      }
   }
 
   companion object {
-    val APP_PERMISSIONS = arrayOf(
-      Manifest.permission.ACCESS_COARSE_LOCATION,
-      Manifest.permission.ACCESS_FINE_LOCATION,
-      Manifest.permission.READ_EXTERNAL_STORAGE,
-      Manifest.permission.WRITE_EXTERNAL_STORAGE
-    )
+    val APP_PERMISSIONS =
+      arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+      )
     const val PERMISSION_REQUEST_CODE = 1
   }
 }

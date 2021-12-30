@@ -43,6 +43,7 @@ class Config(
 
     fun fromText(text: String): Config = deserialize(text).apply { save() }
 
-    fun fromFile(): Config = (if (file.exists()) deserialize(file.readText()) else Config()).apply { save() }
+    fun fromFile(): Config =
+      (if (file.exists()) deserialize(file.readText()) else Config()).apply { save() }
   }
 }

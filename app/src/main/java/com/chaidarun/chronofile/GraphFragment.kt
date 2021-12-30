@@ -7,19 +7,20 @@ abstract class GraphFragment : BaseFragment() {
   /**
    * Determines the date range that should be used to render each chart.
    *
-   * This takes into account the earliest recorded entry, the last recorded entry, the
-   * user-selected start date, the user-selected end date, and the graph metric.
+   * This takes into account the earliest recorded entry, the last recorded entry, the user-selected
+   * start date, the user-selected end date, and the graph metric.
    */
   protected fun getChartRange(history: History, graphConfig: GraphConfig): Pair<Long, Long> {
     val historyStart = history.entries[0].startTime
     val historyEnd = history.currentActivityStartTime
     val pickerStart = graphConfig.startTime ?: 0
-    val pickerEnd = if (graphConfig.endTime == null) {
-      Long.MAX_VALUE
-    } else {
-      // Must append a day's worth of seconds to the range to make it inclusive
-      graphConfig.endTime + DAY_SECONDS
-    }
+    val pickerEnd =
+      if (graphConfig.endTime == null) {
+        Long.MAX_VALUE
+      } else {
+        // Must append a day's worth of seconds to the range to make it inclusive
+        graphConfig.endTime + DAY_SECONDS
+      }
     val rangeEnd = Math.min(historyEnd, pickerEnd)
     var rangeStart = Math.max(historyStart, pickerStart)
     if (graphConfig.metric == Metric.AVERAGE) {
@@ -28,11 +29,13 @@ abstract class GraphFragment : BaseFragment() {
     return Pair(rangeStart, rangeEnd)
   }
 
-  protected enum class Aggregation { DAY, DAY_OF_WEEK, TOTAL }
+  protected enum class Aggregation {
+    DAY,
+    DAY_OF_WEEK,
+    TOTAL
+  }
 
-  /**
-   * Returns a ({ bucket: { slice: duration } }, { slice: total duration })
-   */
+  /** Returns a ({ bucket: { slice: duration } }, { slice: total duration }) */
   protected fun aggregateEntries(
     config: Config,
     history: History,
@@ -53,27 +56,29 @@ abstract class GraphFragment : BaseFragment() {
 
       // Get slice(s) depending on whether entry crosses midnight
       val startTime = Math.max(entry.startTime, rangeStart)
-      val bucketIncrements: Map<Long, Long> = when (aggregation) {
-        Aggregation.DAY, Aggregation.DAY_OF_WEEK -> {
-          val midnightBeforeStart = getPreviousMidnight(startTime)
-          val midnightBeforeEnd = getPreviousMidnight(endTime)
-          val pieces = if (midnightBeforeStart != midnightBeforeEnd) {
-            mapOf(
-              midnightBeforeEnd to (endTime - midnightBeforeEnd),
-              midnightBeforeStart to (midnightBeforeEnd - startTime)
-            )
-          } else {
-            mapOf(midnightBeforeStart to (endTime - startTime))
-          }
+      val bucketIncrements: Map<Long, Long> =
+        when (aggregation) {
+          Aggregation.DAY, Aggregation.DAY_OF_WEEK -> {
+            val midnightBeforeStart = getPreviousMidnight(startTime)
+            val midnightBeforeEnd = getPreviousMidnight(endTime)
+            val pieces =
+              if (midnightBeforeStart != midnightBeforeEnd) {
+                mapOf(
+                  midnightBeforeEnd to (endTime - midnightBeforeEnd),
+                  midnightBeforeStart to (midnightBeforeEnd - startTime)
+                )
+              } else {
+                mapOf(midnightBeforeStart to (endTime - startTime))
+              }
 
-          when (aggregation) {
-            Aggregation.DAY -> pieces
-            Aggregation.DAY_OF_WEEK -> pieces.mapKeys { getDayOfWeek(it.key).value.toLong() }
-            else -> error("Unhandled aggregation")
+            when (aggregation) {
+              Aggregation.DAY -> pieces
+              Aggregation.DAY_OF_WEEK -> pieces.mapKeys { getDayOfWeek(it.key).value.toLong() }
+              else -> error("Unhandled aggregation")
+            }
           }
+          Aggregation.TOTAL -> mapOf(0L to (endTime - startTime))
         }
-        Aggregation.TOTAL -> mapOf(0L to (endTime - startTime))
-      }
 
       // Record slices
       val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
@@ -92,16 +97,20 @@ abstract class GraphFragment : BaseFragment() {
 
     // Consolidate small slices into "Other" slice
     val totalDuration = sliceMap.values.sum()
-    val sliceList = sliceMap.toList().sortedByDescending { it.second }.takeWhile {
-      it.second >= totalDuration * MIN_SLICE_PERCENT
-    }.toMutableList()
+    val sliceList =
+      sliceMap
+        .toList()
+        .sortedByDescending { it.second }
+        .takeWhile { it.second >= totalDuration * MIN_SLICE_PERCENT }
+        .toMutableList()
     sliceList.add(OTHER_SLICE_NAME to sliceMap.values.sum() - sliceList.map { it.second }.sum())
     val nonOtherSlices = sliceList.map { it.first }.toSet()
-    val bucketsWithOther = buckets.mapValues { (_, value) ->
-      val newMap = value.filter { it.key in nonOtherSlices }.toMutableMap()
-      newMap[OTHER_SLICE_NAME] = value.filter { it.key !in nonOtherSlices }.map { it.value }.sum()
-      newMap
-    }
+    val bucketsWithOther =
+      buckets.mapValues { (_, value) ->
+        val newMap = value.filter { it.key in nonOtherSlices }.toMutableMap()
+        newMap[OTHER_SLICE_NAME] = value.filter { it.key !in nonOtherSlices }.map { it.value }.sum()
+        newMap
+      }
 
     return Pair(bucketsWithOther, sliceList)
   }
@@ -120,7 +129,8 @@ abstract class GraphFragment : BaseFragment() {
         "#ff9da7",
         "#9c755f",
         "#bab0ab"
-      ).map { Color.parseColor(it) }
+      )
+        .map { Color.parseColor(it) }
     }
 
     /** Slices smaller than this will get bucketed into "Other" */

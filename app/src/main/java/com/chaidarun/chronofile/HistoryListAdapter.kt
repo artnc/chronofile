@@ -28,21 +28,26 @@ import kotlinx.android.synthetic.main.item_entry.view.entryDuration
 import kotlinx.android.synthetic.main.item_entry.view.entryNote
 import kotlinx.android.synthetic.main.item_time.view.time
 
-private enum class ViewType { DATE, ENTRY, SPACER, TIME }
+private enum class ViewType {
+  DATE,
+  ENTRY,
+  SPACER,
+  TIME
+}
+
 sealed class ListItem(val viewType: ViewType)
+
 private data class DateItem(val date: Date) : ListItem(ViewType.DATE)
-private data class EntryItem(
-  val entry: Entry,
-  val itemStart: Long,
-  val itemEnd: Long
-) : ListItem(ViewType.ENTRY)
+
+private data class EntryItem(val entry: Entry, val itemStart: Long, val itemEnd: Long) :
+  ListItem(ViewType.ENTRY)
 
 private data class SpacerItem(val height: Int) : ListItem(ViewType.SPACER)
+
 private data class TimeItem(val time: Date) : ListItem(ViewType.TIME)
 
-class HistoryListAdapter(
-  private val appActivity: AppCompatActivity
-) : RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
+class HistoryListAdapter(private val appActivity: AppCompatActivity) :
+  RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
   private var itemList = listOf<ListItem>()
   private var itemListLength = 0
@@ -70,13 +75,13 @@ class HistoryListAdapter(
                 view.formEntryActivity.setText(entry.activity)
                 view.formEntryNote.setText(entry.note ?: "")
                 setView(view)
-                setPositiveButton(
-                  "OK"
-                ) { _, _ ->
+                setPositiveButton("OK") { _, _ ->
                   Store.dispatch(
                     Action.EditEntry(
-                      entry.startTime, view.formEntryStartTime.text.toString(),
-                      view.formEntryActivity.text.toString(), view.formEntryNote.text.toString()
+                      entry.startTime,
+                      view.formEntryStartTime.text.toString(),
+                      view.formEntryActivity.text.toString(),
+                      view.formEntryNote.text.toString()
                     )
                   )
                 }
@@ -88,10 +93,11 @@ class HistoryListAdapter(
               if (entry.latLong == null) {
                 App.toast("No location data available")
               } else {
-                val location = Location("dummyprovider").apply {
-                  latitude = entry.latLong.first
-                  longitude = entry.latLong.second
-                }
+                val location =
+                  Location("dummyprovider").apply {
+                    latitude = entry.latLong.first
+                    longitude = entry.latLong.second
+                  }
                 val intent = Intent(App.ctx, FetchAddressIntentService::class.java)
                 intent.putExtra(FetchAddressIntentService.RECEIVER, receiver)
                 intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location)
@@ -116,39 +122,40 @@ class HistoryListAdapter(
     }
   }
 
-  private val subscription = Store.observable.map { it.history }.distinctUntilChanged().subscribe { history ->
-    if (history == null) {
-      Log.i(TAG, "History is null")
-      return@subscribe
-    }
-
-    val elapsedMs = measureTimeMillis {
-      val items = mutableListOf<ListItem>()
-      items.add(SpacerItem(32))
-      var lastSeenStartTime = history.currentActivityStartTime
-      history.entries.takeLast(MAX_ENTRIES_SHOWN).reversed().forEach { entry ->
-        items.add(TimeItem(Date(lastSeenStartTime * 1000)))
-
-        // Use either one or two items for entry depending on whether it crosses midnight
-        if (formatDate(entry.startTime) != formatDate(lastSeenStartTime)) {
-          val midnight = getPreviousMidnight(lastSeenStartTime)
-          items.add(EntryItem(entry, midnight, lastSeenStartTime))
-          items.add(DateItem(Date(lastSeenStartTime * 1000)))
-          items.add(EntryItem(entry, entry.startTime, midnight))
-        } else {
-          items.add(EntryItem(entry, entry.startTime, lastSeenStartTime))
-        }
-
-        lastSeenStartTime = entry.startTime
+  private val subscription =
+    Store.observable.map { it.history }.distinctUntilChanged().subscribe { history ->
+      if (history == null) {
+        Log.i(TAG, "History is null")
+        return@subscribe
       }
-      items.add(SpacerItem(32))
-      itemList = items.reversed()
-      itemListLength = itemList.size
-      notifyDataSetChanged()
-      appActivity.historyList.scrollToPosition(itemList.size - 1)
+
+      val elapsedMs = measureTimeMillis {
+        val items = mutableListOf<ListItem>()
+        items.add(SpacerItem(32))
+        var lastSeenStartTime = history.currentActivityStartTime
+        history.entries.takeLast(MAX_ENTRIES_SHOWN).reversed().forEach { entry ->
+          items.add(TimeItem(Date(lastSeenStartTime * 1000)))
+
+          // Use either one or two items for entry depending on whether it crosses midnight
+          if (formatDate(entry.startTime) != formatDate(lastSeenStartTime)) {
+            val midnight = getPreviousMidnight(lastSeenStartTime)
+            items.add(EntryItem(entry, midnight, lastSeenStartTime))
+            items.add(DateItem(Date(lastSeenStartTime * 1000)))
+            items.add(EntryItem(entry, entry.startTime, midnight))
+          } else {
+            items.add(EntryItem(entry, entry.startTime, lastSeenStartTime))
+          }
+
+          lastSeenStartTime = entry.startTime
+        }
+        items.add(SpacerItem(32))
+        itemList = items.reversed()
+        itemListLength = itemList.size
+        notifyDataSetChanged()
+        appActivity.historyList.scrollToPosition(itemList.size - 1)
+      }
+      Log.i(TAG, "Rendered history view in $elapsedMs ms")
     }
-    Log.i(TAG, "Rendered history view in $elapsedMs ms")
-  }
 
   override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
     subscription.dispose()
@@ -158,24 +165,31 @@ class HistoryListAdapter(
   override fun getItemCount() = itemListLength
   override fun getItemViewType(position: Int) = itemList[position].viewType.ordinal
 
-  override fun onCreateViewHolder(parent: ViewGroup, viewTypeOrdinal: Int) = when (ViewType.values()[viewTypeOrdinal]) {
-    ViewType.DATE -> DateViewHolder(
-      LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false)
-    )
-    ViewType.ENTRY -> EntryViewHolder(
-      LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false)
-    )
-    ViewType.TIME -> TimeViewHolder(
-      LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false)
-    )
-    ViewType.SPACER -> SpacerViewHolder(
-      LinearLayout(appActivity).apply {
-        layoutParams = LinearLayout.LayoutParams(
-          LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+  override fun onCreateViewHolder(parent: ViewGroup, viewTypeOrdinal: Int) =
+    when (ViewType.values()[viewTypeOrdinal]) {
+      ViewType.DATE ->
+        DateViewHolder(
+          LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false)
         )
-      }
-    )
-  }
+      ViewType.ENTRY ->
+        EntryViewHolder(
+          LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false)
+        )
+      ViewType.TIME ->
+        TimeViewHolder(
+          LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false)
+        )
+      ViewType.SPACER ->
+        SpacerViewHolder(
+          LinearLayout(appActivity).apply {
+            layoutParams =
+              LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+              )
+          }
+        )
+    }
 
   override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     holder.bindItem(itemList[position])

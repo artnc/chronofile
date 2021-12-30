@@ -1,6 +1,10 @@
 package com.chaidarun.chronofile
 
-enum class Metric { AVERAGE, TOTAL }
+enum class Metric {
+  AVERAGE,
+  TOTAL
+}
+
 data class GraphConfig(
   val grouped: Boolean = true,
   val stacked: Boolean = true,

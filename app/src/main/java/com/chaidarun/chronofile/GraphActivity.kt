@@ -48,9 +48,9 @@ class GraphActivity : BaseActivity() {
       for (i in 0 until tabsCount) {
         with(getChildAt(i) as ViewGroup) {
           val tabChildsCount = childCount
-          (0 until tabChildsCount)
-            .map { getChildAt(it) }
-            .forEach { (it as? TextView)?.typeface = App.instance.typeface }
+          (0 until tabChildsCount).map { getChildAt(it) }.forEach {
+            (it as? TextView)?.typeface = App.instance.typeface
+          }
         }
       }
     }
@@ -58,59 +58,60 @@ class GraphActivity : BaseActivity() {
     var startTime: Long? = null
     var endTime: Long? = null
     setPresetRange(Store.state.history!!, PresetRange.PAST_MONTH)
-    disposables = CompositeDisposable().apply {
-      add(
-        Store.observable
-          .map { it.graphConfig.startTime }
-          .distinctUntilChanged()
-          .subscribe {
+    disposables =
+      CompositeDisposable().apply {
+        add(
+          Store.observable.map { it.graphConfig.startTime }.distinctUntilChanged().subscribe {
             startTime = it
             if (it != null) startDate.text = formatDate(it)
           }
-      )
-      add(
-        Store.observable
-          .map { it.graphConfig.endTime }
-          .distinctUntilChanged()
-          .subscribe {
+        )
+        add(
+          Store.observable.map { it.graphConfig.endTime }.distinctUntilChanged().subscribe {
             endTime = it
             if (it != null) endDate.text = formatDate(it)
           }
-      )
-      add(
-        RxView.clicks(startDate).subscribe {
-          DatePickerFragment().apply {
-            arguments = Bundle().apply {
-              putString(DatePickerFragment.ENDPOINT, "start")
-              putLong(DatePickerFragment.TIMESTAMP, startTime ?: epochSeconds())
-            }
-          }.show(supportFragmentManager, "datePicker")
-        }
-      )
-      add(
-        RxView.clicks(endDate).subscribe {
-          DatePickerFragment().apply {
-            arguments = Bundle().apply {
-              putString(DatePickerFragment.ENDPOINT, "end")
-              putLong(DatePickerFragment.TIMESTAMP, endTime ?: epochSeconds())
-            }
-          }.show(supportFragmentManager, "datePicker")
-        }
-      )
-      add(
-        RxView.clicks(quickRange).subscribe {
-          with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
-            setSingleChoiceItems(PresetRange.values().map { it.text }.toTypedArray(), -1, null)
-            setPositiveButton("OK") { dialog, _ ->
-              val position = (dialog as AlertDialog).listView.checkedItemPosition
-              setPresetRange(Store.state.history!!, PresetRange.values()[position])
-            }
-            setNegativeButton("Cancel", null)
-            show()
+        )
+        add(
+          RxView.clicks(startDate).subscribe {
+            DatePickerFragment()
+              .apply {
+                arguments =
+                  Bundle().apply {
+                    putString(DatePickerFragment.ENDPOINT, "start")
+                    putLong(DatePickerFragment.TIMESTAMP, startTime ?: epochSeconds())
+                  }
+              }
+              .show(supportFragmentManager, "datePicker")
           }
-        }
-      )
-    }
+        )
+        add(
+          RxView.clicks(endDate).subscribe {
+            DatePickerFragment()
+              .apply {
+                arguments =
+                  Bundle().apply {
+                    putString(DatePickerFragment.ENDPOINT, "end")
+                    putLong(DatePickerFragment.TIMESTAMP, endTime ?: epochSeconds())
+                  }
+              }
+              .show(supportFragmentManager, "datePicker")
+          }
+        )
+        add(
+          RxView.clicks(quickRange).subscribe {
+            with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
+              setSingleChoiceItems(PresetRange.values().map { it.text }.toTypedArray(), -1, null)
+              setPositiveButton("OK") { dialog, _ ->
+                val position = (dialog as AlertDialog).listView.checkedItemPosition
+                setPresetRange(Store.state.history!!, PresetRange.values()[position])
+              }
+              setNegativeButton("Cancel", null)
+              show()
+            }
+          }
+        )
+      }
   }
 
   private fun setPresetRange(history: History, presetRange: PresetRange) {
