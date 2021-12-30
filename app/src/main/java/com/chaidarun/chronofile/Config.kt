@@ -27,7 +27,7 @@ class Config(
 
   fun serialize(): String = gson.toJson(this)
 
-  private fun save() = IOUtils.writeFile(file, serialize())
+  private fun save() = IOUtil.writeFile(file, serialize())
 
   companion object {
     private val gson by lazy {
@@ -37,7 +37,7 @@ class Config(
         .setPrettyPrinting()
         .create()
     }
-    private val file = File("/storage/emulated/0/Sync/chronofile.json")
+    private val file = File("${IOUtil.dir}/Sync/chronofile.json")
 
     private fun deserialize(text: String) = gson.fromJson(text, Config::class.java)
 
