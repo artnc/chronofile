@@ -11,8 +11,8 @@ abstract class GraphFragment : BaseFragment() {
    * start date, the user-selected end date, and the graph metric.
    */
   protected fun getChartRange(history: History, graphConfig: GraphConfig): Pair<Long, Long> {
-    val historyStart = history.entries[0].startTime
     val historyEnd = history.currentActivityStartTime
+    val historyStart = history.entries.getOrNull(0)?.startTime ?: historyEnd
     val pickerStart = graphConfig.startTime ?: 0
     val pickerEnd =
       if (graphConfig.endTime == null) {

@@ -117,7 +117,8 @@ class GraphActivity : BaseActivity() {
   private fun setPresetRange(history: History, presetRange: PresetRange) {
     Log.i(TAG, "Setting range to $presetRange")
     val now = history.currentActivityStartTime
-    val startTime = Math.max(now - presetRange.duration, history.entries[0].startTime)
+    val startTime =
+      Math.max(now - presetRange.duration, history.entries.getOrNull(0)?.startTime ?: 0)
     Store.dispatch(Action.SetGraphRangeStart(startTime))
     Store.dispatch(Action.SetGraphRangeEnd(now))
   }
