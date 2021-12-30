@@ -3,6 +3,7 @@ package com.chaidarun.chronofile
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -45,6 +46,8 @@ class MainActivity : BaseActivity() {
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     when (item.itemId) {
+      R.id.action_about ->
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile")))
       R.id.action_edit_config_file -> startActivity(Intent(this, EditorActivity::class.java))
       R.id.action_refresh -> {
         hydrateStoreFromFiles()
