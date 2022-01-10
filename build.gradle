@@ -1,6 +1,6 @@
 buildscript {
   ext.anko_version = '0.10.3'
-  ext.kotlin_version = '1.4.32'
+  ext.kotlin_version = '1.6.10'
   ext.support_version = '26.1.0'
 
   repositories {
