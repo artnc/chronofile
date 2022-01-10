@@ -72,7 +72,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     )
 
   companion object {
-    private val file = File("${IOUtil.dir}/Sync/chronofile.tsv")
+    private val file = File("${IOUtil.dir}/Sync/Mobile/chronofile.tsv")
     private val locationClient by lazy { LocationServices.getFusedLocationProviderClient(App.ctx) }
 
     private fun normalizeAndSave(entries: Collection<Entry>, currentActivityStartTime: Long) =

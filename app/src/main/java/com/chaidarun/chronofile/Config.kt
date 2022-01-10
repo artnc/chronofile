@@ -37,7 +37,7 @@ class Config(
         .setPrettyPrinting()
         .create()
     }
-    private val file = File("${IOUtil.dir}/Sync/chronofile.json")
+    private val file = File("${IOUtil.dir}/Sync/Mobile/chronofile.json")
 
     private fun deserialize(text: String) = gson.fromJson(text, Config::class.java)
 
