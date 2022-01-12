@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:orientation="vertical"
   android:padding="16dp">
 
-  <EditText
-    android:id="@+id/formEntryStartTime"
+  <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:hint="Start time" />
+    android:orientation="vertical">
 
-  <EditText
-    android:id="@+id/formEntryActivity"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="Activity" />
+    <EditText
+      android:id="@+id/formEntryActivity"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:hint="Activity" />
 
-  <EditText
-    android:id="@+id/formEntryNote"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:hint="Note" />
-</LinearLayout>
+    <Button
+      android:id="@+id/formEnableStartTime"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      tools:text="20:26" />
+
+    <TimePicker
+      android:id="@+id/formEntryStartTime"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:timePickerMode="clock"
+      android:visibility="gone"
+      tools:text="20:26" />
+
+    <EditText
+      android:id="@+id/formEntryNote"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:hint="Note" />
+
+  </LinearLayout>
+
+</ScrollView>

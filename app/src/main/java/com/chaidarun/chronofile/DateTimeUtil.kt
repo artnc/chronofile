@@ -6,6 +6,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -20,6 +21,21 @@ fun formatDate(date: Date): String = dateFormat.format(date)
 fun formatDate(seconds: Long) = formatDate(Date(seconds * 1000))
 
 fun formatTime(date: Date): String = timeFormat.format(date)
+
+fun formatTime(seconds: Long): String = formatTime(Date(seconds * 1000))
+
+fun getTimeDetails(seconds: Long) : Pair<Int, Int> {
+  val cal = Calendar.getInstance()
+  cal.time = Date(seconds * 1000)
+  return Pair(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
+}
+
+fun buildTimeDetails(hour: Int, minute: Int) : Date {
+  val cal = Calendar.getInstance()
+  cal.set(Calendar.HOUR_OF_DAY, hour)
+  cal.set(Calendar.MINUTE, minute)
+  return cal.time
+}
 
 /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
 fun formatDuration(seconds: Long, showDays: Boolean = false): String {

@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.Date
 import kotlin.system.measureTimeMillis
 import kotlinx.android.synthetic.main.content_main.historyList
+import kotlinx.android.synthetic.main.form_entry.view.formEnableStartTime
 import kotlinx.android.synthetic.main.form_entry.view.formEntryActivity
 import kotlinx.android.synthetic.main.form_entry.view.formEntryNote
 import kotlinx.android.synthetic.main.form_entry.view.formEntryStartTime
@@ -70,6 +71,15 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
             R.id.delete -> Store.dispatch(Action.RemoveEntry(entry.startTime))
             R.id.edit -> {
               val view = LayoutInflater.from(appActivity).inflate(R.layout.form_entry, null)
+              view.formEnableStartTime.text = formatTime(entry.startTime)
+              view.formEnableStartTime.setOnClickListener {
+                it.visibility = View.GONE
+                view.formEntryStartTime.visibility = View.VISIBLE
+              }
+              view.formEntryStartTime.setIs24HourView(true);
+              val timeDetails = getTimeDetails(entry.startTime)
+              view.formEntryStartTime.hour = timeDetails.first
+              view.formEntryStartTime.minute = timeDetails.second
               with(AlertDialog.Builder(appActivity, R.style.MyAlertDialogTheme)) {
                 setTitle("Edit entry")
                 view.formEntryActivity.setText(entry.activity)
@@ -79,7 +89,7 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
                   Store.dispatch(
                     Action.EditEntry(
                       entry.startTime,
-                      view.formEntryStartTime.text.toString(),
+                      formatTime(buildTimeDetails(view.formEntryStartTime.hour, view.formEntryStartTime.minute)),
                       view.formEntryActivity.text.toString(),
                       view.formEntryNote.text.toString()
                     )
