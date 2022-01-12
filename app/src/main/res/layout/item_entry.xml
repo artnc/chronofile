@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.chaidarun.chronofile.EntryView xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="wrap_content"
   android:minHeight="40dp"
   android:gravity="center_vertical"
   android:clipToPadding="false"
-  android:background="?android:attr/selectableItemBackground"
+  android:background="@drawable/selectable_item_background"
   android:paddingEnd="20dp"
   android:paddingStart="16dp">
 
@@ -34,4 +34,4 @@
     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
     tools:text="Dec 31" />
 
-</LinearLayout>
+</com.chaidarun.chronofile.EntryView>

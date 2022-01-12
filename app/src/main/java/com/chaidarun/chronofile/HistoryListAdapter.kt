@@ -118,7 +118,11 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
       }
 
       override fun onPrepareActionMode(p0: ActionMode?, p1: Menu?) = false
-      override fun onDestroyActionMode(mode: ActionMode?) {}
+      override fun onDestroyActionMode(mode: ActionMode?) {
+        selectedEntry = null
+        // for updating the checked state
+        notifyDataSetChanged();
+      }
     }
   }
 
@@ -173,7 +177,7 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
         )
       ViewType.ENTRY ->
         EntryViewHolder(
-          LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false)
+          LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false) as EntryView
         )
       ViewType.TIME ->
         TimeViewHolder(
@@ -210,13 +214,13 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
     }
   }
 
-  inner class EntryViewHolder(view: View) : ViewHolder(view) {
+  inner class EntryViewHolder(view: EntryView) : ViewHolder(view) {
     override fun bindItem(listItem: ListItem) {
       val (entry, itemStart, itemEnd) = listItem as EntryItem
       val activity = entry.activity
       val note = entry.note
 
-      with(itemView) {
+      with(itemView as EntryView) {
         entryActivity.text = activity
         entryNote.text = note
         entryDuration.text = formatDuration(itemEnd - itemStart)
@@ -224,8 +228,11 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
         setOnLongClickListener {
           (context as AppCompatActivity).startActionMode(actionModeCallback)
           selectedEntry = entry
+          isChecked = true;
+          notifyDataSetChanged();
           true
         }
+        itemView.isChecked = (selectedEntry == entry);
       }
     }
   }
