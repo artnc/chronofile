@@ -15,7 +15,7 @@
   <style name="AppTheme.NoActionBar">
     <item name="windowActionBar">false</item>
     <item name="windowActionModeOverlay">true</item>
-    <item name="android:itemBackground">@color/colorPrimaryDark</item>
+    <item name="android:itemBackground">@drawable/menu_item_background</item>
     <item name="windowNoTitle">true</item>
   </style>
 
