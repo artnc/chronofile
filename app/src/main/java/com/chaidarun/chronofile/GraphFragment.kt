@@ -19,7 +19,7 @@ abstract class GraphFragment : BaseFragment() {
         Long.MAX_VALUE
       } else {
         // Must append a day's worth of seconds to the range to make it inclusive
-        graphConfig.endTime + DAY_SECONDS
+        graphConfig.endTime + DAY_SECONDS - 1
       }
     val rangeEnd = Math.min(historyEnd, pickerEnd)
     var rangeStart = Math.max(historyStart, pickerStart)
