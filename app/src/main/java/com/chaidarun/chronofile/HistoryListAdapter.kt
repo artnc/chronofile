@@ -76,7 +76,7 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
                 it.visibility = View.GONE
                 view.formEntryStartTime.visibility = View.VISIBLE
               }
-              view.formEntryStartTime.setIs24HourView(true);
+              view.formEntryStartTime.setIs24HourView(true)
               val timeDetails = getTimeDetails(entry.startTime)
               view.formEntryStartTime.hour = timeDetails.first
               view.formEntryStartTime.minute = timeDetails.second
@@ -131,7 +131,7 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
       override fun onDestroyActionMode(mode: ActionMode?) {
         selectedEntry = null
         // for updating the checked state
-        notifyDataSetChanged();
+        notifyDataSetChanged()
       }
     }
   }
@@ -238,11 +238,11 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
         setOnLongClickListener {
           (context as AppCompatActivity).startActionMode(actionModeCallback)
           selectedEntry = entry
-          isChecked = true;
-          notifyDataSetChanged();
+          isChecked = true
+          notifyDataSetChanged()
           true
         }
-        itemView.isChecked = (selectedEntry == entry);
+        itemView.isChecked = (selectedEntry == entry)
       }
     }
   }

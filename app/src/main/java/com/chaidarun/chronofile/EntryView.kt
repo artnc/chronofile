@@ -13,14 +13,14 @@ class EntryView : LinearLayout, Checkable {
   constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
   override fun setChecked(checked: Boolean) {
-    isActivated = checked;
+    isActivated = checked
   }
 
   override fun isChecked(): Boolean {
-    return isActivated;
+    return isActivated
   }
 
   override fun toggle() {
-    isActivated = !isActivated;
+    isActivated = !isActivated
   }
 }
