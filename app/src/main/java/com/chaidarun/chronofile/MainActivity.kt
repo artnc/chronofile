@@ -5,10 +5,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jakewharton.rxbinding2.view.RxView
 import com.jakewharton.rxbinding2.widget.RxTextView
@@ -75,13 +77,40 @@ class MainActivity : BaseActivity() {
     }
   }
 
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    when (requestCode) {
+      STORAGE_REQUEST_CODE ->
+        if (resultCode == RESULT_OK) {
+          App.instance.storageDirectory = data!!.data
+          init()
+        } else {
+          App.toast("No storage available :(")
+        }
+    }
+  }
+
+  private fun requestStorage() {
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+      putExtra(DocumentsContract.EXTRA_PROMPT, "Pick a directory")
+    }
+
+    startActivityForResult(intent, STORAGE_REQUEST_CODE)
+  }
+
   private fun hydrateStoreFromFiles() {
-    Store.dispatch(Action.SetConfigFromFile(Config.fromFile()))
+    // TODO use storage access framework for config file
+    Store.dispatch(Action.SetConfigFromFile(Config()))
     Store.dispatch(Action.SetHistory(History.fromFile()))
   }
 
   private fun init() {
-    hydrateStoreFromFiles()
+    try {
+      hydrateStoreFromFiles()
+    } catch (e: IllegalArgumentException) {
+      requestStorage()
+      return
+    }
 
     // Hook up list view
     historyList.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
@@ -110,10 +139,9 @@ class MainActivity : BaseActivity() {
     val APP_PERMISSIONS =
       arrayOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
+        Manifest.permission.ACCESS_FINE_LOCATION
       )
     const val PERMISSION_REQUEST_CODE = 1
+    const val STORAGE_REQUEST_CODE = 2
   }
 }

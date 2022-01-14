@@ -2,7 +2,9 @@ package com.chaidarun.chronofile
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Typeface
+import android.net.Uri
 import android.view.Gravity
 import android.widget.Toast
 import io.github.inflationx.calligraphy3.CalligraphyConfig
@@ -12,10 +14,13 @@ import io.github.inflationx.viewpump.ViewPump
 class App : Application() {
 
   val typeface: Typeface by lazy { Typeface.createFromAsset(assets, FONT_PATH) }
+  lateinit var preferences: SharedPreferences
 
   override fun onCreate() {
     instance = this
     super.onCreate()
+
+    preferences = getSharedPreferences("chronofile", MODE_PRIVATE)
 
     // Set global default font
     ViewPump.init(
@@ -31,6 +36,17 @@ class App : Application() {
         .build()
     )
   }
+
+  var storageDirectory: Uri?
+    get() {
+      val uri = preferences.getString("storage_dir", null)
+      return if (uri.isNullOrEmpty()) null else Uri.parse(uri)
+    }
+    set(value) {
+      preferences.edit()
+        .putString("storage_dir", value.toString())
+        .apply()
+    }
 
   companion object {
     lateinit var instance: App

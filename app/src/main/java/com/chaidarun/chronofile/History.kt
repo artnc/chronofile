@@ -1,7 +1,9 @@
 package com.chaidarun.chronofile
 
 import android.util.Log
+import androidx.documentfile.provider.DocumentFile
 import com.google.android.gms.location.LocationServices
+import java.io.BufferedReader
 import java.io.File
 
 data class History(val entries: List<Entry>, val currentActivityStartTime: Long) {
@@ -72,7 +74,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     )
 
   companion object {
-    private val file = File("${IOUtil.dir}/Sync/Mobile/chronofile.tsv")
+    private const val filename = "chronofile.tsv"
     private val locationClient by lazy { LocationServices.getFusedLocationProviderClient(App.ctx) }
 
     private fun normalizeAndSave(entries: Collection<Entry>, currentActivityStartTime: Long) =
@@ -91,9 +93,19 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
             shouldRemove
           }
 
+          // TODO exception handling
+          val storageDir = App.instance.storageDirectory
+            ?: throw IllegalArgumentException("You must configure a history file")
+          val baseDir = DocumentFile.fromTreeUri(App.instance, storageDir)
+          var historyFile = baseDir!!.findFile(filename)?.uri
+          if (historyFile == null) {
+            historyFile = baseDir.createFile("text/tab-separated-values", filename)!!.uri
+          }
+
           // Save
           IOUtil.writeFile(
-            file,
+            App.instance,
+            historyFile,
             joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n"
           )
         }
@@ -127,10 +139,16 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     }
 
     fun fromFile(): History {
+      val storageDir = App.instance.storageDirectory
+        ?: throw IllegalArgumentException("You must configure a history file")
+
       // Read lines
+      val historyFile = DocumentFile.fromTreeUri(App.instance, storageDir)
+        ?.findFile(filename)?.uri
+      val stream = historyFile?.let { App.instance.contentResolver.openInputStream(historyFile) }
       var currentActivityStartTime = epochSeconds()
-      val lines =
-        if (file.exists()) file.readLines() else listOf("\t\t\t\t$currentActivityStartTime")
+      val lines = stream?.bufferedReader()?.readLines()
+        ?: listOf("\t\t\t\t$currentActivityStartTime")
 
       // Parse lines
       val entries = mutableListOf<Entry>()
