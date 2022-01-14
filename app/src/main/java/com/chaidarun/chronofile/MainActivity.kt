@@ -64,6 +64,7 @@ class MainActivity : BaseActivity() {
     permissions: Array<out String>,
     grantResults: IntArray
   ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     when (requestCode) {
       PERMISSION_REQUEST_CODE ->
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
