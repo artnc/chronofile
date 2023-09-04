@@ -3,6 +3,11 @@
   xmlns:tools="http://schemas.android.com/tools"
   tools:context="com.chaidarun.chronofile.MainActivity">
   <item
+    android:id="@+id/action_search"
+    android:icon="@android:drawable/ic_menu_search"
+    android:title="Search"
+    app:showAsAction="always" />
+  <item
     android:id="@+id/action_stats"
     android:icon="@android:drawable/ic_menu_view"
     android:title="Stats"

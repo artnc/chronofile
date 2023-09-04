@@ -26,13 +26,15 @@ sealed class Action {
   data class SetGraphRangeStart(val timestamp: Long) : Action()
   data class SetGraphStacking(val stacked: Boolean) : Action()
   data class SetHistory(val history: History) : Action()
+  data class SetSearchQuery(val query: String?) : Action()
 }
 
 /** This class must be deeply immutable and preferably printable */
 data class State(
   val config: Config? = null,
   val history: History? = null,
-  val graphConfig: GraphConfig = GraphConfig()
+  val graphConfig: GraphConfig = GraphConfig(),
+  val searchQuery: String? = null
 )
 
 private val reducer: (State, Action) -> State = { state, action ->
@@ -87,6 +89,7 @@ private val reducer: (State, Action) -> State = { state, action ->
         }
         is Action.SetGraphStacking -> copy(graphConfig = graphConfig.copy(stacked = action.stacked))
         is Action.SetHistory -> copy(history = action.history)
+        is Action.SetSearchQuery -> copy(searchQuery = action.query)
       }
 
     Log.i(TAG, "Reduced $action in ${System.currentTimeMillis() - start} ms")

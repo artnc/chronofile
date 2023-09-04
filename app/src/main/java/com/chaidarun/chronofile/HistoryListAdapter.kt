@@ -123,36 +123,73 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
   }
 
   private val subscription =
-    Store.observable.map { it.history }.distinctUntilChanged().subscribe { history ->
+    Store.observable.map { Pair(it.history, it.searchQuery) }.distinctUntilChanged().subscribe {
+      (history, query) ->
       if (history == null) {
         Log.i(TAG, "History is null")
         return@subscribe
       }
 
       val elapsedMs = measureTimeMillis {
-        val items = mutableListOf<ListItem>()
-        items.add(SpacerItem(32))
-        var lastSeenStartTime = history.currentActivityStartTime
-        history.entries.takeLast(MAX_ENTRIES_SHOWN).reversed().forEach { entry ->
-          items.add(TimeItem(Date(lastSeenStartTime * 1000)))
-
-          // Use either one or two items for entry depending on whether it crosses midnight
-          if (formatDate(entry.startTime) != formatDate(lastSeenStartTime)) {
-            val midnight = getPreviousMidnight(lastSeenStartTime)
-            items.add(EntryItem(entry, midnight, lastSeenStartTime))
-            items.add(DateItem(Date(lastSeenStartTime * 1000)))
-            items.add(EntryItem(entry, entry.startTime, midnight))
-          } else {
-            items.add(EntryItem(entry, entry.startTime, lastSeenStartTime))
+        // Select entries to show, and also compute activity end times for convenience later on
+        val entriesToShow =
+          mutableListOf<Pair<Entry, Long>>().apply {
+            var entriesTaken = 0
+            var lastSeenStartTime = history.currentActivityStartTime
+            for (entry in history.entries.reversed()) {
+              if (query == null ||
+                  query.lowercase() in "${entry.activity}|${entry.note ?: ""}".lowercase() ||
+                  query.toIntOrNull() != null && formatForSearch(entry.startTime).startsWith(query)
+              ) {
+                add(Pair(entry, lastSeenStartTime))
+                if (++entriesTaken == MAX_ENTRIES_TO_SHOW) {
+                  break
+                }
+              }
+              lastSeenStartTime = entry.startTime
+            }
+            reverse()
           }
 
-          lastSeenStartTime = entry.startTime
+        // Construct list items
+        val items = mutableListOf<ListItem>(SpacerItem(32))
+        var lastDateShown: String? = null
+        var lastTimeShown: Long? = null
+        for ((entry, endTime) in entriesToShow) {
+          // Show date marker
+          val startDate = formatDate(entry.startTime)
+          if (startDate != lastDateShown) {
+            items.add(DateItem(Date(entry.startTime * 1000)))
+            lastDateShown = startDate
+          }
+
+          // Show start time marker
+          if (entry.startTime != lastTimeShown) {
+            items.add(TimeItem(Date(entry.startTime * 1000)))
+            lastTimeShown = entry.startTime
+          }
+
+          // Show entry either once or twice depending on whether it crosses midnight
+          val endDate = formatDate(endTime)
+          if (startDate != endDate) {
+            val midnight = getPreviousMidnight(endTime)
+            items.add(EntryItem(entry, entry.startTime, midnight))
+            items.add(DateItem(Date(endTime * 1000)))
+            lastDateShown = endDate
+            items.add(EntryItem(entry, midnight, endTime))
+          } else {
+            items.add(EntryItem(entry, entry.startTime, endTime))
+          }
+
+          // Show end time marker
+          items.add(TimeItem(Date(endTime * 1000)))
+          lastTimeShown = endTime
         }
         items.add(SpacerItem(32))
-        itemList = items.reversed()
-        itemListLength = itemList.size
+        itemList = items
+        itemListLength = items.size
         notifyDataSetChanged()
-        appActivity.historyList.scrollToPosition(itemList.size - 1)
+        appActivity.historyList.scrollToPosition(items.size - 1)
       }
       Log.i(TAG, "Rendered history view in $elapsedMs ms")
     }
@@ -197,7 +234,7 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
 
   companion object {
     /** We limit shown entries because showing all can be slow */
-    private const val MAX_ENTRIES_SHOWN = 1000
+    private const val MAX_ENTRIES_TO_SHOW = 1000
   }
 
   abstract class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

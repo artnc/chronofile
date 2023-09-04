@@ -5,8 +5,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +20,7 @@ import kotlinx.android.synthetic.main.content_main.addEntry
 import kotlinx.android.synthetic.main.content_main.addEntryActivity
 import kotlinx.android.synthetic.main.content_main.addEntryNote
 import kotlinx.android.synthetic.main.content_main.historyList
+import kotlinx.android.synthetic.main.form_search.view.formSearchQuery
 
 class MainActivity : BaseActivity() {
 
@@ -52,6 +55,22 @@ class MainActivity : BaseActivity() {
       R.id.action_refresh -> {
         hydrateStoreFromFiles()
         App.toast("Reloaded history and config from disk")
+      }
+      R.id.action_search -> {
+        val view = LayoutInflater.from(this).inflate(R.layout.form_search, null)
+        with(AlertDialog.Builder(this, R.style.MyAlertDialogTheme)) {
+          setTitle("Search timeline")
+          view.formSearchQuery.setText(Store.state.searchQuery ?: "")
+          setView(view)
+          fun search(input: String?) {
+            val query = if (input.isNullOrBlank()) null else input.trim()
+            Store.dispatch(Action.SetSearchQuery(query))
+            toolbar.title = if (query == null) "Timeline" else "\"$query\""
+          }
+          setPositiveButton("Go") { _, _ -> search(view.formSearchQuery.text.toString()) }
+          setNegativeButton("Clear") { _, _ -> search(null) }
+          show()
+        }
       }
       R.id.action_stats -> startActivity(Intent(this, GraphActivity::class.java))
       else -> return super.onOptionsItemSelected(item)
