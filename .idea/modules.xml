@@ -4,6 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/chronofile.iml" filepath="$PROJECT_DIR$/.idea/modules/chronofile.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/chronofile.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/chronofile.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/chronofile.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/chronofile.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/chronofile.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/chronofile.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/chronofile.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/chronofile.app.unitTest.iml" />
     </modules>
   </component>
 </project>
