@@ -13,12 +13,12 @@
     android:title="Stats"
     app:showAsAction="always" />
   <item
-    android:id="@+id/action_refresh"
-    android:title="Reload from disk"
-    app:showAsAction="never" />
-  <item
     android:id="@+id/action_edit_config_file"
     android:title="Edit config file"
+    app:showAsAction="never" />
+  <item
+    android:id="@+id/action_refresh"
+    android:title="Reload from disk"
     app:showAsAction="never" />
   <item
     android:id="@+id/action_about"
