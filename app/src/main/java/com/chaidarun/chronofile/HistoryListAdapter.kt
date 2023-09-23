@@ -134,21 +134,27 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
         // Select entries to show, and also compute activity end times for convenience later on
         val entriesToShow =
           mutableListOf<Pair<Entry, Long>>().apply {
-            var entriesTaken = 0
+            var numMatchingEntries = 0
+            var matchingEntriesSeconds = 0L
             var lastSeenStartTime = history.currentActivityStartTime
             for (entry in history.entries.reversed()) {
               if (query == null ||
                   query.lowercase() in "${entry.activity}|${entry.note ?: ""}".lowercase() ||
                   query.toIntOrNull() != null && formatForSearch(entry.startTime).startsWith(query)
               ) {
-                add(Pair(entry, lastSeenStartTime))
-                if (++entriesTaken == MAX_ENTRIES_TO_SHOW) {
-                  break
+                matchingEntriesSeconds += lastSeenStartTime - entry.startTime
+                if (++numMatchingEntries <= MAX_ENTRIES_TO_SHOW) {
+                  add(Pair(entry, lastSeenStartTime))
                 }
               }
               lastSeenStartTime = entry.startTime
             }
             reverse()
+            if (query != null) {
+              App.toast(
+                "$numMatchingEntries results, ${formatDuration(matchingEntriesSeconds, showDays = true, showMinutes = false)}"
+              )
+            }
           }
 
         // Construct list items

@@ -22,10 +22,10 @@ fun formatDate(seconds: Long) = formatDate(Date(seconds * 1000))
 
 fun formatTime(date: Date): String = timeFormat.format(date)
 
-fun formatForSearch(seconds: Long) = searchFormat.format(Date(seconds * 1000))
+fun formatForSearch(seconds: Long): String = searchFormat.format(Date(seconds * 1000))
 
 /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
-fun formatDuration(seconds: Long, showDays: Boolean = false): String {
+fun formatDuration(seconds: Long, showDays: Boolean = false, showMinutes: Boolean = true): String {
   if (seconds < 30) return "0m"
 
   // Rounds to nearest minute
@@ -34,10 +34,10 @@ fun formatDuration(seconds: Long, showDays: Boolean = false): String {
   val pieces = mutableListOf<String>()
   val totalMinutes = adjustedSeconds / 60
   val minutes = totalMinutes % 60
-  if (minutes != 0L) {
+  if (showMinutes && minutes != 0L) {
     pieces.add(0, "${minutes}m")
   }
-  val totalHours = totalMinutes / 60
+  val totalHours = if (showMinutes) totalMinutes / 60 else Math.round(totalMinutes.toDouble() / 60)
   val hours = if (showDays) totalHours % 24 else totalHours
   if (hours != 0L) {
     pieces.add(0, "${hours}h")
