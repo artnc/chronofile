@@ -15,6 +15,8 @@ android {
       storePassword keystoreProperties['storePassword']
     }
   }
+
+  namespace 'com.chaidarun.chronofile'
   compileSdkVersion 29
 
   defaultConfig {
@@ -46,7 +48,7 @@ dependencies {
   implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
   implementation 'com.google.android.gms:play-services-location:21.0.1'
   implementation 'com.google.android.material:material:1.4.0'
-  implementation 'com.google.code.gson:gson:2.9.0'
+  implementation 'com.google.code.gson:gson:2.11.0'
   implementation 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7-kotlin:2.0.0'
   implementation 'com.jakewharton.rxbinding2:rxbinding-design-kotlin:2.0.0'
   implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.0.0'

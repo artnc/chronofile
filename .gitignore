@@ -4,10 +4,7 @@
 .DS_Store
 .externalNativeBuild
 .gradle
-/.idea/caches
-/.idea/dictionaries
-/.idea/libraries
-/.idea/workspace.xml
+/.idea
 /build
 /captures
 /local.properties
