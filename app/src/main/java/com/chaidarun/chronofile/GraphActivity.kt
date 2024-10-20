@@ -48,9 +48,9 @@ class GraphActivity : BaseActivity() {
       for (i in 0 until tabsCount) {
         with(getChildAt(i) as ViewGroup) {
           val tabChildsCount = childCount
-          (0 until tabChildsCount).map { getChildAt(it) }.forEach {
-            (it as? TextView)?.typeface = App.instance.typeface
-          }
+          (0 until tabChildsCount)
+            .map { getChildAt(it) }
+            .forEach { (it as? TextView)?.typeface = App.instance.typeface }
         }
       }
     }
@@ -61,16 +61,22 @@ class GraphActivity : BaseActivity() {
     disposables =
       CompositeDisposable().apply {
         add(
-          Store.observable.map { it.graphConfig.startTime }.distinctUntilChanged().subscribe {
-            startTime = it
-            if (it != null) startDate.text = formatDate(it)
-          }
+          Store.observable
+            .map { it.graphConfig.startTime }
+            .distinctUntilChanged()
+            .subscribe {
+              startTime = it
+              if (it != null) startDate.text = formatDate(it)
+            }
         )
         add(
-          Store.observable.map { it.graphConfig.endTime }.distinctUntilChanged().subscribe {
-            endTime = it
-            if (it != null) endDate.text = formatDate(it)
-          }
+          Store.observable
+            .map { it.graphConfig.endTime }
+            .distinctUntilChanged()
+            .subscribe {
+              endTime = it
+              if (it != null) endDate.text = formatDate(it)
+            }
         )
         add(
           RxView.clicks(startDate).subscribe {

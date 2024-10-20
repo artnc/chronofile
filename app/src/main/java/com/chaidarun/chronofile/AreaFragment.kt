@@ -70,14 +70,16 @@ class AreaFragment : GraphFragment() {
             }
         )
         add(
-          Store.observable.map { it.graphConfig.grouped }.distinctUntilChanged().subscribe {
-            areaIsGrouped.isChecked = it
-          }
+          Store.observable
+            .map { it.graphConfig.grouped }
+            .distinctUntilChanged()
+            .subscribe { areaIsGrouped.isChecked = it }
         )
         add(
-          Store.observable.map { it.graphConfig.stacked }.distinctUntilChanged().subscribe {
-            areaIsStacked.isChecked = it
-          }
+          Store.observable
+            .map { it.graphConfig.stacked }
+            .distinctUntilChanged()
+            .subscribe { areaIsStacked.isChecked = it }
         )
       }
   }

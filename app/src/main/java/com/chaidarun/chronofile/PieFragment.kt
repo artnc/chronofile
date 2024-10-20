@@ -60,9 +60,10 @@ class PieFragment : GraphFragment() {
             .subscribe { render(it) }
         )
         add(
-          Store.observable.map { it.graphConfig.grouped }.distinctUntilChanged().subscribe {
-            pieIsGrouped.isChecked = it
-          }
+          Store.observable
+            .map { it.graphConfig.grouped }
+            .distinctUntilChanged()
+            .subscribe { pieIsGrouped.isChecked = it }
         )
       }
   }

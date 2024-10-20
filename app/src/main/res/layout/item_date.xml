@@ -1,24 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   android:gravity="center"
-  android:paddingVertical="16dp">
-
-  <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+  android:layout_height="wrap_content"
+  android:layout_width="match_parent"
+  android:paddingVertical="16dp"
+>
+  <androidx.cardview.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
     android:textAlignment="center"
     card_view:cardBackgroundColor="@color/colorPrimary"
     card_view:cardCornerRadius="12dp"
-    card_view:cardElevation="0dp">
-
+    card_view:cardElevation="0dp"
+  >
     <TextView
-      android:id="@+id/date"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
       android:alpha="0.4"
+      android:id="@+id/date"
+      android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
       android:paddingHorizontal="12dp"
-      android:paddingVertical="4dp" />
+      android:paddingVertical="4dp"
+    />
   </androidx.cardview.widget.CardView>
 </LinearLayout>

@@ -118,87 +118,92 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
       }
 
       override fun onPrepareActionMode(p0: ActionMode?, p1: Menu?) = false
+
       override fun onDestroyActionMode(mode: ActionMode?) {}
     }
   }
 
   private val subscription =
-    Store.observable.map { Pair(it.history, it.searchQuery) }.distinctUntilChanged().subscribe {
-      (history, query) ->
-      if (history == null) {
-        Log.i(TAG, "History is null")
-        return@subscribe
-      }
-
-      val elapsedMs = measureTimeMillis {
-        // Select entries to show, and also compute activity end times for convenience later on
-        val entriesToShow =
-          mutableListOf<Pair<Entry, Long>>().apply {
-            var numMatchingEntries = 0
-            var matchingEntriesSeconds = 0L
-            var lastSeenStartTime = history.currentActivityStartTime
-            for (entry in history.entries.reversed()) {
-              if (query == null ||
-                  query.lowercase() in "${entry.activity}|${entry.note ?: ""}".lowercase() ||
-                  query.toIntOrNull() != null && formatForSearch(entry.startTime).startsWith(query)
-              ) {
-                matchingEntriesSeconds += lastSeenStartTime - entry.startTime
-                if (++numMatchingEntries <= MAX_ENTRIES_TO_SHOW) {
-                  add(Pair(entry, lastSeenStartTime))
-                }
-              }
-              lastSeenStartTime = entry.startTime
-            }
-            reverse()
-            if (query != null) {
-              App.toast(
-                "$numMatchingEntries results, ${formatDuration(matchingEntriesSeconds, showDays = true, showMinutes = false)}"
-              )
-            }
-          }
-
-        // Construct list items
-        val items = mutableListOf<ListItem>(SpacerItem(32))
-        var lastDateShown: String? = null
-        var lastTimeShown: Long? = null
-        for ((entry, endTime) in entriesToShow) {
-          // Show date marker
-          val startDate = formatDate(entry.startTime)
-          if (startDate != lastDateShown) {
-            items.add(DateItem(Date(entry.startTime * 1000)))
-            lastDateShown = startDate
-          }
-
-          // Show start time marker
-          if (entry.startTime != lastTimeShown) {
-            items.add(TimeItem(Date(entry.startTime * 1000)))
-            lastTimeShown = entry.startTime
-          }
-
-          // Show entry either once or twice depending on whether it crosses midnight
-          val endDate = formatDate(endTime)
-          if (startDate != endDate) {
-            val midnight = getPreviousMidnight(endTime)
-            items.add(EntryItem(entry, entry.startTime, midnight))
-            items.add(DateItem(Date(endTime * 1000)))
-            lastDateShown = endDate
-            items.add(EntryItem(entry, midnight, endTime))
-          } else {
-            items.add(EntryItem(entry, entry.startTime, endTime))
-          }
-
-          // Show end time marker
-          items.add(TimeItem(Date(endTime * 1000)))
-          lastTimeShown = endTime
+    Store.observable
+      .map { Pair(it.history, it.searchQuery) }
+      .distinctUntilChanged()
+      .subscribe { (history, query) ->
+        if (history == null) {
+          Log.i(TAG, "History is null")
+          return@subscribe
         }
-        items.add(SpacerItem(32))
-        itemList = items
-        itemListLength = items.size
-        notifyDataSetChanged()
-        appActivity.historyList.scrollToPosition(items.size - 1)
+
+        val elapsedMs = measureTimeMillis {
+          // Select entries to show, and also compute activity end times for convenience later on
+          val entriesToShow =
+            mutableListOf<Pair<Entry, Long>>().apply {
+              var numMatchingEntries = 0
+              var matchingEntriesSeconds = 0L
+              var lastSeenStartTime = history.currentActivityStartTime
+              for (entry in history.entries.reversed()) {
+                if (
+                  query == null ||
+                    query.lowercase() in "${entry.activity}|${entry.note ?: ""}".lowercase() ||
+                    query.toIntOrNull() != null &&
+                      formatForSearch(entry.startTime).startsWith(query)
+                ) {
+                  matchingEntriesSeconds += lastSeenStartTime - entry.startTime
+                  if (++numMatchingEntries <= MAX_ENTRIES_TO_SHOW) {
+                    add(Pair(entry, lastSeenStartTime))
+                  }
+                }
+                lastSeenStartTime = entry.startTime
+              }
+              reverse()
+              if (query != null) {
+                App.toast(
+                  "$numMatchingEntries results, ${formatDuration(matchingEntriesSeconds, showDays = true, showMinutes = false)}"
+                )
+              }
+            }
+
+          // Construct list items
+          val items = mutableListOf<ListItem>(SpacerItem(32))
+          var lastDateShown: String? = null
+          var lastTimeShown: Long? = null
+          for ((entry, endTime) in entriesToShow) {
+            // Show date marker
+            val startDate = formatDate(entry.startTime)
+            if (startDate != lastDateShown) {
+              items.add(DateItem(Date(entry.startTime * 1000)))
+              lastDateShown = startDate
+            }
+
+            // Show start time marker
+            if (entry.startTime != lastTimeShown) {
+              items.add(TimeItem(Date(entry.startTime * 1000)))
+              lastTimeShown = entry.startTime
+            }
+
+            // Show entry either once or twice depending on whether it crosses midnight
+            val endDate = formatDate(endTime)
+            if (startDate != endDate) {
+              val midnight = getPreviousMidnight(endTime)
+              items.add(EntryItem(entry, entry.startTime, midnight))
+              items.add(DateItem(Date(endTime * 1000)))
+              lastDateShown = endDate
+              items.add(EntryItem(entry, midnight, endTime))
+            } else {
+              items.add(EntryItem(entry, entry.startTime, endTime))
+            }
+
+            // Show end time marker
+            items.add(TimeItem(Date(endTime * 1000)))
+            lastTimeShown = endTime
+          }
+          items.add(SpacerItem(32))
+          itemList = items
+          itemListLength = items.size
+          notifyDataSetChanged()
+          appActivity.historyList.scrollToPosition(items.size - 1)
+        }
+        Log.i(TAG, "Rendered history view in $elapsedMs ms")
       }
-      Log.i(TAG, "Rendered history view in $elapsedMs ms")
-    }
 
   override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
     subscription.dispose()
@@ -206,6 +211,7 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
   }
 
   override fun getItemCount() = itemListLength
+
   override fun getItemViewType(position: Int) = itemList[position].viewType.ordinal
 
   override fun onCreateViewHolder(parent: ViewGroup, viewTypeOrdinal: Int) =

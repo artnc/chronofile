@@ -18,14 +18,23 @@ sealed class Action {
   ) : Action()
 
   data class RemoveEntry(val entry: Long) : Action()
+
   data class SetConfigFromText(val text: String) : Action()
+
   data class SetConfigFromFile(val config: Config) : Action()
+
   data class SetGraphGrouping(val grouped: Boolean) : Action()
+
   data class SetGraphMetric(val metric: Metric) : Action()
+
   data class SetGraphRangeEnd(val timestamp: Long) : Action()
+
   data class SetGraphRangeStart(val timestamp: Long) : Action()
+
   data class SetGraphStacking(val stacked: Boolean) : Action()
+
   data class SetHistory(val history: History) : Action()
+
   data class SetSearchQuery(val query: String?) : Action()
 }
 

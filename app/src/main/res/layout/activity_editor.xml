@@ -1,42 +1,43 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:layout_width="match_parent"
   android:orientation="vertical"
-  tools:context="com.chaidarun.chronofile.EditorActivity">
-
+  tools:context="com.chaidarun.chronofile.EditorActivity"
+>
   <com.google.android.material.appbar.AppBarLayout
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:theme="@style/AppTheme.AppBarOverlay">
-
+    android:layout_width="match_parent"
+    android:theme="@style/AppTheme.AppBarOverlay"
+  >
     <androidx.appcompat.widget.Toolbar
-      android:id="@+id/editorToolbar"
-      android:layout_width="match_parent"
-      android:layout_height="?attr/actionBarSize"
       android:background="?attr/colorPrimary"
       android:elevation="4dp"
-      app:popupTheme="@style/AppTheme.PopupOverlay"
-      app:title="Config editor" />
-
-  </com.google.android.material.appbar.AppBarLayout>
-
-  <TextView
+      android:id="@+id/editorToolbar"
+      android:layout_height="?attr/actionBarSize"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:padding="16dp"
-      android:text="If you'd like to aggregate multiple activity types into a single one for charting purposes, you can specify such groups in the config JSON object below. Example:\n\n{&quot;activityGroups&quot;:{&quot;Chores&quot;:[&quot;Cook&quot;,&quot;Laundry&quot;],&quot;Exercise&quot;:[&quot;Football&quot;,&quot;Yoga&quot;]}}" />
-
-  <EditText
-    android:id="@+id/editorText"
+      app:popupTheme="@style/AppTheme.PopupOverlay"
+      app:title="Config editor"
+    />
+  </com.google.android.material.appbar.AppBarLayout>
+  <TextView
+    android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
+    android:padding="16dp"
+    android:text="If you'd like to aggregate multiple activity types into a single one for charting purposes, you can specify such groups in the config JSON object below. Example:\n\n{&quot;activityGroups&quot;:{&quot;Chores&quot;:[&quot;Cook&quot;,&quot;Laundry&quot;],&quot;Exercise&quot;:[&quot;Football&quot;,&quot;Yoga&quot;]}}"
+  />
+  <EditText
     android:background="@android:color/transparent"
     android:gravity="top"
+    android:id="@+id/editorText"
     android:inputType="textMultiLine"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:layout_width="match_parent"
     android:padding="16dp"
-    android:scrollbars="vertical" />
+    android:scrollbars="vertical"
+  />
 </LinearLayout>

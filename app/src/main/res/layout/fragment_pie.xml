@@ -1,60 +1,58 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:layout_width="match_parent"
   android:orientation="vertical"
-  tools:context="com.chaidarun.chronofile.GraphActivity">
-
+  tools:context="com.chaidarun.chronofile.GraphActivity"
+>
   <com.github.mikephil.charting.charts.PieChart
     android:id="@+id/pieChart"
-    android:layout_width="match_parent"
     android:layout_height="0dp"
-    android:layout_weight="1" />
-
-  <LinearLayout
+    android:layout_weight="1"
     android:layout_width="match_parent"
+  />
+  <LinearLayout
     android:layout_height="wrap_content"
-    android:padding="16dp">
-
+    android:layout_width="match_parent"
+    android:padding="16dp"
+  >
     <LinearLayout
-      android:layout_width="0dp"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:orientation="vertical">
-
+      android:layout_width="0dp"
+      android:orientation="vertical"
+    >
       <CheckBox
         android:id="@+id/pieIsGrouped"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:onClick="onCheckboxClicked"
-        android:text="Group similar" />
-
+        android:text="Group similar"
+      />
     </LinearLayout>
-
     <RadioGroup
-      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:layout_weight="1">
-
+      android:layout_weight="1"
+      android:layout_width="0dp"
+    >
       <RadioButton
         android:id="@+id/radioAverage"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_width="wrap_content"
         android:onClick="onRadioButtonClicked"
-        android:text="Average daily" />
-
+        android:text="Average daily"
+      />
       <RadioButton
         android:id="@+id/radioTotal"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_width="wrap_content"
         android:onClick="onRadioButtonClicked"
-        android:text="Total recorded" />
-
+        android:text="Total recorded"
+      />
     </RadioGroup>
-
   </LinearLayout>
-
 </LinearLayout>

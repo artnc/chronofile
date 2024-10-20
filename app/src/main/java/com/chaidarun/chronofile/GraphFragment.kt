@@ -58,7 +58,8 @@ abstract class GraphFragment : BaseFragment() {
       val startTime = Math.max(entry.startTime, rangeStart)
       val bucketIncrements: Map<Long, Long> =
         when (aggregation) {
-          Aggregation.DAY, Aggregation.DAY_OF_WEEK -> {
+          Aggregation.DAY,
+          Aggregation.DAY_OF_WEEK -> {
             val midnightBeforeStart = getPreviousMidnight(startTime)
             val midnightBeforeEnd = getPreviousMidnight(endTime)
             val pieces =
@@ -119,17 +120,17 @@ abstract class GraphFragment : BaseFragment() {
     /** Ripped from D3.js: d3.schemeTableau10 */
     val COLORS by lazy {
       listOf(
-        "#4e79a7",
-        "#f28e2c",
-        "#e15759",
-        "#76b7b2",
-        "#59a14f",
-        "#edc949",
-        "#af7aa1",
-        "#ff9da7",
-        "#9c755f",
-        "#bab0ab"
-      )
+          "#4e79a7",
+          "#f28e2c",
+          "#e15759",
+          "#76b7b2",
+          "#59a14f",
+          "#edc949",
+          "#af7aa1",
+          "#ff9da7",
+          "#9c755f",
+          "#bab0ab"
+        )
         .map { Color.parseColor(it) }
     }
 

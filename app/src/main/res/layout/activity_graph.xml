@@ -1,67 +1,66 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:orientation="vertical">
-
+  android:layout_width="match_parent"
+  android:orientation="vertical"
+>
   <com.google.android.material.appbar.AppBarLayout
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:theme="@style/AppTheme.AppBarOverlay">
-
+    android:layout_width="match_parent"
+    android:theme="@style/AppTheme.AppBarOverlay"
+  >
     <androidx.appcompat.widget.Toolbar
-      android:id="@+id/graphToolbar"
-      android:layout_width="match_parent"
-      android:layout_height="?attr/actionBarSize"
       android:background="?attr/colorPrimary"
       android:elevation="4dp"
+      android:id="@+id/graphToolbar"
+      android:layout_height="?attr/actionBarSize"
+      android:layout_width="match_parent"
       app:popupTheme="@style/AppTheme.PopupOverlay"
-      app:title="Statistics" />
-
+      app:title="Statistics"
+    />
   </com.google.android.material.appbar.AppBarLayout>
-
   <com.google.android.material.tabs.TabLayout
     android:id="@+id/graphTabs"
-    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_width="match_parent"
     app:tabGravity="center"
     app:tabIndicatorFullWidth="false"
     app:tabMode="fixed"
-    app:tabRippleColor="@null" />
-
+    app:tabRippleColor="@null"
+  />
   <androidx.viewpager.widget.ViewPager
     android:id="@+id/graphViewPager"
-    android:layout_width="match_parent"
     android:layout_height="0px"
-    android:layout_weight="1" />
-
-  <LinearLayout
+    android:layout_weight="1"
     android:layout_width="match_parent"
+  />
+  <LinearLayout
     android:layout_height="wrap_content"
-    android:padding="16dp">
-
+    android:layout_width="match_parent"
+    android:padding="16dp"
+  >
     <Button
+      android:background="@color/colorPrimary"
       android:id="@+id/startDate"
-      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:background="@color/colorPrimary" />
-
+      android:layout_width="wrap_content"
+    />
     <TextView
       android:id="@+id/quickRange"
-      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:paddingHorizontal="12dp"
-      android:text="to" />
-
-    <Button
-      android:id="@+id/endDate"
       android:layout_width="wrap_content"
+      android:paddingHorizontal="12dp"
+      android:text="to"
+    />
+    <Button
+      android:background="@color/colorPrimary"
+      android:id="@+id/endDate"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:background="@color/colorPrimary" />
-
+      android:layout_width="wrap_content"
+    />
   </LinearLayout>
-
 </LinearLayout>

@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 class GraphPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
   override fun getCount() = Tab.values().size
+
   override fun getPageTitle(position: Int) = Tab.get(position).title
 
   override fun getItem(position: Int) = Tab.get(position).create()

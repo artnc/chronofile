@@ -35,6 +35,7 @@ class App : Application() {
   companion object {
     lateinit var instance: App
       private set
+
     val ctx: Context
       get() = instance.applicationContext
 

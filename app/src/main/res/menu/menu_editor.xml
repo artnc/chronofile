@@ -1,15 +1,20 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8" ?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
-  tools:context="com.chaidarun.chronofile.MainActivity">
+  tools:context="com.chaidarun.chronofile.MainActivity"
+>
   <item
-    android:id="@+id/action_editor_save"
     android:icon="@android:drawable/ic_menu_save"
+    android:id="@+id/action_editor_save"
     android:title="Save"
-    app:showAsAction="always" />
+    app:showAsAction="always"
+  />
   <item
-    android:id="@+id/action_editor_cancel"
     android:icon="@android:drawable/ic_menu_close_clear_cancel"
+    android:id="@+id/action_editor_cancel"
     android:title="Cancel"
-    app:showAsAction="always" />
+    app:showAsAction="always"
+  />
 </menu>

@@ -64,9 +64,10 @@ class RadarFragment : GraphFragment() {
             .subscribe { render(it) }
         )
         add(
-          Store.observable.map { it.graphConfig.grouped }.distinctUntilChanged().subscribe {
-            radarIsGrouped.isChecked = it
-          }
+          Store.observable
+            .map { it.graphConfig.grouped }
+            .distinctUntilChanged()
+            .subscribe { radarIsGrouped.isChecked = it }
         )
       }
   }

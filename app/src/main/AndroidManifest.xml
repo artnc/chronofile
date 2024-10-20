@@ -1,42 +1,44 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.chaidarun.chronofile">
-
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.chaidarun.chronofile"
+>
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
   <application
-    android:name=".App"
     android:allowBackup="true"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"
+    android:name=".App"
     android:requestLegacyExternalStorage="true"
     android:supportsRtl="true"
-    android:theme="@style/AppTheme">
+    android:theme="@style/AppTheme"
+  >
     <activity
-      android:name=".MainActivity"
       android:label="@string/app_name"
-      android:theme="@style/AppTheme.NoActionBar">
+      android:name=".MainActivity"
+      android:theme="@style/AppTheme.NoActionBar"
+    >
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
-
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
     <activity
+      android:exported="false"
       android:name=".EditorActivity"
-      android:exported="false"
-      android:parentActivityName=".MainActivity" />
+      android:parentActivityName=".MainActivity"
+    />
     <activity
-      android:name=".GraphActivity"
       android:exported="false"
-      android:parentActivityName=".MainActivity" />
-
+      android:name=".GraphActivity"
+      android:parentActivityName=".MainActivity"
+    />
     <service
+      android:exported="false"
       android:name=".FetchAddressIntentService"
-      android:exported="false" />
+    />
   </application>
-
 </manifest>
