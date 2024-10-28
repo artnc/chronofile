@@ -15,8 +15,13 @@ android {
     }
   }
 
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_21
+    targetCompatibility JavaVersion.VERSION_21
+  }
+
   namespace 'com.chaidarun.chronofile'
-  compileSdkVersion 29
+  compileSdkVersion 34
 
   defaultConfig {
     applicationId 'com.chaidarun.chronofile'

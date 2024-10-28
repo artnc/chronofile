@@ -23,7 +23,7 @@ import com.chaidarun.chronofile.databinding.ItemTimeBinding
 import java.util.Date
 import kotlin.system.measureTimeMillis
 
-private enum class ViewType {
+enum class ViewType {
   DATE,
   ENTRY,
   SPACER,
@@ -210,7 +210,7 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
   override fun getItemViewType(position: Int) = itemList[position].viewType.ordinal
 
   override fun onCreateViewHolder(parent: ViewGroup, viewTypeOrdinal: Int) =
-    when (ViewType.values()[viewTypeOrdinal]) {
+    when (ViewType.entries[viewTypeOrdinal]) {
       ViewType.DATE ->
         DateViewHolder(ItemDateBinding.inflate(LayoutInflater.from(parent.context), parent, false))
       ViewType.ENTRY ->

@@ -28,7 +28,7 @@ class GraphActivity : BaseActivity() {
     binding.graphViewPager.run {
       adapter = GraphPagerAdapter(supportFragmentManager)
       currentItem = GraphPagerAdapter.Tab.PIE.ordinal
-      offscreenPageLimit = GraphPagerAdapter.Tab.values().size
+      offscreenPageLimit = GraphPagerAdapter.Tab.entries.size
     }
     binding.graphTabs.setupWithViewPager(binding.graphViewPager)
 
@@ -98,10 +98,10 @@ class GraphActivity : BaseActivity() {
         add(
           RxView.clicks(binding.quickRange).subscribe {
             with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
-              setSingleChoiceItems(PresetRange.values().map { it.text }.toTypedArray(), -1, null)
+              setSingleChoiceItems(PresetRange.entries.map { it.text }.toTypedArray(), -1, null)
               setPositiveButton("OK") { dialog, _ ->
                 val position = (dialog as AlertDialog).listView.checkedItemPosition
-                setPresetRange(Store.state.history!!, PresetRange.values()[position])
+                setPresetRange(Store.state.history!!, PresetRange.entries[position])
               }
               setNegativeButton("Cancel", null)
               show()

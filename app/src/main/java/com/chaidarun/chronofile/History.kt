@@ -34,7 +34,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
             else -> oldStartTime + trimmedEditedStartTime.toInt() * 60 // Minute delta
           }
         if (enteredTime > 15e8 && enteredTime <= epochSeconds()) enteredTime else null
-      } catch (e: Exception) {
+      } catch (_: Exception) {
         null
       }
     if (newStartTime == null) {
@@ -112,7 +112,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
           }
         }
         return
-      } catch (e: SecurityException) {
+      } catch (_: SecurityException) {
         Log.i(TAG, "Failed to get location")
       }
       callback(null)

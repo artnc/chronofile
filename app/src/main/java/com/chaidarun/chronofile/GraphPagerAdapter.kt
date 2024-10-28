@@ -5,7 +5,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 
 class GraphPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
-  override fun getCount() = Tab.values().size
+  override fun getCount() = Tab.entries.size
 
   override fun getPageTitle(position: Int) = Tab.get(position).title
 
@@ -17,7 +17,7 @@ class GraphPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     AREA("Area", { AreaFragment() });
 
     companion object {
-      fun get(index: Int) = values()[index]
+      fun get(index: Int) = Tab.entries[index]
     }
   }
 }

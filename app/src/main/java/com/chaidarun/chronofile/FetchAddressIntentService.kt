@@ -17,10 +17,10 @@ class FetchAddressIntentService : IntentService(TAG) {
     try {
       val location = intent.getParcelableExtra<Location>(LOCATION_DATA_EXTRA) ?: return
       val geocoder = Geocoder(this, Locale.US)
-      val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)[0]
+      val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)!![0]
       val text = address.getAddressLine(0)
       receiver?.send(SUCCESS_CODE, Bundle().apply { putString(RESULT_DATA_KEY, text) })
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       receiver?.send(FAILURE_CODE, Bundle())
     }
   }

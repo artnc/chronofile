@@ -79,7 +79,7 @@ private val reducer: (State, Action) -> State = { state, action ->
         is Action.SetGraphRangeEnd -> {
           val timestamp = action.timestamp
           val newSettings =
-            if (timestamp >= state.graphConfig.startTime ?: 0) {
+            if (timestamp >= (state.graphConfig.startTime ?: 0)) {
               graphConfig.copy(endTime = timestamp)
             } else {
               graphConfig.copy(endTime = timestamp, startTime = timestamp)
@@ -89,7 +89,7 @@ private val reducer: (State, Action) -> State = { state, action ->
         is Action.SetGraphRangeStart -> {
           val timestamp = action.timestamp
           val newSettings =
-            if (timestamp <= state.graphConfig.endTime ?: Long.MAX_VALUE) {
+            if (timestamp <= (state.graphConfig.endTime ?: Long.MAX_VALUE)) {
               graphConfig.copy(startTime = timestamp)
             } else {
               graphConfig.copy(endTime = timestamp, startTime = timestamp)

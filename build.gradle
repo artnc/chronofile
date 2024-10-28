@@ -1,6 +1,6 @@
 buildscript {
   ext.anko_version = '0.10.3'
-  ext.kotlin_version = '1.6.21' // 1.8+ removes support for kotlin-android-extensions
+  ext.kotlin_version = '2.0.21'
   ext.support_version = '26.1.0'
 
   repositories {
