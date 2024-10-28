@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 // https://developer.android.com/studio/publish/app-signing#secure_key
 def keystoreProperties = new Properties()
@@ -25,6 +24,10 @@ android {
     targetSdkVersion 29 // TODO: Bump after removing dependency on deprecated [READ/WRITE]_EXTERNAL_STORAGE perms
     versionCode 4
     versionName '1.0.3'
+  }
+
+  buildFeatures {
+    viewBinding true
   }
 
   buildTypes {

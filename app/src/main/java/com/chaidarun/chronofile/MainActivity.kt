@@ -12,24 +12,18 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.chaidarun.chronofile.databinding.ActivityMainBinding
+import com.chaidarun.chronofile.databinding.FormSearchBinding
 import com.jakewharton.rxbinding2.view.RxView
 import com.jakewharton.rxbinding2.widget.RxTextView
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_main.toolbar
-import kotlinx.android.synthetic.main.content_main.addEntry
-import kotlinx.android.synthetic.main.content_main.addEntryActivity
-import kotlinx.android.synthetic.main.content_main.addEntryNote
-import kotlinx.android.synthetic.main.content_main.historyList
-import kotlinx.android.synthetic.main.form_search.view.formSearchQuery
 
 class MainActivity : BaseActivity() {
+  val binding by viewBinding(ActivityMainBinding::inflate)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    // Set up UI
-    setContentView(R.layout.activity_main)
-    setSupportActionBar(toolbar)
+    setSupportActionBar(binding.toolbar)
 
     // Ensure required permissions are granted
     if (
@@ -58,17 +52,18 @@ class MainActivity : BaseActivity() {
         App.toast("Reloaded history and config from disk")
       }
       R.id.action_search -> {
-        val view = LayoutInflater.from(this).inflate(R.layout.form_search, null)
+        val formBinding = FormSearchBinding.inflate(LayoutInflater.from(this), null, false)
+        val view = formBinding.root
         with(AlertDialog.Builder(this, R.style.MyAlertDialogTheme)) {
           setTitle("Search timeline")
-          view.formSearchQuery.setText(Store.state.searchQuery ?: "")
+          formBinding.formSearchQuery.setText(Store.state.searchQuery ?: "")
           setView(view)
           fun search(input: String?) {
             val query = if (input.isNullOrBlank()) null else input.trim()
             Store.dispatch(Action.SetSearchQuery(query))
-            toolbar.title = if (query == null) "Timeline" else "\"$query\""
+            binding.toolbar.title = if (query == null) "Timeline" else "\"$query\""
           }
-          setPositiveButton("Go") { _, _ -> search(view.formSearchQuery.text.toString()) }
+          setPositiveButton("Go") { _, _ -> search(formBinding.formSearchQuery.text.toString()) }
           setNegativeButton("Clear") { _, _ -> search(null) }
           show()
         }
@@ -84,6 +79,7 @@ class MainActivity : BaseActivity() {
     permissions: Array<out String>,
     grantResults: IntArray
   ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     when (requestCode) {
       PERMISSION_REQUEST_CODE ->
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
@@ -103,23 +99,28 @@ class MainActivity : BaseActivity() {
     hydrateStoreFromFiles()
 
     // Hook up list view
-    historyList.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
-    historyList.adapter = HistoryListAdapter(this)
+    val main = binding.contentMain
+    main.historyList.layoutManager =
+      LinearLayoutManager(this@MainActivity).apply { stackFromEnd = true }
+    main.historyList.adapter = HistoryListAdapter(this@MainActivity)
 
     // Set up listeners
     disposables =
       CompositeDisposable().apply {
         add(
-          RxView.clicks(addEntry).subscribe {
-            History.addEntry(addEntryActivity.text.toString(), addEntryNote.text.toString())
-            addEntryActivity.text.clear()
-            addEntryNote.text.clear()
+          RxView.clicks(main.addEntry).subscribe {
+            History.addEntry(
+              main.addEntryActivity.text.toString(),
+              main.addEntryNote.text.toString()
+            )
+            main.addEntryActivity.text.clear()
+            main.addEntryNote.text.clear()
             currentFocus?.clearFocus()
           }
         )
         add(
-          RxTextView.afterTextChangeEvents(addEntryActivity).subscribe {
-            addEntry.isEnabled = !addEntryActivity.text.toString().isBlank()
+          RxTextView.afterTextChangeEvents(main.addEntryActivity).subscribe {
+            main.addEntry.isEnabled = !main.addEntryActivity.text.toString().isBlank()
           }
         )
       }

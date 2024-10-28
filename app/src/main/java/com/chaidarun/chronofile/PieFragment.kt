@@ -6,28 +6,28 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.chaidarun.chronofile.databinding.FragmentPieBinding
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_pie.pieChart
-import kotlinx.android.synthetic.main.fragment_pie.pieIsGrouped
-import kotlinx.android.synthetic.main.fragment_pie.radioAverage
-import kotlinx.android.synthetic.main.fragment_pie.radioTotal
 
 class PieFragment : GraphFragment() {
+  private var _binding: FragmentPieBinding? = null
+  private val binding
+    get() = _binding!!
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View = inflater.inflate(R.layout.fragment_pie, container, false)
+  ) = FragmentPieBinding.inflate(inflater, container, false).also { _binding = it }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    with(pieChart) {
+    with(binding.pieChart) {
       description.isEnabled = false
       holeRadius = 50f
       legend.isEnabled = false
@@ -45,8 +45,8 @@ class PieFragment : GraphFragment() {
     // Populate form with current state
     with(Store.state) {
       when (graphConfig.metric) {
-        Metric.AVERAGE -> radioAverage
-        Metric.TOTAL -> radioTotal
+        Metric.AVERAGE -> binding.radioAverage
+        Metric.TOTAL -> binding.radioTotal
       }.isChecked = true
     }
 
@@ -63,9 +63,14 @@ class PieFragment : GraphFragment() {
           Store.observable
             .map { it.graphConfig.grouped }
             .distinctUntilChanged()
-            .subscribe { pieIsGrouped.isChecked = it }
+            .subscribe { binding.pieIsGrouped.isChecked = it }
         )
       }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 
   /** (Re-)renders pie chart */
@@ -109,7 +114,7 @@ class PieFragment : GraphFragment() {
         yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
       }
 
-    with(pieChart) {
+    with(binding.pieChart) {
       centerText = "Range:\n${formatDuration(sliceList.map { it.second }.sum(), showDays = true)}"
       data = PieData(pieDataSet)
       invalidate()

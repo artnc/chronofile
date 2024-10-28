@@ -5,17 +5,15 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.NavUtils
-import kotlinx.android.synthetic.main.activity_editor.editorText
-import kotlinx.android.synthetic.main.activity_editor.editorToolbar
+import com.chaidarun.chronofile.databinding.ActivityEditorBinding
 
 class EditorActivity : BaseActivity() {
+  private val binding by viewBinding(ActivityEditorBinding::inflate)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_editor)
-    setSupportActionBar(editorToolbar)
-
-    editorText.setText(Store.state.config?.serialize() ?: "")
+    setSupportActionBar(binding.editorToolbar)
+    binding.editorText.setText(Store.state.config?.serialize() ?: "")
   }
 
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -27,7 +25,7 @@ class EditorActivity : BaseActivity() {
     when (item.itemId) {
       R.id.action_editor_cancel -> Log.i(TAG, "Canceled config file edit")
       R.id.action_editor_save -> {
-        Store.dispatch(Action.SetConfigFromText(editorText.text.toString()))
+        Store.dispatch(Action.SetConfigFromText(binding.editorText.text.toString()))
         Log.i(TAG, "Edited config file")
       }
       else -> return super.onOptionsItemSelected(item)

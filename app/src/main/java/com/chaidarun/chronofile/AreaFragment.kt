@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.chaidarun.chronofile.databinding.FragmentAreaBinding
 import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
@@ -13,22 +14,22 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IFillFormatter
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_area.areaChart
-import kotlinx.android.synthetic.main.fragment_area.areaIsGrouped
-import kotlinx.android.synthetic.main.fragment_area.areaIsStacked
 
 class AreaFragment : GraphFragment() {
+  private var _binding: FragmentAreaBinding? = null
+  private val binding
+    get() = _binding!!
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View = inflater.inflate(R.layout.fragment_area, container, false)
+  ) = FragmentAreaBinding.inflate(inflater, container, false).also { _binding = it }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    with(areaChart) {
+    with(binding.areaChart) {
       with(axisLeft) {
         axisMinimum = 0f
         setDrawAxisLine(false)
@@ -66,22 +67,27 @@ class AreaFragment : GraphFragment() {
             .subscribe {
               render(it)
               val visibleStart = it.third.startTime?.toFloat()
-              if (visibleStart != null) areaChart.moveViewToX(visibleStart)
+              if (visibleStart != null) binding.areaChart.moveViewToX(visibleStart)
             }
         )
         add(
           Store.observable
             .map { it.graphConfig.grouped }
             .distinctUntilChanged()
-            .subscribe { areaIsGrouped.isChecked = it }
+            .subscribe { binding.areaIsGrouped.isChecked = it }
         )
         add(
           Store.observable
             .map { it.graphConfig.stacked }
             .distinctUntilChanged()
-            .subscribe { areaIsStacked.isChecked = it }
+            .subscribe { binding.areaIsStacked.isChecked = it }
         )
       }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 
   private fun render(state: Triple<Config, History, GraphConfig>) {
@@ -127,7 +133,7 @@ class AreaFragment : GraphFragment() {
           lineWidth = if (stacked) 0f else 1f
           fillAlpha = if (stacked) 255 else 0
           fillColor = mColor
-          fillFormatter = IFillFormatter { _, _ -> areaChart.axisLeft.axisMinimum }
+          fillFormatter = IFillFormatter { _, _ -> binding.areaChart.axisLeft.axisMinimum }
           setDrawCircles(false)
           setDrawCircleHole(false)
           setDrawFilled(true)
@@ -137,7 +143,7 @@ class AreaFragment : GraphFragment() {
         }
       }
 
-    with(areaChart) {
+    with(binding.areaChart) {
       with(axisLeft) {
         axisMaximum = if (stacked) DAY_SECONDS.toFloat() else maxEntrySeconds.toFloat()
         removeAllLimitLines()

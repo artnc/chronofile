@@ -16,17 +16,12 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.chaidarun.chronofile.databinding.FormEntryBinding
+import com.chaidarun.chronofile.databinding.ItemDateBinding
+import com.chaidarun.chronofile.databinding.ItemEntryBinding
+import com.chaidarun.chronofile.databinding.ItemTimeBinding
 import java.util.Date
 import kotlin.system.measureTimeMillis
-import kotlinx.android.synthetic.main.content_main.historyList
-import kotlinx.android.synthetic.main.form_entry.view.formEntryActivity
-import kotlinx.android.synthetic.main.form_entry.view.formEntryNote
-import kotlinx.android.synthetic.main.form_entry.view.formEntryStartTime
-import kotlinx.android.synthetic.main.item_date.view.date
-import kotlinx.android.synthetic.main.item_entry.view.entryActivity
-import kotlinx.android.synthetic.main.item_entry.view.entryDuration
-import kotlinx.android.synthetic.main.item_entry.view.entryNote
-import kotlinx.android.synthetic.main.item_time.view.time
 
 private enum class ViewType {
   DATE,
@@ -46,7 +41,7 @@ private data class SpacerItem(val height: Int) : ListItem(ViewType.SPACER)
 
 private data class TimeItem(val time: Date) : ListItem(ViewType.TIME)
 
-class HistoryListAdapter(private val appActivity: AppCompatActivity) :
+class HistoryListAdapter(private val appActivity: MainActivity) :
   RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
   private var itemList = listOf<ListItem>()
@@ -69,19 +64,19 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
           when (item?.itemId) {
             R.id.delete -> Store.dispatch(Action.RemoveEntry(entry.startTime))
             R.id.edit -> {
-              val view = LayoutInflater.from(appActivity).inflate(R.layout.form_entry, null)
+              val binding = FormEntryBinding.inflate(LayoutInflater.from(appActivity), null, false)
               with(AlertDialog.Builder(appActivity, R.style.MyAlertDialogTheme)) {
                 setTitle("Edit entry")
-                view.formEntryActivity.setText(entry.activity)
-                view.formEntryNote.setText(entry.note ?: "")
-                setView(view)
+                binding.formEntryActivity.setText(entry.activity)
+                binding.formEntryNote.setText(entry.note ?: "")
+                setView(binding.root)
                 setPositiveButton("OK") { _, _ ->
                   Store.dispatch(
                     Action.EditEntry(
                       entry.startTime,
-                      view.formEntryStartTime.text.toString(),
-                      view.formEntryActivity.text.toString(),
-                      view.formEntryNote.text.toString()
+                      binding.formEntryStartTime.text.toString(),
+                      binding.formEntryActivity.text.toString(),
+                      binding.formEntryNote.text.toString()
                     )
                   )
                 }
@@ -200,7 +195,7 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
           itemList = items
           itemListLength = items.size
           notifyDataSetChanged()
-          appActivity.historyList.scrollToPosition(items.size - 1)
+          appActivity.binding.contentMain.historyList.scrollToPosition(items.size - 1)
         }
         Log.i(TAG, "Rendered history view in $elapsedMs ms")
       }
@@ -217,17 +212,13 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
   override fun onCreateViewHolder(parent: ViewGroup, viewTypeOrdinal: Int) =
     when (ViewType.values()[viewTypeOrdinal]) {
       ViewType.DATE ->
-        DateViewHolder(
-          LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false)
-        )
+        DateViewHolder(ItemDateBinding.inflate(LayoutInflater.from(parent.context), parent, false))
       ViewType.ENTRY ->
         EntryViewHolder(
-          LayoutInflater.from(parent.context).inflate(R.layout.item_entry, parent, false)
+          ItemEntryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
       ViewType.TIME ->
-        TimeViewHolder(
-          LayoutInflater.from(parent.context).inflate(R.layout.item_time, parent, false)
-        )
+        TimeViewHolder(ItemTimeBinding.inflate(LayoutInflater.from(parent.context), parent, false))
       ViewType.SPACER ->
         SpacerViewHolder(
           LinearLayout(appActivity).apply {
@@ -253,22 +244,22 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
     abstract fun bindItem(listItem: ListItem): Any
   }
 
-  class DateViewHolder(view: View) : ViewHolder(view) {
+  class DateViewHolder(val binding: ItemDateBinding) : ViewHolder(binding.root) {
     override fun bindItem(listItem: ListItem) {
-      itemView.date.text = (listItem as? DateItem)?.date?.let { formatDate(it) } ?: ""
+      binding.date.text = (listItem as? DateItem)?.date?.let { formatDate(it) } ?: ""
     }
   }
 
-  inner class EntryViewHolder(view: View) : ViewHolder(view) {
+  inner class EntryViewHolder(val binding: ItemEntryBinding) : ViewHolder(binding.root) {
     override fun bindItem(listItem: ListItem) {
       val (entry, itemStart, itemEnd) = listItem as EntryItem
       val activity = entry.activity
       val note = entry.note
 
       with(itemView) {
-        entryActivity.text = activity
-        entryNote.text = note
-        entryDuration.text = formatDuration(itemEnd - itemStart)
+        binding.entryActivity.text = activity
+        binding.entryNote.text = note
+        binding.entryDuration.text = formatDuration(itemEnd - itemStart)
         setOnClickListener { History.addEntry(activity, note) }
         setOnLongClickListener {
           (context as AppCompatActivity).startActionMode(actionModeCallback)
@@ -288,9 +279,9 @@ class HistoryListAdapter(private val appActivity: AppCompatActivity) :
     }
   }
 
-  class TimeViewHolder(view: View) : ViewHolder(view) {
+  class TimeViewHolder(val binding: ItemTimeBinding) : ViewHolder(binding.root) {
     override fun bindItem(listItem: ListItem) {
-      itemView.time.text = formatTime((listItem as TimeItem).time)
+      binding.time.text = formatTime((listItem as TimeItem).time)
     }
   }
 }

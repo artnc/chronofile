@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.chaidarun.chronofile.databinding.FragmentRadarBinding
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.data.RadarData
 import com.github.mikephil.charting.data.RadarDataSet
@@ -13,21 +14,22 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import io.reactivex.disposables.CompositeDisposable
 import java.text.DateFormatSymbols
 import java.util.Locale
-import kotlinx.android.synthetic.main.fragment_radar.radarChart
-import kotlinx.android.synthetic.main.fragment_radar.radarIsGrouped
 
 class RadarFragment : GraphFragment() {
+  private var _binding: FragmentRadarBinding? = null
+  private val binding
+    get() = _binding!!
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View = inflater.inflate(R.layout.fragment_radar, container, false)
+  ) = FragmentRadarBinding.inflate(inflater, container, false).also { _binding = it }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    radarChart.run {
+    binding.radarChart.run {
       description.isEnabled = false
       legend.run {
         isWordWrapEnabled = true
@@ -67,9 +69,14 @@ class RadarFragment : GraphFragment() {
           Store.observable
             .map { it.graphConfig.grouped }
             .distinctUntilChanged()
-            .subscribe { radarIsGrouped.isChecked = it }
+            .subscribe { binding.radarIsGrouped.isChecked = it }
         )
       }
+  }
+
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
   }
 
   /** (Re-)renders radar chart */
@@ -102,7 +109,7 @@ class RadarFragment : GraphFragment() {
           setDrawValues(false)
         }
       }
-    radarChart.run {
+    binding.radarChart.run {
       data = RadarData(radarDataSets)
       invalidate()
     }

@@ -8,20 +8,12 @@ import android.widget.CheckBox
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import com.chaidarun.chronofile.databinding.ActivityGraphBinding
 import com.jakewharton.rxbinding2.view.RxView
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.activity_graph.endDate
-import kotlinx.android.synthetic.main.activity_graph.graphTabs
-import kotlinx.android.synthetic.main.activity_graph.graphToolbar
-import kotlinx.android.synthetic.main.activity_graph.graphViewPager
-import kotlinx.android.synthetic.main.activity_graph.quickRange
-import kotlinx.android.synthetic.main.activity_graph.startDate
-import kotlinx.android.synthetic.main.fragment_area.areaIsGrouped
-import kotlinx.android.synthetic.main.fragment_area.areaIsStacked
-import kotlinx.android.synthetic.main.fragment_pie.pieIsGrouped
-import kotlinx.android.synthetic.main.fragment_radar.radarIsGrouped
 
 class GraphActivity : BaseActivity() {
+  private val binding by viewBinding(ActivityGraphBinding::inflate)
 
   private enum class PresetRange(val text: String, val duration: Long) {
     TODAY("Today", DAY_SECONDS),
@@ -32,18 +24,17 @@ class GraphActivity : BaseActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_graph)
-    setSupportActionBar(graphToolbar)
-    graphViewPager.run {
+    setSupportActionBar(binding.graphToolbar)
+    binding.graphViewPager.run {
       adapter = GraphPagerAdapter(supportFragmentManager)
       currentItem = GraphPagerAdapter.Tab.PIE.ordinal
       offscreenPageLimit = GraphPagerAdapter.Tab.values().size
     }
-    graphTabs.setupWithViewPager(graphViewPager)
+    binding.graphTabs.setupWithViewPager(binding.graphViewPager)
 
     // Set tab font
     // https://stackoverflow.com/a/31067431
-    with(graphTabs.getChildAt(0) as ViewGroup) {
+    with(binding.graphTabs.getChildAt(0) as ViewGroup) {
       val tabsCount = childCount
       for (i in 0 until tabsCount) {
         with(getChildAt(i) as ViewGroup) {
@@ -66,7 +57,7 @@ class GraphActivity : BaseActivity() {
             .distinctUntilChanged()
             .subscribe {
               startTime = it
-              if (it != null) startDate.text = formatDate(it)
+              if (it != null) binding.startDate.text = formatDate(it)
             }
         )
         add(
@@ -75,11 +66,11 @@ class GraphActivity : BaseActivity() {
             .distinctUntilChanged()
             .subscribe {
               endTime = it
-              if (it != null) endDate.text = formatDate(it)
+              if (it != null) binding.endDate.text = formatDate(it)
             }
         )
         add(
-          RxView.clicks(startDate).subscribe {
+          RxView.clicks(binding.startDate).subscribe {
             DatePickerFragment()
               .apply {
                 arguments =
@@ -92,7 +83,7 @@ class GraphActivity : BaseActivity() {
           }
         )
         add(
-          RxView.clicks(endDate).subscribe {
+          RxView.clicks(binding.endDate).subscribe {
             DatePickerFragment()
               .apply {
                 arguments =
@@ -105,7 +96,7 @@ class GraphActivity : BaseActivity() {
           }
         )
         add(
-          RxView.clicks(quickRange).subscribe {
+          RxView.clicks(binding.quickRange).subscribe {
             with(AlertDialog.Builder(this@GraphActivity, R.style.MyAlertDialogTheme)) {
               setSingleChoiceItems(PresetRange.values().map { it.text }.toTypedArray(), -1, null)
               setPositiveButton("OK") { dialog, _ ->
@@ -132,10 +123,10 @@ class GraphActivity : BaseActivity() {
   fun onCheckboxClicked(view: View) {
     with(view as CheckBox) {
       when (id) {
-        R.id.areaIsGrouped -> Store.dispatch(Action.SetGraphGrouping(areaIsGrouped.isChecked))
-        R.id.areaIsStacked -> Store.dispatch(Action.SetGraphStacking(areaIsStacked.isChecked))
-        R.id.pieIsGrouped -> Store.dispatch(Action.SetGraphGrouping(pieIsGrouped.isChecked))
-        R.id.radarIsGrouped -> Store.dispatch(Action.SetGraphGrouping(radarIsGrouped.isChecked))
+        R.id.areaIsGrouped -> Store.dispatch(Action.SetGraphGrouping(isChecked))
+        R.id.areaIsStacked -> Store.dispatch(Action.SetGraphStacking(isChecked))
+        R.id.pieIsGrouped -> Store.dispatch(Action.SetGraphGrouping(isChecked))
+        R.id.radarIsGrouped -> Store.dispatch(Action.SetGraphGrouping(isChecked))
       }
     }
   }
