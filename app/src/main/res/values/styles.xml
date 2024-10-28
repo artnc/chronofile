@@ -2,11 +2,11 @@
 <resources>
   <!-- Base application theme. -->
   <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-    <!-- Customize your theme here. -->
     <item name="android:actionModeBackground">@color/colorPrimary</item>
     <item
       name="android:datePickerDialogTheme"
     >@style/MyDatePickerDialogTheme</item>
+    <item name="android:fontFamily">@font/exo2</item>
     <item name="android:windowBackground">@color/colorPrimaryDark</item>
     <item name="colorAccent">@color/colorAccent</item>
     <item name="colorButtonNormal">@color/colorAccent</item>

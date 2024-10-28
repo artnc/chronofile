@@ -42,7 +42,7 @@ class AreaFragment : GraphFragment() {
         isWordWrapEnabled = true
         textColor = LABEL_COLOR
         textSize = LABEL_FONT_SIZE
-        typeface = App.instance.typeface
+        typeface = resources.getFont(R.font.exo2_regular)
         xEntrySpace = 15f
       }
 

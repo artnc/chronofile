@@ -1,11 +1,9 @@
 package com.chaidarun.chronofile
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import io.github.inflationx.viewpump.ViewPumpContextWrapper
 import io.reactivex.disposables.CompositeDisposable
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -57,11 +55,6 @@ abstract class BaseActivity : AppCompatActivity() {
     disposables?.clear()
 
     super.onDestroy()
-  }
-
-  override fun attachBaseContext(newBase: Context) {
-    // Use global default font
-    super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase))
   }
 
   private fun logLifecycleEvent(event: String) {

@@ -35,7 +35,7 @@ class RadarFragment : GraphFragment() {
         isWordWrapEnabled = true
         textColor = LABEL_COLOR
         textSize = LABEL_FONT_SIZE
-        typeface = App.instance.typeface
+        typeface = resources.getFont(R.font.exo2_regular)
         xEntrySpace = 15f
       }
       setDrawWeb(false)
@@ -48,7 +48,7 @@ class RadarFragment : GraphFragment() {
           }
         textColor = LABEL_COLOR
         textSize = LABEL_FONT_SIZE
-        typeface = App.instance.typeface
+        typeface = resources.getFont(R.font.exo2_regular)
       }
       yAxis.run {
         axisMinimum = 0f

@@ -41,7 +41,7 @@ class GraphActivity : BaseActivity() {
           val tabChildsCount = childCount
           (0 until tabChildsCount)
             .map { getChildAt(it) }
-            .forEach { (it as? TextView)?.typeface = App.instance.typeface }
+            .forEach { (it as? TextView)?.typeface = resources.getFont(R.font.exo2_regular) }
         }
       }
     }
