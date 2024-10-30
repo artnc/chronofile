@@ -23,6 +23,11 @@
     app:showAsAction="never"
   />
   <item
+    android:id="@+id/action_change_save_dir"
+    android:title="Change save directory"
+    app:showAsAction="never"
+  />
+  <item
     android:id="@+id/action_about"
     android:title="About"
     app:showAsAction="never"

@@ -2,7 +2,6 @@ package com.chaidarun.chronofile
 
 import android.util.Log
 import com.google.android.gms.location.LocationServices
-import java.io.File
 
 data class History(val entries: List<Entry>, val currentActivityStartTime: Long) {
 
@@ -72,7 +71,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     )
 
   companion object {
-    private val file = File("${IOUtil.dir}/Sync/chronofile.tsv")
+    private const val FILENAME = "chronofile.tsv"
     private val locationClient by lazy { LocationServices.getFusedLocationProviderClient(App.ctx) }
 
     private fun normalizeAndSave(entries: Collection<Entry>, currentActivityStartTime: Long) =
@@ -93,7 +92,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
 
           // Save
           IOUtil.writeFile(
-            file,
+            FILENAME,
             joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n"
           )
         }
@@ -129,8 +128,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     fun fromFile(): History {
       // Read lines
       var currentActivityStartTime = epochSeconds()
-      val lines =
-        if (file.exists()) file.readLines() else listOf("\t\t\t\t$currentActivityStartTime")
+      val lines = IOUtil.readFile(FILENAME)?.lines() ?: listOf("\t\t\t\t$currentActivityStartTime")
 
       // Parse lines
       val entries = mutableListOf<Entry>()

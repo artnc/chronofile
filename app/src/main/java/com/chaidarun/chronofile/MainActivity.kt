@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -25,73 +26,6 @@ class MainActivity : BaseActivity() {
     super.onCreate(savedInstanceState)
     setSupportActionBar(binding.toolbar)
 
-    // Ensure required permissions are granted
-    if (
-      APP_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-      }
-    ) {
-      init()
-    } else {
-      ActivityCompat.requestPermissions(this, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
-    }
-  }
-
-  override fun onCreateOptionsMenu(menu: Menu): Boolean {
-    menuInflater.inflate(R.menu.menu_main, menu)
-    return true
-  }
-
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    when (item.itemId) {
-      R.id.action_about ->
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile")))
-      R.id.action_edit_config_file -> startActivity(Intent(this, EditorActivity::class.java))
-      R.id.action_search -> {
-        val formBinding = FormSearchBinding.inflate(LayoutInflater.from(this), null, false)
-        val view = formBinding.root
-        with(AlertDialog.Builder(this, R.style.MyAlertDialogTheme)) {
-          setTitle("Search timeline")
-          formBinding.formSearchQuery.setText(Store.state.searchQuery ?: "")
-          setView(view)
-          fun search(input: String?) {
-            val query = if (input.isNullOrBlank()) null else input.trim()
-            Store.dispatch(Action.SetSearchQuery(query))
-            binding.toolbar.title = if (query == null) "Timeline" else "\"$query\""
-          }
-          setPositiveButton("Go") { _, _ -> search(formBinding.formSearchQuery.text.toString()) }
-          setNegativeButton("Clear") { _, _ -> search(null) }
-          show()
-        }
-      }
-      R.id.action_stats -> startActivity(Intent(this, GraphActivity::class.java))
-      else -> return super.onOptionsItemSelected(item)
-    }
-    return true
-  }
-
-  override fun onRequestPermissionsResult(
-    requestCode: Int,
-    permissions: Array<out String>,
-    grantResults: IntArray
-  ) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    when (requestCode) {
-      PERMISSION_REQUEST_CODE ->
-        if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-          init()
-        } else {
-          App.toast("Permission denied :(")
-        }
-    }
-  }
-
-  private fun hydrateStoreFromFiles() {
-    Store.dispatch(Action.SetConfigFromFile(Config.fromFile()))
-    Store.dispatch(Action.SetHistory(History.fromFile()))
-  }
-
-  private fun init() {
     hydrateStoreFromFiles()
 
     // Hook up list view
@@ -120,16 +54,107 @@ class MainActivity : BaseActivity() {
           }
         )
       }
+
+    // Check for missing permissions
+    // TODO: Instead of launching straight into UI that asks the user for thes permissions, show
+    // captioned warning buttons that will let the user initiate these grant flows
+    if (
+      !APP_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+      }
+    ) {
+      Log.i(TAG, "Found ungranted permissions")
+      ActivityCompat.requestPermissions(this, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
+    }
+    if (
+      IOUtil.getPref(IOUtil.STORAGE_DIR_PREF).isNullOrEmpty() ||
+        !IOUtil.persistAndCheckStoragePermission()
+    ) {
+      Log.i(TAG, "Found ungranted storage access")
+      requestStorageAccess()
+    }
+  }
+
+  override fun onCreateOptionsMenu(menu: Menu): Boolean {
+    menuInflater.inflate(R.menu.menu_main, menu)
+    return true
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    when (item.itemId) {
+      R.id.action_about ->
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile")))
+      R.id.action_change_save_dir -> requestStorageAccess()
+      R.id.action_edit_config_file -> startActivity(Intent(this, EditorActivity::class.java))
+      R.id.action_search -> {
+        val formBinding = FormSearchBinding.inflate(LayoutInflater.from(this), null, false)
+        val view = formBinding.root
+        with(AlertDialog.Builder(this, R.style.MyAlertDialogTheme)) {
+          setTitle("Search timeline")
+          formBinding.formSearchQuery.setText(Store.state.searchQuery ?: "")
+          setView(view)
+          fun search(input: String?) {
+            val query = if (input.isNullOrBlank()) null else input.trim()
+            Store.dispatch(Action.SetSearchQuery(query))
+            binding.toolbar.title = if (query == null) "Timeline" else "\"$query\""
+          }
+          setPositiveButton("Go") { _, _ -> search(formBinding.formSearchQuery.text.toString()) }
+          setNegativeButton("Clear") { _, _ -> search(null) }
+          show()
+        }
+      }
+      R.id.action_stats -> startActivity(Intent(this, GraphActivity::class.java))
+      else -> return super.onOptionsItemSelected(item)
+    }
+    return true
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
+    super.onActivityResult(requestCode, resultCode, resultData)
+    when (requestCode) {
+      STORAGE_REQUEST_CODE -> {
+        val uri = resultData?.data
+        if (resultCode != RESULT_OK || uri == null) {
+          App.toast("Storage location not changed")
+          return
+        }
+        App.toast("Successfully changed storage location")
+        IOUtil.persistAndCheckStoragePermission()
+        IOUtil.setPref(IOUtil.STORAGE_DIR_PREF, uri.toString())
+        hydrateStoreFromFiles()
+      }
+    }
+  }
+
+  override fun onRequestPermissionsResult(
+    requestCode: Int,
+    permissions: Array<out String>,
+    grantResults: IntArray
+  ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    when (requestCode) {
+      PERMISSION_REQUEST_CODE ->
+        if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+          App.toast("Permissions granted successfully :)")
+        } else {
+          App.toast("You denied permission :(")
+        }
+    }
+  }
+
+  private fun requestStorageAccess() {
+    startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), STORAGE_REQUEST_CODE)
+  }
+
+  private fun hydrateStoreFromFiles() {
+    Store.dispatch(Action.SetConfigFromFile(Config.fromFile()))
+    Store.dispatch(Action.SetHistory(History.fromFile()))
   }
 
   companion object {
-    val APP_PERMISSIONS =
-      arrayOf(
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-      )
-    const val PERMISSION_REQUEST_CODE = 1
+    private val APP_PERMISSIONS =
+      arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+    private const val PERMISSION_REQUEST_CODE = 1
+    private const val STORAGE_REQUEST_CODE = 2
   }
 }

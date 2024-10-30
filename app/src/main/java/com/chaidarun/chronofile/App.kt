@@ -20,7 +20,7 @@ class App : Application() {
       get() = instance.applicationContext
 
     fun toast(message: String) =
-      Toast.makeText(ctx, message, Toast.LENGTH_SHORT)
+      Toast.makeText(ctx, message, Toast.LENGTH_LONG)
         .apply {
           val dpOffset = 3.5
           // https://developer.android.com/training/multiscreen/screendensities#dips-pels

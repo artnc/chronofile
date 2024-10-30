@@ -3,7 +3,6 @@ package com.chaidarun.chronofile
 import com.google.gson.GsonBuilder
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import java.io.File
 
 class Config(
   /**
@@ -27,7 +26,7 @@ class Config(
 
   fun serialize(): String = gson.toJson(this)
 
-  private fun save() = IOUtil.writeFile(file, serialize())
+  private fun save() = IOUtil.writeFile(FILENAME, serialize())
 
   companion object {
     private val gson by lazy {
@@ -37,13 +36,15 @@ class Config(
         .setPrettyPrinting()
         .create()
     }
-    private val file = File("${IOUtil.dir}/Sync/chronofile.json")
+    private const val FILENAME = "chronofile.json"
 
     private fun deserialize(text: String) = gson.fromJson(text, Config::class.java)
 
     fun fromText(text: String): Config = deserialize(text).apply { save() }
 
-    fun fromFile(): Config =
-      (if (file.exists()) deserialize(file.readText()) else Config()).apply { save() }
+    fun fromFile(): Config {
+      val text = IOUtil.readFile(FILENAME)
+      return if (text == null) Config().apply { save() } else deserialize(text)
+    }
   }
 }
