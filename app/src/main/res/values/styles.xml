@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
   <!-- Base application theme. -->
   <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
     <item name="android:actionModeBackground">@color/colorPrimary</item>
@@ -8,6 +8,10 @@
     >@style/MyDatePickerDialogTheme</item>
     <item name="android:fontFamily">@font/exo2</item>
     <item name="android:windowBackground">@color/colorPrimaryDark</item>
+    <item
+      name="android:windowOptOutEdgeToEdgeEnforcement"
+      tools:targetApi="35"
+    >true</item>
     <item name="colorAccent">@color/colorAccent</item>
     <item name="colorButtonNormal">@color/colorAccent</item>
     <item name="colorPrimary">@color/colorPrimary</item>
