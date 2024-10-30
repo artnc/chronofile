@@ -47,10 +47,6 @@ class MainActivity : BaseActivity() {
       R.id.action_about ->
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile")))
       R.id.action_edit_config_file -> startActivity(Intent(this, EditorActivity::class.java))
-      R.id.action_refresh -> {
-        hydrateStoreFromFiles()
-        App.toast("Reloaded history and config from disk")
-      }
       R.id.action_search -> {
         val formBinding = FormSearchBinding.inflate(LayoutInflater.from(this), null, false)
         val view = formBinding.root
