@@ -2,8 +2,10 @@ package com.chaidarun.chronofile
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewbinding.ViewBinding
 import io.reactivex.disposables.CompositeDisposable
 
 abstract class BaseActivity : AppCompatActivity() {
@@ -14,6 +16,15 @@ abstract class BaseActivity : AppCompatActivity() {
    * https://medium.com/@vanniktech/rxjava-2-disposable-under-the-hood-f842d2373e64
    */
   protected var disposables: CompositeDisposable? = null
+
+  /**
+   * https://zhuinden.medium.com/simple-one-liner-viewbinding-in-fragments-and-activities-with-kotlin-961430c6c07c
+   * https://github.com/duolingo/literacy-android/blob/43522a3f93b7846ca5900cab508506650d450097/shared/src/main/java/com/duolingo/shared/extensions/AppCompatActivity.kt#L11-L17
+   */
+  inline fun <T : ViewBinding> viewBinding(crossinline bindingInflater: (LayoutInflater) -> T) =
+    lazy(LazyThreadSafetyMode.NONE) {
+      bindingInflater.invoke(layoutInflater).also { setContentView(it.root) }
+    }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     logLifecycleEvent("onCreate")
