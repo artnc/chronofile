@@ -30,6 +30,58 @@
     tools:context="com.chaidarun.chronofile.MainActivity"
     tools:showIn="@layout/activity_main"
   >
+    <LinearLayout
+      android:id="@+id/changeSaveDirBanner"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:orientation="horizontal"
+      android:padding="16dp"
+      android:visibility="gone"
+    >
+      <TextView
+        android:gravity="bottom"
+        android:layout_gravity="fill"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="0dp"
+        android:text="Choose a save directory. Otherwise your logged activities will be lost upon exit!"
+      />
+      <Button
+        android:id="@+id/changeSaveDirButton"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Go"
+        android:textColor="@color/colorPrimaryDark"
+      />
+    </LinearLayout>
+    <LinearLayout
+      android:id="@+id/grantLocationBanner"
+      android:layout_height="wrap_content"
+      android:layout_width="match_parent"
+      android:orientation="horizontal"
+      android:padding="16dp"
+      android:visibility="gone"
+    >
+      <TextView
+        android:gravity="bottom"
+        android:layout_gravity="fill"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:paddingEnd="16dp"
+        android:paddingStart="0dp"
+        android:text="Grant location permissions so we can record where your activities happen."
+      />
+      <Button
+        android:id="@+id/grantLocationButton"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="Go"
+        android:textColor="@color/colorPrimaryDark"
+      />
+    </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/historyList"
       android:layout_height="0dp"

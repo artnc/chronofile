@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -36,6 +37,16 @@ class MainActivity : BaseActivity() {
     // Set up listeners
     disposables =
       CompositeDisposable().apply {
+        add(RxView.clicks(binding.changeSaveDirButton).subscribe { requestStorageAccess() })
+        add(
+          RxView.clicks(binding.grantLocationButton).subscribe {
+            ActivityCompat.requestPermissions(
+              this@MainActivity,
+              APP_PERMISSIONS,
+              PERMISSION_REQUEST_CODE
+            )
+          }
+        )
         add(
           RxView.clicks(binding.addEntry).subscribe {
             History.addEntry(
@@ -55,22 +66,20 @@ class MainActivity : BaseActivity() {
       }
 
     // Check for missing permissions
-    // TODO: Instead of launching straight into UI that asks the user for thes permissions, show
-    // captioned warning buttons that will let the user initiate these grant flows
     if (
       !APP_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
       }
     ) {
       Log.i(TAG, "Found ungranted permissions")
-      ActivityCompat.requestPermissions(this, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
+      binding.grantLocationBanner.visibility = View.VISIBLE
     }
     if (
       IOUtil.getPref(IOUtil.STORAGE_DIR_PREF).isNullOrEmpty() ||
         !IOUtil.persistAndCheckStoragePermission()
     ) {
       Log.i(TAG, "Found ungranted storage access")
-      requestStorageAccess()
+      binding.changeSaveDirBanner.visibility = View.VISIBLE
     }
   }
 
@@ -117,6 +126,7 @@ class MainActivity : BaseActivity() {
           App.toast("Storage location not changed")
           return
         }
+        binding.changeSaveDirBanner.visibility = View.GONE
         App.toast("Successfully changed storage location")
         IOUtil.persistAndCheckStoragePermission()
         IOUtil.setPref(IOUtil.STORAGE_DIR_PREF, uri.toString())
@@ -134,6 +144,7 @@ class MainActivity : BaseActivity() {
     when (requestCode) {
       PERMISSION_REQUEST_CODE ->
         if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+          binding.grantLocationBanner.visibility = View.GONE
           App.toast("Permissions granted successfully :)")
         } else {
           App.toast("You denied permission :(")
