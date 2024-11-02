@@ -13,12 +13,10 @@ import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chaidarun.chronofile.databinding.ActivityMainBinding
 import com.chaidarun.chronofile.databinding.FormSearchBinding
-import com.jakewharton.rxbinding2.view.RxView
-import com.jakewharton.rxbinding2.widget.RxTextView
-import io.reactivex.disposables.CompositeDisposable
 
 class MainActivity : BaseActivity() {
   val binding by viewBinding(ActivityMainBinding::inflate)
@@ -35,35 +33,24 @@ class MainActivity : BaseActivity() {
     binding.historyList.adapter = HistoryListAdapter(this@MainActivity)
 
     // Set up listeners
-    disposables =
-      CompositeDisposable().apply {
-        add(RxView.clicks(binding.changeSaveDirButton).subscribe { requestStorageAccess() })
-        add(
-          RxView.clicks(binding.grantLocationButton).subscribe {
-            ActivityCompat.requestPermissions(
-              this@MainActivity,
-              APP_PERMISSIONS,
-              PERMISSION_REQUEST_CODE
-            )
-          }
-        )
-        add(
-          RxView.clicks(binding.addEntry).subscribe {
-            History.addEntry(
-              binding.addEntryActivity.text.toString(),
-              binding.addEntryNote.text.toString()
-            )
-            binding.addEntryActivity.text.clear()
-            binding.addEntryNote.text.clear()
-            currentFocus?.clearFocus()
-          }
-        )
-        add(
-          RxTextView.afterTextChangeEvents(binding.addEntryActivity).subscribe {
-            binding.addEntry.isEnabled = !binding.addEntryActivity.text.toString().isBlank()
-          }
-        )
+    binding.changeSaveDirButton.setOnClickListener { requestStorageAccess() }
+    binding.grantLocationButton.setOnClickListener {
+      ActivityCompat.requestPermissions(this@MainActivity, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
+    }
+    binding.addEntry.setOnClickListener {
+      History.addEntry(
+        binding.addEntryActivity.text.toString(),
+        binding.addEntryNote.text.toString()
+      )
+      binding.addEntryActivity.text.clear()
+      binding.addEntryNote.text.clear()
+      currentFocus?.clearFocus()
+    }
+    binding.addEntryActivity.addTextChangedListener(
+      afterTextChanged = {
+        binding.addEntry.isEnabled = !binding.addEntryActivity.text.toString().isBlank()
       }
+    )
 
     // Check for missing permissions
     if (

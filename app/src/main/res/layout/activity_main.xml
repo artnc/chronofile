@@ -113,6 +113,7 @@
         android:layout_width="match_parent"
       />
       <Button
+        android:enabled="false"
         android:id="@+id/addEntry"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
