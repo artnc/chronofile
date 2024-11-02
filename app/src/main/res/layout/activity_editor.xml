@@ -20,7 +20,7 @@
       android:layout_height="?attr/actionBarSize"
       android:layout_width="match_parent"
       app:popupTheme="@style/AppTheme.PopupOverlay"
-      app:title="Config editor"
+      app:title="Settings"
     />
   </com.google.android.material.appbar.AppBarLayout>
   <TextView

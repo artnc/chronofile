@@ -84,7 +84,6 @@ class MainActivity : BaseActivity() {
       R.id.action_about ->
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile")))
       R.id.action_change_save_dir -> requestStorageAccess()
-      R.id.action_edit_config_file -> startActivity(Intent(this, EditorActivity::class.java))
       R.id.action_search -> {
         val formBinding = FormSearchBinding.inflate(LayoutInflater.from(this), null, false)
         val view = formBinding.root
@@ -102,6 +101,7 @@ class MainActivity : BaseActivity() {
           show()
         }
       }
+      R.id.action_settings -> startActivity(Intent(this, EditorActivity::class.java))
       R.id.action_stats -> startActivity(Intent(this, GraphActivity::class.java))
       else -> return super.onOptionsItemSelected(item)
     }

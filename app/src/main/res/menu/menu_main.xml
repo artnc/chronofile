@@ -18,8 +18,8 @@
     app:showAsAction="always"
   />
   <item
-    android:id="@+id/action_edit_config_file"
-    android:title="Edit config file"
+    android:id="@+id/action_settings"
+    android:title="Settings"
     app:showAsAction="never"
   />
   <item
