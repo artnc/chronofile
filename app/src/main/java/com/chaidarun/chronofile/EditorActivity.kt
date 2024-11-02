@@ -1,10 +1,12 @@
 package com.chaidarun.chronofile
 
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.NavUtils
+import androidx.core.text.HtmlCompat
 import com.chaidarun.chronofile.databinding.ActivityEditorBinding
 
 class EditorActivity : BaseActivity() {
@@ -13,6 +15,14 @@ class EditorActivity : BaseActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setSupportActionBar(binding.editorToolbar)
+    binding.editorInstructions.apply {
+      text =
+        HtmlCompat.fromHtml(
+          "If you'd like to aggregate multiple activity types into a single one for charting purposes, you can define such groups in the <a href=\"https://en.wikipedia.org/wiki/JSON#Syntax\">JSON</a> config object below. Example:<br /><br />{\"activityGroups\":{\"Chores\":[\"Cook\",\"Laundry\"],\"Exercise\":[\"Football\",\"Yoga\"]}}",
+          HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
+      movementMethod = LinkMovementMethod.getInstance() // https://stackoverflow.com/a/4303608
+    }
     binding.editorText.setText(Store.state.config?.serialize() ?: "")
   }
 

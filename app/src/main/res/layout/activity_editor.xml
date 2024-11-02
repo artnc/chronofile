@@ -24,10 +24,10 @@
     />
   </com.google.android.material.appbar.AppBarLayout>
   <TextView
+    android:id="@+id/editorInstructions"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:padding="16dp"
-    android:text="If you'd like to aggregate multiple activity types into a single one for charting purposes, you can specify such groups in the config JSON object below. Example:\n\n{&quot;activityGroups&quot;:{&quot;Chores&quot;:[&quot;Cook&quot;,&quot;Laundry&quot;],&quot;Exercise&quot;:[&quot;Football&quot;,&quot;Yoga&quot;]}}"
   />
   <EditText
     android:background="@android:color/transparent"
