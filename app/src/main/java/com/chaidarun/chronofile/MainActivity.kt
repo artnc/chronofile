@@ -29,28 +29,27 @@ class MainActivity : BaseActivity() {
     hydrateStoreFromFiles()
 
     // Hook up list view
-    val main = binding.contentMain
-    main.historyList.layoutManager =
+    binding.historyList.layoutManager =
       LinearLayoutManager(this@MainActivity).apply { stackFromEnd = true }
-    main.historyList.adapter = HistoryListAdapter(this@MainActivity)
+    binding.historyList.adapter = HistoryListAdapter(this@MainActivity)
 
     // Set up listeners
     disposables =
       CompositeDisposable().apply {
         add(
-          RxView.clicks(main.addEntry).subscribe {
+          RxView.clicks(binding.addEntry).subscribe {
             History.addEntry(
-              main.addEntryActivity.text.toString(),
-              main.addEntryNote.text.toString()
+              binding.addEntryActivity.text.toString(),
+              binding.addEntryNote.text.toString()
             )
-            main.addEntryActivity.text.clear()
-            main.addEntryNote.text.clear()
+            binding.addEntryActivity.text.clear()
+            binding.addEntryNote.text.clear()
             currentFocus?.clearFocus()
           }
         )
         add(
-          RxTextView.afterTextChangeEvents(main.addEntryActivity).subscribe {
-            main.addEntry.isEnabled = !main.addEntryActivity.text.toString().isBlank()
+          RxTextView.afterTextChangeEvents(binding.addEntryActivity).subscribe {
+            binding.addEntry.isEnabled = !binding.addEntryActivity.text.toString().isBlank()
           }
         )
       }

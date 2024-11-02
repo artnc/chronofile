@@ -195,7 +195,7 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
           itemList = items
           itemListLength = items.size
           notifyDataSetChanged()
-          appActivity.binding.contentMain.historyList.scrollToPosition(items.size - 1)
+          appActivity.binding.historyList.scrollToPosition(items.size - 1)
         }
         Log.i(TAG, "Rendered history view in $elapsedMs ms")
       }
