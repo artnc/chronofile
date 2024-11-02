@@ -48,7 +48,9 @@ class MainActivity : BaseActivity() {
     }
     binding.addEntryActivity.addTextChangedListener(
       afterTextChanged = {
-        binding.addEntry.isEnabled = !binding.addEntryActivity.text.toString().isBlank()
+        val shouldEnable = binding.addEntryActivity.text.toString().isNotBlank()
+        binding.addEntry.alpha = if (shouldEnable) 1f else 0.5f
+        binding.addEntry.isEnabled = shouldEnable
       }
     )
 

@@ -50,10 +50,8 @@
       />
       <Button
         android:id="@+id/changeSaveDirButton"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
         android:text="Go"
-        android:textColor="@color/colorPrimaryDark"
+        style="@style/MainActivityButton"
       />
     </LinearLayout>
     <LinearLayout
@@ -76,10 +74,8 @@
       />
       <Button
         android:id="@+id/grantLocationButton"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
         android:text="Go"
-        android:textColor="@color/colorPrimaryDark"
+        style="@style/MainActivityButton"
       />
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
@@ -113,12 +109,11 @@
         android:layout_width="match_parent"
       />
       <Button
+        android:alpha="0.5"
         android:enabled="false"
         android:id="@+id/addEntry"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
         android:text="Add"
-        android:textColor="@color/colorPrimaryDark"
+        style="@style/MainActivityButton"
       />
     </LinearLayout>
   </LinearLayout>
