@@ -1,9 +1,12 @@
 package com.chaidarun.chronofile
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.nfc.NfcAdapter
+import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,10 +19,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chaidarun.chronofile.databinding.ActivityMainBinding
+import com.chaidarun.chronofile.databinding.FormNfcBinding
 import com.chaidarun.chronofile.databinding.FormSearchBinding
 
 class MainActivity : BaseActivity() {
   val binding by viewBinding(ActivityMainBinding::inflate)
+  private var nfcFlow: NfcFlow? = null
+
+  private data class NfcFlow(
+    val id1: String,
+    val id2: String? = null,
+    val dialog: AlertDialog,
+    val binding: FormNfcBinding
+  )
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -141,6 +153,87 @@ class MainActivity : BaseActivity() {
     }
   }
 
+  override fun onNewIntent(intent: Intent?) {
+    super.onNewIntent(intent)
+    if (intent != null && intent.action in NFC_INTENT_ACTIONS) {
+      processNfcIntent(intent)
+    }
+  }
+
+  override fun onResume() {
+    super.onResume()
+    if (intent.action in NFC_INTENT_ACTIONS) {
+      processNfcIntent(intent)
+    }
+  }
+
+  @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
+  private fun processNfcIntent(intent: Intent) {
+    // Prevent intent from being processed by multiple lifecycle events - fixes a bug where
+    // backgrounding and then foregrounding calls onResume with the same intent again
+    // https://stackoverflow.com/a/30836555
+    setIntent(Intent())
+
+    val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
+    val id = tag.id.toHexString().uppercase()
+    Log.i(TAG, "Detected NFC tag: $id")
+    val nfcFlow = nfcFlow
+    val entryToAdd = Store.state.config?.nfcTags?.get(id)
+    when {
+      entryToAdd != null -> History.addEntry(entryToAdd[0], entryToAdd.getOrNull(1))
+      nfcFlow == null -> {
+        // Step 1 of NFC tag registration flow
+        val binding = FormNfcBinding.inflate(LayoutInflater.from(this), null, false)
+        val dialog =
+          AlertDialog.Builder(this, R.style.MyAlertDialogTheme)
+            .setTitle("Found new NFC tag")
+            .setView(binding.root)
+            .setOnDismissListener { this@MainActivity.nfcFlow = null }
+            .setPositiveButton("OK") { _, _ ->
+              val nfcFlow = this@MainActivity.nfcFlow
+              if (nfcFlow != null && nfcFlow.id1 == nfcFlow.id2) {
+                val inputs = mutableListOf(nfcFlow.binding.formNfcActivity.text.toString())
+                val note = nfcFlow.binding.formNfcNote.text.toString()
+                if (note.isNotBlank()) {
+                  inputs.add(note)
+                }
+                Store.dispatch(Action.RegisterNfcTag(id, inputs))
+                App.toast("NFC tag registered - try tapping it!")
+              }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+        dialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.GONE
+        this.nfcFlow = NfcFlow(id1 = id, dialog = dialog, binding = binding)
+      }
+      nfcFlow.id1 != id -> {
+        // Error screen
+        nfcFlow.dialog.setTitle("Unusable NFC tag")
+        nfcFlow.binding.formNfcTapAgain.visibility = View.GONE
+        nfcFlow.binding.formNfcMismatch.visibility = View.VISIBLE
+        nfcFlow.dialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.VISIBLE
+        nfcFlow.dialog.getButton(Dialog.BUTTON_NEGATIVE).visibility = View.GONE
+      }
+      else -> {
+        // Step 2 of NFC tag registration flow
+        nfcFlow.dialog.setTitle("Register NFC tag")
+        nfcFlow.binding.formNfcTapAgain.visibility = View.GONE
+        nfcFlow.binding.formNfcEnterInfo.visibility = View.VISIBLE
+        val okButton = nfcFlow.dialog.getButton(Dialog.BUTTON_POSITIVE)
+        nfcFlow.binding.formNfcActivity.addTextChangedListener(
+          afterTextChanged = {
+            okButton.isEnabled = nfcFlow.binding.formNfcActivity.text.toString().isNotBlank()
+          }
+        )
+        nfcFlow.binding.formNfcInputs.visibility = View.VISIBLE
+        nfcFlow.binding.formNfcActivity.requestFocus()
+        okButton.isEnabled = false
+        okButton.visibility = View.VISIBLE
+        this.nfcFlow = nfcFlow.copy(id2 = id)
+      }
+    }
+  }
+
   private fun requestStorageAccess() {
     startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), STORAGE_REQUEST_CODE)
   }
@@ -153,6 +246,12 @@ class MainActivity : BaseActivity() {
   companion object {
     private val APP_PERMISSIONS =
       arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+    private val NFC_INTENT_ACTIONS =
+      arrayOf(
+        NfcAdapter.ACTION_NDEF_DISCOVERED,
+        NfcAdapter.ACTION_TECH_DISCOVERED,
+        NfcAdapter.ACTION_TAG_DISCOVERED
+      )
     private const val PERMISSION_REQUEST_CODE = 1
     private const val STORAGE_REQUEST_CODE = 2
   }

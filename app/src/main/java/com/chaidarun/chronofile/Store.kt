@@ -17,6 +17,8 @@ sealed class Action {
     val note: String
   ) : Action()
 
+  data class RegisterNfcTag(val id: String, val entry: List<String>) : Action()
+
   data class RemoveEntry(val entry: Long) : Action()
 
   data class SetConfigFromText(val text: String) : Action()
@@ -63,6 +65,13 @@ private val reducer: (State, Action) -> State = { state, action ->
                 action.note
               )
           )
+        is Action.RegisterNfcTag -> {
+          val oldConfig = config ?: Config()
+          val oldNfcTags = oldConfig.nfcTags ?: mutableMapOf()
+          val newConfig = oldConfig.copy(nfcTags = oldNfcTags + (action.id to action.entry))
+          newConfig.save()
+          copy(config = newConfig)
+        }
         is Action.RemoveEntry -> copy(history = history?.withoutEntry(action.entry))
         is Action.SetConfigFromText ->
           try {

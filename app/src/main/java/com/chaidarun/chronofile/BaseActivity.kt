@@ -1,5 +1,6 @@
 package com.chaidarun.chronofile
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -66,6 +67,11 @@ abstract class BaseActivity : AppCompatActivity() {
     disposables?.clear()
 
     super.onDestroy()
+  }
+
+  override fun onNewIntent(intent: Intent?) {
+    logLifecycleEvent("onNewIntent")
+    super.onNewIntent(intent)
   }
 
   private fun logLifecycleEvent(event: String) {

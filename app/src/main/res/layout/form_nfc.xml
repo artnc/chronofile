@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_height="match_parent"
+  android:layout_width="match_parent"
+  android:orientation="vertical"
+  android:padding="16dp"
+>
+  <TextView
+    android:id="@+id/formNfcTapAgain"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="9dp"
+    android:layout_width="match_parent"
+    android:text="Tap the NFC tag again to confirm that you'd like to use it for logging new activities."
+  />
+  <TextView
+    android:id="@+id/formNfcMismatch"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="9dp"
+    android:layout_width="match_parent"
+    android:text="Sorry, Chronofile can't register this NFC tag because its serial number changes every time you tap it, a security measure implemented by some devices such as phones and credit cards."
+    android:visibility="gone"
+  />
+  <TextView
+    android:id="@+id/formNfcEnterInfo"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="9dp"
+    android:layout_width="match_parent"
+    android:text="Enter the activity name and note to record whenever you tap this tag from now on. You can edit or delete this later in Settings."
+    android:visibility="gone"
+  />
+  <LinearLayout
+    android:id="@+id/formNfcInputs"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="6dp"
+    android:layout_marginTop="8dp"
+    android:layout_width="match_parent"
+    android:visibility="gone"
+  >
+    <EditText
+      android:hint="Activity"
+      android:id="@+id/formNfcActivity"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:layout_width="match_parent"
+    />
+    <EditText
+      android:hint="Note (optional)"
+      android:id="@+id/formNfcNote"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:layout_width="match_parent"
+    />
+  </LinearLayout>
+</LinearLayout>

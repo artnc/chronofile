@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class Config(
+data class Config(
   /**
    * Map of arbitrary group names to (mutually exclusive) lists of activities.
    *
@@ -13,6 +13,8 @@ class Config(
   @Expose
   @SerializedName("activityGroups")
   private val unnormalizedActivityGroups: Map<String, List<String>>? = null,
+  /** Map of NFC tag IDs to [activity, note] pairs as registered by the user. */
+  @Expose @SerializedName("nfc") val nfcTags: Map<String, List<String>>? = null,
 ) {
   private val activityGroups by lazy {
     mutableMapOf<String, String>().apply {
@@ -26,7 +28,7 @@ class Config(
 
   fun serialize(): String = gson.toJson(this)
 
-  private fun save() = IOUtil.writeFile(FILENAME, serialize())
+  fun save() = IOUtil.writeFile(FILENAME, serialize())
 
   companion object {
     private val gson by lazy {
