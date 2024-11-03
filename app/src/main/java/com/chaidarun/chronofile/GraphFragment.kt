@@ -117,7 +117,7 @@ abstract class GraphFragment : BaseFragment() {
   }
 
   companion object {
-    /** Ripped from D3.js: d3.schemeTableau10 */
+    /** D3.js schemeTableau10 and schemeDark2 */
     val COLORS by lazy {
       listOf(
           "#4e79a7",
@@ -129,7 +129,15 @@ abstract class GraphFragment : BaseFragment() {
           "#af7aa1",
           "#ff9da7",
           "#9c755f",
-          "#bab0ab"
+          "#bab0ab",
+          "#1b9e77",
+          "#d95f02",
+          "#7570b3",
+          "#e7298a",
+          "#66a61e",
+          "#e6ab02",
+          "#a6761d",
+          "#666666",
         )
         .map { Color.parseColor(it) }
     }
