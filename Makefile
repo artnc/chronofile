@@ -2,8 +2,8 @@ MAKEFLAGS += --silent
 
 .PHONY: apk
 apk:
-	# Gradle doesn't support Java 17 yet
-	PATH="/usr/lib/jvm/java-11-openjdk/bin:${PATH}" ./gradlew assembleRelease
+	# Gradle requires Java 17+
+	PATH="/opt/android-studio/jbr/bin:${PATH}" ./gradlew assembleRelease
 	find app -name '*.apk' | grep release
 
 .PHONY: log
