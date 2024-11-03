@@ -12,17 +12,14 @@ import java.util.Locale
 /** Gets current Unix timestamp in seconds */
 fun epochSeconds() = System.currentTimeMillis() / 1000
 
-private val dateFormat by lazy { SimpleDateFormat("EE, d MMM yyyy", Locale.US) }
-private val timeFormat by lazy { SimpleDateFormat("H:mm", Locale.US) }
-private val searchFormat by lazy { SimpleDateFormat("yyyyMMdd", Locale.US) }
-
-fun formatDate(date: Date): String = dateFormat.format(date)
+fun formatDate(date: Date) = SimpleDateFormat("EE, d MMM yyyy", Locale.US).format(date)
 
 fun formatDate(seconds: Long) = formatDate(Date(seconds * 1000))
 
-fun formatTime(date: Date): String = timeFormat.format(date)
+fun formatTime(date: Date) = SimpleDateFormat("H:mm", Locale.US).format(date)
 
-fun formatForSearch(seconds: Long): String = searchFormat.format(Date(seconds * 1000))
+fun formatForSearch(seconds: Long) =
+  SimpleDateFormat("yyyyMMdd", Locale.US).format(Date(seconds * 1000))
 
 /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
 fun formatDuration(seconds: Long, showDays: Boolean = false, showMinutes: Boolean = true): String {

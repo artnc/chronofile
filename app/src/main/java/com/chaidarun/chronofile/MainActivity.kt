@@ -162,6 +162,7 @@ class MainActivity : BaseActivity() {
 
   override fun onResume() {
     super.onResume()
+    binding.historyList.adapter?.notifyDataSetChanged() // Reformat times in case time zone changed
     if (intent.action in NFC_INTENT_ACTIONS) {
       processNfcIntent(intent)
     }
