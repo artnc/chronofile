@@ -1,3 +1,12 @@
+# Android
+# https://stackoverflow.com/a/5553290
+-assumenosideeffects class android.util.Log {
+  public static *** d(...);
+  public static *** i(...);
+  public static *** v(...);
+  public static *** w(...);
+}
+
 # Gson
 # https://github.com/google/gson/blob/04f66f993cc650be48ab472bbf41f5e9b568ff38/examples/android-proguard-example/proguard.cfg
 -keepattributes Signature
