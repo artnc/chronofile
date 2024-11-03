@@ -42,14 +42,14 @@
       android:id="@+id/formNfcActivity"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:layout_width="match_parent"
+      android:layout_width="0dp"
     />
     <EditText
       android:hint="Note (optional)"
       android:id="@+id/formNfcNote"
       android:layout_height="wrap_content"
       android:layout_weight="1"
-      android:layout_width="match_parent"
+      android:layout_width="0dp"
     />
   </LinearLayout>
 </LinearLayout>

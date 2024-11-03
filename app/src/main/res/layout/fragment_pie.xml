@@ -40,7 +40,6 @@
       <RadioButton
         android:id="@+id/radioAverage"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_width="wrap_content"
         android:onClick="onRadioButtonClicked"
         android:text="Average daily"
@@ -48,7 +47,6 @@
       <RadioButton
         android:id="@+id/radioTotal"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:layout_width="wrap_content"
         android:onClick="onRadioButtonClicked"
         android:text="Total recorded"
