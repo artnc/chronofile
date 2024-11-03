@@ -1,3 +1,5 @@
+// © Art Chaidarun
+
 package com.chaidarun.chronofile
 
 import java.text.SimpleDateFormat

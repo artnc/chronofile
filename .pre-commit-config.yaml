@@ -3,3 +3,11 @@ repos:
     rev: 1.7.3
     hooks:
       - id: duolingo
+  - repo: local
+    hooks:
+      - id: copyright
+        name: Copyright
+        entry: |
+          bash -c 'for f in $@;do if ! grep -q © "${f}";then sed -i "1s@^@// © Art Chaidarun\n\n@" "${f}";fi;done' -
+        language: system
+        files: \.kt$

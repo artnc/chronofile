@@ -1,3 +1,5 @@
+// © Art Chaidarun
+
 package com.chaidarun.chronofile
 
 import android.util.Log

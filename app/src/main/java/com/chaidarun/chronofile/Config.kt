@@ -1,3 +1,5 @@
+// © Art Chaidarun
+
 package com.chaidarun.chronofile
 
 import com.google.gson.GsonBuilder
