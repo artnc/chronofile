@@ -62,6 +62,6 @@ abstract class BaseFragment : Fragment() {
   }
 
   private fun logLifecycleEvent(event: String) {
-    Log.i(TAG, "${this.javaClass.simpleName} $event")
+    Log.d(TAG, "${this.javaClass.simpleName} $event")
   }
 }
