@@ -94,7 +94,9 @@ class MainActivity : BaseActivity() {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     when (item.itemId) {
       R.id.action_about ->
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile")))
+        startActivity(
+          Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile#chronofile"))
+        )
       R.id.action_change_save_dir -> requestStorageAccess()
       R.id.action_search -> {
         val formBinding = FormSearchBinding.inflate(LayoutInflater.from(this), null, false)
