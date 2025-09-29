@@ -1,0 +1,1 @@
+<p><i>Chronofile</i> is a personal time tracking app designed and developed by and for myself. The app requires Android 10+ and has undergone essentially zero QA! All entries are written to a local TSV file in external storage for easy sync/backup.</p>
