@@ -1,0 +1,1 @@
+<p><i>Chronofile</i> is a personal time tracking app. More background at this <a href="https://chaidarun.com/ten-years-of-logging-my-life">blog post</a> and <a href="https://news.ycombinator.com/item?id=29692087">Hacker News</a>. All data is saved to a chronofile.tsv file on your device. This app is 100% offline and never accesses the internet - no ads, no telemetry, nothing.</p>

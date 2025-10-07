@@ -6,7 +6,7 @@ You can try it out by installing an APK from the [releases](https://github.com/a
 
 All data is saved to a `chronofile.tsv` file on your device. This app is 100% offline and never accesses the internet - no ads, no telemetry, nothing.
 
-<img alt="Timeline" src="https://raw.githubusercontent.com/artnc/chronofile/master/.github/Screenshot_20180103-223514.png" width="32%"> <img alt="Pie chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/.github/Screenshot_20180103-222320.png" width="32%"> <img alt="Area chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/.github/Screenshot_20180103-222328.png" width="32%">
+<img alt="Timeline" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/01.png" width="32%"> <img alt="Pie chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/02.png" width="32%"> <img alt="Area chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/03.png" width="32%">
 
 I used this project to learn Kotlin and relearn Android development before I began work on the [Duolingo app](https://play.google.com/store/apps/details?id=com.duolingo), which is [now 100% Kotlin](https://blog.duolingo.com/migrating-duolingos-android-app-to-100-kotlin/)!
 
