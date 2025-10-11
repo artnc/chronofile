@@ -4,7 +4,7 @@ package com.chaidarun.chronofile
 
 enum class Metric {
   AVERAGE,
-  TOTAL
+  TOTAL,
 }
 
 data class GraphConfig(
@@ -12,5 +12,5 @@ data class GraphConfig(
   val stacked: Boolean = true,
   val metric: Metric = Metric.AVERAGE,
   val startTime: Long? = null,
-  val endTime: Long? = null
+  val endTime: Long? = null,
 )

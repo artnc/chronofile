@@ -29,7 +29,7 @@ enum class ViewType {
   DATE,
   ENTRY,
   SPACER,
-  TIME
+  TIME,
 }
 
 sealed class ListItem(val viewType: ViewType)
@@ -78,7 +78,7 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
                       entry.startTime,
                       binding.formEntryStartTime.text.toString(),
                       binding.formEntryActivity.text.toString(),
-                      binding.formEntryNote.text.toString()
+                      binding.formEntryNote.text.toString(),
                     )
                   )
                 }
@@ -227,7 +227,7 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
             layoutParams =
               LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                LinearLayout.LayoutParams.WRAP_CONTENT,
               )
           }
         )

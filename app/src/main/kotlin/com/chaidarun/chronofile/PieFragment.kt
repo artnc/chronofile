@@ -23,7 +23,7 @@ class PieFragment : GraphFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = FragmentPieBinding.inflate(inflater, container, false).also { _binding = it }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

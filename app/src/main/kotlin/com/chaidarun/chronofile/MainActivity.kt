@@ -32,7 +32,7 @@ class MainActivity : BaseActivity() {
     val id1: String,
     val id2: String? = null,
     val dialog: AlertDialog,
-    val binding: FormNfcBinding
+    val binding: FormNfcBinding,
   )
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +54,7 @@ class MainActivity : BaseActivity() {
     binding.addEntry.setOnClickListener {
       History.addEntry(
         binding.addEntryActivity.text.toString(),
-        binding.addEntryNote.text.toString()
+        binding.addEntryNote.text.toString(),
       )
       binding.addEntryActivity.text.clear()
       binding.addEntryNote.text.clear()
@@ -143,7 +143,7 @@ class MainActivity : BaseActivity() {
   override fun onRequestPermissionsResult(
     requestCode: Int,
     permissions: Array<out String>,
-    grantResults: IntArray
+    grantResults: IntArray,
   ) {
     super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     when (requestCode) {
@@ -255,7 +255,7 @@ class MainActivity : BaseActivity() {
       arrayOf(
         NfcAdapter.ACTION_NDEF_DISCOVERED,
         NfcAdapter.ACTION_TECH_DISCOVERED,
-        NfcAdapter.ACTION_TAG_DISCOVERED
+        NfcAdapter.ACTION_TAG_DISCOVERED,
       )
     private const val PERMISSION_REQUEST_CODE = 1
     private const val STORAGE_REQUEST_CODE = 2

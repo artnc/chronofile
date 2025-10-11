@@ -16,7 +16,7 @@ sealed class Action {
     val oldStartTime: Long,
     val newStartTime: String,
     val activity: String,
-    val note: String
+    val note: String,
   ) : Action()
 
   data class RegisterNfcTag(val id: String, val entry: List<String>) : Action()
@@ -47,7 +47,7 @@ data class State(
   val config: Config? = null,
   val history: History? = null,
   val graphConfig: GraphConfig = GraphConfig(),
-  val searchQuery: String? = null
+  val searchQuery: String? = null,
 )
 
 private val reducer: (State, Action) -> State = { state, action ->
@@ -64,7 +64,7 @@ private val reducer: (State, Action) -> State = { state, action ->
                 action.oldStartTime,
                 action.newStartTime,
                 action.activity,
-                action.note
+                action.note,
               )
           )
         is Action.RegisterNfcTag -> {

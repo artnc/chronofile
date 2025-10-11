@@ -20,7 +20,7 @@ class GraphActivity : BaseActivity() {
     TODAY("Today", DAY_SECONDS),
     PAST_WEEK("Past week", 7 * DAY_SECONDS),
     PAST_MONTH("Past month", 30 * DAY_SECONDS),
-    ALL_TIME("All time", Long.MAX_VALUE)
+    ALL_TIME("All time", Long.MAX_VALUE),
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {

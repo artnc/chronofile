@@ -33,7 +33,7 @@ abstract class BaseFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ): View? {
     logLifecycleEvent("onCreateView")
     return super.onCreateView(inflater, container, savedInstanceState)

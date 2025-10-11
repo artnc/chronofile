@@ -21,7 +21,7 @@ class EditorActivity : BaseActivity() {
       text =
         HtmlCompat.fromHtml(
           "If you'd like to aggregate multiple activity types into a single one for charting purposes, you can define such groups in the <a href=\"https://en.wikipedia.org/wiki/JSON#Syntax\">JSON</a> config object below. Example:<br /><br />{\"activityGroups\":{\"Chores\":[\"Cook\",\"Laundry\"],\"Exercise\":[\"Football\",\"Yoga\"]}}",
-          HtmlCompat.FROM_HTML_MODE_LEGACY
+          HtmlCompat.FROM_HTML_MODE_LEGACY,
         )
       movementMethod = LinkMovementMethod.getInstance() // https://stackoverflow.com/a/4303608
     }

@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/duolingo/pre-commit-hooks.git
-    rev: 1.7.3
+    rev: 1.11.1
     hooks:
       - id: duolingo
   - repo: local

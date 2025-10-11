@@ -34,7 +34,7 @@ abstract class GraphFragment : BaseFragment() {
   protected enum class Aggregation {
     DAY,
     DAY_OF_WEEK,
-    TOTAL
+    TOTAL,
   }
 
   /** Returns a ({ bucket: { slice: duration } }, { slice: total duration }) */
@@ -44,7 +44,7 @@ abstract class GraphFragment : BaseFragment() {
     graphConfig: GraphConfig,
     rangeStart: Long,
     rangeEnd: Long,
-    aggregation: Aggregation
+    aggregation: Aggregation,
   ): Pair<Map<Long, Map<String, Long>>, List<Pair<String, Long>>> {
     val grouped = graphConfig.grouped
     var endTime = rangeEnd
@@ -68,7 +68,7 @@ abstract class GraphFragment : BaseFragment() {
               if (midnightBeforeStart != midnightBeforeEnd) {
                 mapOf(
                   midnightBeforeEnd to (endTime - midnightBeforeEnd),
-                  midnightBeforeStart to (midnightBeforeEnd - startTime)
+                  midnightBeforeStart to (midnightBeforeEnd - startTime),
                 )
               } else {
                 mapOf(midnightBeforeStart to (endTime - startTime))

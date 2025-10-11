@@ -25,7 +25,7 @@ class RadarFragment : GraphFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = FragmentRadarBinding.inflate(inflater, container, false).also { _binding = it }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

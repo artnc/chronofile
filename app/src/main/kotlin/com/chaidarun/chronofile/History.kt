@@ -11,7 +11,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     oldStartTime: Long,
     editedStartTime: String,
     activity: String,
-    note: String?
+    note: String?,
   ): History {
     // Collect inputs
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
@@ -62,7 +62,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val nextStartTime = epochSeconds()
     return copy(
       currentActivityStartTime = nextStartTime,
-      entries = normalizeAndSave(newEntries, nextStartTime)
+      entries = normalizeAndSave(newEntries, nextStartTime),
     )
   }
 
@@ -95,7 +95,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
           // Save
           IOUtil.writeFile(
             FILENAME,
-            joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n"
+            joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n",
           )
         }
         .toList()

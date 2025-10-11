@@ -25,7 +25,7 @@ class AreaFragment : GraphFragment() {
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
-    savedInstanceState: Bundle?
+    savedInstanceState: Bundle?,
   ) = FragmentAreaBinding.inflate(inflater, container, false).also { _binding = it }.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,7 +105,7 @@ class AreaFragment : GraphFragment() {
         graphConfig,
         getPreviousMidnight(rangeStart),
         rangeEnd,
-        Aggregation.DAY
+        Aggregation.DAY,
       )
     val groups = sliceList.map { it.first }
 

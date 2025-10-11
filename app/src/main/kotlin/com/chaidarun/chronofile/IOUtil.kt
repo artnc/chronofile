@@ -55,7 +55,7 @@ object IOUtil {
     try {
       App.ctx.contentResolver.takePersistableUriPermission(
         getStorageUri()!!,
-        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
       )
       true
     } catch (e: Exception) {
@@ -71,7 +71,7 @@ object IOUtil {
     }
     Log.i(
       TAG,
-      if (result == null) "Failed to read $filename" else "Read $filename in $elapsedMs ms"
+      if (result == null) "Failed to read $filename" else "Read $filename in $elapsedMs ms",
     )
     return result
   }
@@ -92,7 +92,7 @@ object IOUtil {
                   filename.endsWith(".tsv") -> "text/tab-separated-values"
                   else -> "text/plain"
                 },
-                filename
+                filename,
               )
             if (documentFile == null) {
               Log.i(TAG, "Failed to create $filename")
