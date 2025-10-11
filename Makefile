@@ -2,8 +2,7 @@ MAKEFLAGS += --silent
 
 .PHONY: apk
 apk:
-	# Gradle requires Java 17+
-	PATH="/opt/android-studio/jbr/bin:${PATH}" ./gradlew assembleRelease
+	./gradlew assembleRelease
 	find app -name '*.apk' | grep release
 
 .PHONY: log
