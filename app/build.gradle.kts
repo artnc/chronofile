@@ -12,6 +12,12 @@ val keystoreProperties = Properties()
 keystoreProperties.load(FileInputStream(rootProject.file("keystore.properties")))
 
 android {
+  // https://github.com/artnc/chronofile/issues/13#issuecomment-3408303694
+  dependenciesInfo {
+    includeInApk = false
+    includeInBundle = false
+  }
+
   signingConfigs {
     create("config") {
       keyAlias = keystoreProperties["keyAlias"] as String
