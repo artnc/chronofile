@@ -2,9 +2,11 @@
 
 This is a personal time tracking app that I created for myself. More background at my [blog](https://chaidarun.com/ten-years-of-logging-my-life) and [Hacker News](https://news.ycombinator.com/item?id=29692087).
 
-You can try it out by installing an APK from the [releases](https://github.com/artnc/chronofile/releases) page. Please open a GitHub issue if you're having problems.
-
 All data is saved to a `chronofile.tsv` file on your device. This app is 100% offline and never accesses the internet - no ads, no telemetry, nothing.
+
+<a href='https://play.google.com/store/apps/details?id=com.chaidarun.chronofile'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/></a>
+
+Install from [Google Play](https://play.google.com/store/apps/details?id=com.chaidarun.chronofile), [IzzyOnDroid](https://apt.izzysoft.de/fdroid/index/apk/com.chaidarun.chronofile), or this repo's [releases](https://github.com/artnc/chronofile/releases) page. Please open a GitHub issue if you're having problems.
 
 <img alt="Timeline" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/01.png" width="32%"> <img alt="Pie chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/02.png" width="32%"> <img alt="Area chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/03.png" width="32%">
 
