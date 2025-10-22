@@ -4,9 +4,7 @@ This is a personal time tracking app that I created for myself. More background 
 
 All data is saved to a `chronofile.tsv` file on your device. This app is 100% offline and never accesses the internet - no ads, no telemetry, nothing.
 
-<a href='https://play.google.com/store/apps/details?id=com.chaidarun.chronofile'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height='80px'/></a>
-
-Install from [Google Play](https://play.google.com/store/apps/details?id=com.chaidarun.chronofile), [IzzyOnDroid](https://apt.izzysoft.de/fdroid/index/apk/com.chaidarun.chronofile), or this repo's [releases](https://github.com/artnc/chronofile/releases) page. Please open a GitHub issue if you're having problems.
+<p><a href="https://play.google.com/store/apps/details?id=com.chaidarun.chronofile"><img alt="Get it on Google Play" src="https://github.com/user-attachments/assets/9e4f0788-8bab-420e-a374-5d4ba8814b91" height="50px" style="vertical-align:top" /></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://apt.izzysoft.de/fdroid/index/apk/com.chaidarun.chronofile"><img alt="Get it on IzzyOnDroid" src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="50px" /></a></p>
 
 <img alt="Timeline" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/01.png" width="32%"> <img alt="Pie chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/02.png" width="32%"> <img alt="Area chart" src="https://raw.githubusercontent.com/artnc/chronofile/master/fastlane/metadata/android/en-US/images/phoneScreenshots/03.png" width="32%">
 
