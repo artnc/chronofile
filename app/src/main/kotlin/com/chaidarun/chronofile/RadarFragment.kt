@@ -98,19 +98,18 @@ class RadarFragment : GraphFragment() {
     val (buckets, sliceList) =
       aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.DAY_OF_WEEK)
     var maxEntrySeconds = 0L
-    val radarDataSets =
-      sliceList.mapIndexed { i, (slice, _) ->
-        val radarEntries =
-          (1L until 8L).map { dayOfWeek ->
-            val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
-            maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
-            RadarEntry(Math.sqrt(seconds.toDouble()).toFloat())
-          }
-        RadarDataSet(radarEntries, slice).apply {
-          color = COLORS[i % COLORS.size]
-          setDrawValues(false)
+    val radarDataSets = sliceList.mapIndexed { i, (slice, _) ->
+      val radarEntries =
+        (1L until 8L).map { dayOfWeek ->
+          val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
+          maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
+          RadarEntry(Math.sqrt(seconds.toDouble()).toFloat())
         }
+      RadarDataSet(radarEntries, slice).apply {
+        color = COLORS[i % COLORS.size]
+        setDrawValues(false)
       }
+    }
     binding.radarChart.run {
       data = RadarData(radarDataSets)
       invalidate()

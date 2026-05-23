@@ -8,8 +8,8 @@
     <item name="android:fontFamily">@font/exo2</item>
     <item name="android:windowBackground">@color/colorPrimaryDark</item>
     <item
-      name="android:windowOptOutEdgeToEdgeEnforcement"
       tools:targetApi="35"
+      name="android:windowOptOutEdgeToEdgeEnforcement"
     >true</item>
     <item name="colorAccent">@color/colorAccent</item>
     <item name="colorButtonNormal">@color/colorAccent</item>

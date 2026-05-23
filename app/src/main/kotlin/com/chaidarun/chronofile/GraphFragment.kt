@@ -77,7 +77,6 @@ abstract class GraphFragment : BaseFragment() {
             when (aggregation) {
               Aggregation.DAY -> pieces
               Aggregation.DAY_OF_WEEK -> pieces.mapKeys { getDayOfWeek(it.key).value.toLong() }
-              else -> error("Unhandled aggregation")
             }
           }
           Aggregation.TOTAL -> mapOf(0L to (endTime - startTime))
@@ -108,12 +107,11 @@ abstract class GraphFragment : BaseFragment() {
         .toMutableList()
     sliceList.add(OTHER_SLICE_NAME to sliceMap.values.sum() - sliceList.map { it.second }.sum())
     val nonOtherSlices = sliceList.map { it.first }.toSet()
-    val bucketsWithOther =
-      buckets.mapValues { (_, value) ->
-        val newMap = value.filter { it.key in nonOtherSlices }.toMutableMap()
-        newMap[OTHER_SLICE_NAME] = value.filter { it.key !in nonOtherSlices }.map { it.value }.sum()
-        newMap
-      }
+    val bucketsWithOther = buckets.mapValues { (_, value) ->
+      val newMap = value.filter { it.key in nonOtherSlices }.toMutableMap()
+      newMap[OTHER_SLICE_NAME] = value.filter { it.key !in nonOtherSlices }.map { it.value }.sum()
+      newMap
+    }
 
     return Pair(bucketsWithOther, sliceList)
   }

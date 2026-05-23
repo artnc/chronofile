@@ -127,7 +127,7 @@ object Store {
     }
 
   val state: State
-    get() = stateRelay.value
+    get() = stateRelay.value!!
 
   val observable: Observable<State>
     get() = stateRelay

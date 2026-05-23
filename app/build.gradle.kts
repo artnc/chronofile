@@ -1,10 +1,7 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-plugins {
-  id("com.android.application")
-  id("kotlin-android")
-}
+plugins { id("com.android.application") }
 
 // https://developer.android.com/studio/publish/app-signing#secure_key
 val keystoreProperties = Properties()
@@ -36,9 +33,9 @@ android {
 
   defaultConfig {
     applicationId = "com.chaidarun.chronofile"
-    compileSdk = 35
-    minSdk = 21
-    targetSdk = 35
+    compileSdk = 36
+    minSdk = 23
+    targetSdk = 36
     versionCode = 6
     versionName = "1.1.1"
   }
@@ -63,13 +60,14 @@ android {
 }
 
 dependencies {
-  implementation("androidx.appcompat:appcompat:1.7.0")
+  implementation("androidx.appcompat:appcompat:1.7.1")
   implementation("androidx.cardview:cardview:1.0.0")
-  implementation("androidx.recyclerview:recyclerview:1.3.2")
+  implementation("androidx.documentfile:documentfile:1.1.0")
+  implementation("androidx.recyclerview:recyclerview:1.4.0")
   implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
   implementation("com.google.android.gms:play-services-location:21.3.0")
-  implementation("com.google.android.material:material:1.12.0")
-  implementation("com.google.code.gson:gson:2.11.0")
-  implementation("com.jakewharton.rxrelay2:rxrelay:2.0.0")
-  implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
+  implementation("com.google.android.material:material:1.14.0")
+  implementation("com.google.code.gson:gson:2.14.0")
+  implementation("com.jakewharton.rxrelay2:rxrelay:2.1.1")
+  implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
 }

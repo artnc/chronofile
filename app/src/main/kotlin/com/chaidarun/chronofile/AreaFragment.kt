@@ -126,24 +126,23 @@ class AreaFragment : GraphFragment() {
       }
     }
 
-    val dataSets =
-      groups.mapIndexed { i, group ->
-        LineDataSet(lines[group], group).apply {
-          val mColor = COLORS[i % COLORS.size].apply { setCircleColor(this) }
-          axisDependency = YAxis.AxisDependency.LEFT
-          color = mColor
-          lineWidth = if (stacked) 0f else 1f
-          fillAlpha = if (stacked) 255 else 0
-          fillColor = mColor
-          fillFormatter = IFillFormatter { _, _ -> binding.areaChart.axisLeft.axisMinimum }
-          setDrawCircles(false)
-          setDrawCircleHole(false)
-          setDrawFilled(true)
-          setDrawHorizontalHighlightIndicator(false)
-          setDrawValues(false)
-          setDrawVerticalHighlightIndicator(false)
-        }
+    val dataSets = groups.mapIndexed { i, group ->
+      LineDataSet(lines[group], group).apply {
+        val mColor = COLORS[i % COLORS.size].apply { setCircleColor(this) }
+        axisDependency = YAxis.AxisDependency.LEFT
+        color = mColor
+        lineWidth = if (stacked) 0f else 1f
+        fillAlpha = if (stacked) 255 else 0
+        fillColor = mColor
+        fillFormatter = IFillFormatter { _, _ -> binding.areaChart.axisLeft.axisMinimum }
+        setDrawCircles(false)
+        setDrawCircleHole(false)
+        setDrawFilled(true)
+        setDrawHorizontalHighlightIndicator(false)
+        setDrawValues(false)
+        setDrawVerticalHighlightIndicator(false)
       }
+    }
 
     with(binding.areaChart) {
       with(axisLeft) {
