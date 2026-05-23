@@ -8,6 +8,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.viewbinding.ViewBinding
 import io.reactivex.disposables.CompositeDisposable
 
@@ -35,6 +38,18 @@ abstract class BaseActivity : AppCompatActivity() {
 
     // Keep screen awake
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+    // Pad activity's content frame by system bar + display cutout + IME insets
+    ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+      val bars =
+        insets.getInsets(
+          WindowInsetsCompat.Type.systemBars() or
+            WindowInsetsCompat.Type.displayCutout() or
+            WindowInsetsCompat.Type.ime()
+        )
+      v.updatePadding(left = bars.left, top = bars.top, right = bars.right, bottom = bars.bottom)
+      WindowInsetsCompat.CONSUMED
+    }
   }
 
   override fun onStart() {
