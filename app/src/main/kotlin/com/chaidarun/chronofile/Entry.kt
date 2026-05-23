@@ -8,10 +8,10 @@ data class Entry(
   /** Life activity, e.g. "Sleep" */
   val activity: String,
   /** 2-tuple of [latitude, longitude] */
-  val latLong: Pair<Double, Double>? = null,
+  val latLon: Pair<Double, Double>? = null,
   /** Free-form metadata */
   val note: String? = null,
 ) {
   fun toTsvRow() =
-    "${activity}\t${latLong?.first ?: ""}\t${latLong?.second ?: ""}\t${note ?: ""}\t${startTime}\n"
+    "${activity}\t${latLon?.first ?: ""}\t${latLon?.second ?: ""}\t${note ?: ""}\t${startTime}\n"
 }

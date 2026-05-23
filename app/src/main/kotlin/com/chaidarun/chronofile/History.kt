@@ -4,6 +4,7 @@ package com.chaidarun.chronofile
 
 import android.util.Log
 import com.google.android.gms.location.LocationServices
+import kotlin.random.Random
 
 data class History(val entries: List<Entry>, val currentActivityStartTime: Long) {
 
@@ -28,7 +29,7 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
                 getPreviousMidnight(now) +
                   3600 * hours.toInt() +
                   60 * minutes.toInt() +
-                  Math.round(Math.random() * 60)
+                  Random.nextLong(60)
               if (time > now) time - DAY_SECONDS else time
             }
             trimmedEditedStartTime.length == 10 -> trimmedEditedStartTime.toLong() // Unix timestamp
@@ -48,16 +49,16 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     val oldEntry = entries[entryIndex]
     val newEntries =
       entries.toMutableList().apply {
-        this[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLong, sanitizedNote)
+        this[entryIndex] = Entry(newStartTime, sanitizedActivity, oldEntry.latLon, sanitizedNote)
       }
 
     App.toast("Updated entry")
     return copy(entries = normalizeAndSave(newEntries, currentActivityStartTime))
   }
 
-  fun withNewEntry(activity: String, note: String?, latLong: Pair<Double, Double>?): History {
+  fun withNewEntry(activity: String, note: String?, latLon: Pair<Double, Double>?): History {
     val (sanitizedActivity, sanitizedNote) = sanitizeActivityAndNote(activity, note)
-    val entry = Entry(currentActivityStartTime, sanitizedActivity, latLong, sanitizedNote)
+    val entry = Entry(currentActivityStartTime, sanitizedActivity, latLon, sanitizedNote)
     val newEntries = entries.toMutableList().apply { add(entry) }
     val nextStartTime = epochSeconds()
     return copy(
@@ -139,12 +140,11 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
           return@forEach
         }
 
-        val (activity, lat, long, note, startTime) = it.split("\t")
-        val latLong =
-          if (lat.isNotEmpty() && long.isNotEmpty()) Pair(lat.toDouble(), long.toDouble()) else null
+        val (activity, lat, lon, note, startTime) = it.split("\t")
+        val latLon =
+          if (lat.isNotEmpty() && lon.isNotEmpty()) Pair(lat.toDouble(), lon.toDouble()) else null
         if (activity.isNotEmpty()) {
-          entries +=
-            Entry(startTime.toLong(), activity, latLong, if (note.isEmpty()) null else note)
+          entries += Entry(startTime.toLong(), activity, latLon, if (note.isEmpty()) null else note)
         } else {
           currentActivityStartTime = startTime.toLong()
         }

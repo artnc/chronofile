@@ -2,26 +2,31 @@
 
 package com.chaidarun.chronofile
 
-import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToLong
 
 /** Gets current Unix timestamp in seconds */
 fun epochSeconds() = System.currentTimeMillis() / 1000
 
-fun formatDate(date: Date) = SimpleDateFormat("EE, d MMM yyyy", Locale.US).format(date)
+private val DATE_FORMAT = DateTimeFormatter.ofPattern("EE, d MMM yyyy", Locale.US)
+private val TIME_FORMAT = DateTimeFormatter.ofPattern("H:mm", Locale.US)
+private val SEARCH_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd", Locale.US)
+
+fun formatDate(date: Date) = DATE_FORMAT.format(date.toInstant().atZone(ZoneId.systemDefault()))
 
 fun formatDate(seconds: Long) = formatDate(Date(seconds * 1000))
 
-fun formatTime(date: Date) = SimpleDateFormat("H:mm", Locale.US).format(date)
+fun formatTime(date: Date) = TIME_FORMAT.format(date.toInstant().atZone(ZoneId.systemDefault()))
 
 fun formatForSearch(seconds: Long) =
-  SimpleDateFormat("yyyyMMdd", Locale.US).format(Date(seconds * 1000))
+  SEARCH_FORMAT.format(Instant.ofEpochSecond(seconds).atZone(ZoneId.systemDefault()))
 
 /** Pretty-prints time given in seconds, e.g. 86461 -> "1d 1m" */
 fun formatDuration(seconds: Long, showDays: Boolean = false, showMinutes: Boolean = true): String {
@@ -36,7 +41,8 @@ fun formatDuration(seconds: Long, showDays: Boolean = false, showMinutes: Boolea
   if (showMinutes && minutes != 0L) {
     pieces.add(0, "${minutes}m")
   }
-  val totalHours = if (showMinutes) totalMinutes / 60 else Math.round(totalMinutes.toDouble() / 60)
+  val totalHours =
+    if (showMinutes) totalMinutes / 60 else (totalMinutes.toDouble() / 60).roundToLong()
   val hours = if (showDays) totalHours % 24 else totalHours
   if (hours != 0L) {
     pieces.add(0, "${hours}h")
@@ -50,12 +56,11 @@ fun formatDuration(seconds: Long, showDays: Boolean = false, showMinutes: Boolea
   return pieces.joinToString(" ")
 }
 
-private val LOCAL_TZ = ZoneId.systemDefault()
-
 private fun getDate(timestamp: Long): LocalDate =
-  LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), LOCAL_TZ).toLocalDate()
+  LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault()).toLocalDate()
 
 /** Gets the timestamp of the last midnight that occurred before the given timestamp */
-fun getPreviousMidnight(timestamp: Long) = getDate(timestamp).atStartOfDay(LOCAL_TZ).toEpochSecond()
+fun getPreviousMidnight(timestamp: Long) =
+  getDate(timestamp).atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
 
 fun getDayOfWeek(timestamp: Long): DayOfWeek = getDate(timestamp).dayOfWeek

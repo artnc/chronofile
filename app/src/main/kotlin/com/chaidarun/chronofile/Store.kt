@@ -9,7 +9,7 @@ import io.reactivex.Observable
 
 /** All actions must be immutable */
 sealed class Action {
-  data class AddEntry(val activity: String, val note: String?, val latLong: Pair<Double, Double>?) :
+  data class AddEntry(val activity: String, val note: String?, val latLon: Pair<Double, Double>?) :
     Action()
 
   data class EditEntry(
@@ -21,7 +21,7 @@ sealed class Action {
 
   data class RegisterNfcTag(val id: String, val entry: List<String>) : Action()
 
-  data class RemoveEntry(val entry: Long) : Action()
+  data class RemoveEntry(val startTime: Long) : Action()
 
   data class SetConfigFromText(val text: String) : Action()
 
@@ -56,7 +56,7 @@ private val reducer: (State, Action) -> State = { state, action ->
     val nextState =
       when (action) {
         is Action.AddEntry ->
-          copy(history = history?.withNewEntry(action.activity, action.note, action.latLong))
+          copy(history = history?.withNewEntry(action.activity, action.note, action.latLon))
         is Action.EditEntry ->
           copy(
             history =
@@ -74,7 +74,7 @@ private val reducer: (State, Action) -> State = { state, action ->
           newConfig.save()
           copy(config = newConfig)
         }
-        is Action.RemoveEntry -> copy(history = history?.withoutEntry(action.entry))
+        is Action.RemoveEntry -> copy(history = history?.withoutEntry(action.startTime))
         is Action.SetConfigFromText ->
           try {
             val config = Config.fromText(action.text)

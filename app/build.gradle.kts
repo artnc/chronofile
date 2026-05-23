@@ -25,6 +25,7 @@ android {
   }
 
   compileOptions {
+    isCoreLibraryDesugaringEnabled = true
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
   }
@@ -71,4 +72,6 @@ dependencies {
   implementation("com.google.code.gson:gson:2.14.0")
   implementation("com.jakewharton.rxrelay2:rxrelay:2.1.1")
   implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
+
+  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }

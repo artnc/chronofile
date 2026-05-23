@@ -45,7 +45,6 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
   RecyclerView.Adapter<HistoryListAdapter.ViewHolder>() {
 
   private var itemList = listOf<ListItem>()
-  private var itemListLength = 0
   private var selectedEntry: Entry? = null
   private val geocoderExecutor = Executors.newSingleThreadExecutor()
   private val actionModeCallback by lazy {
@@ -77,14 +76,14 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
               }
             }
             R.id.location -> {
-              if (entry.latLong == null) {
+              if (entry.latLon == null) {
                 App.toast("No location data available")
               } else {
-                val (lat, long) = entry.latLong
+                val (lat, lon) = entry.latLon
                 geocoderExecutor.execute {
                   try {
                     @Suppress("DEPRECATION")
-                    val address = Geocoder(App.ctx, Locale.US).getFromLocation(lat, long, 1)!![0]
+                    val address = Geocoder(App.ctx, Locale.US).getFromLocation(lat, lon, 1)!![0]
                     App.toast(address.getAddressLine(0))
                   } catch (_: Exception) {}
                 }
@@ -103,7 +102,7 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
         return true
       }
 
-      override fun onPrepareActionMode(p0: ActionMode?, p1: Menu?) = false
+      override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?) = false
 
       override fun onDestroyActionMode(mode: ActionMode?) {}
     }
@@ -184,7 +183,6 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
           }
           items.add(SpacerItem(32))
           itemList = items
-          itemListLength = items.size
           notifyDataSetChanged()
           appActivity.binding.historyList.scrollToPosition(items.size - 1)
         }
@@ -196,7 +194,7 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
     super.onDetachedFromRecyclerView(recyclerView)
   }
 
-  override fun getItemCount() = itemListLength
+  override fun getItemCount() = itemList.size
 
   override fun getItemViewType(position: Int) = itemList[position].viewType.ordinal
 

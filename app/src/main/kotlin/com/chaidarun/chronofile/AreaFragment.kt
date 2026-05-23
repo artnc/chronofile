@@ -119,7 +119,7 @@ class AreaFragment : GraphFragment() {
       for (group in groupsReversed) {
         val seconds = dayGroups.getOrDefault(group, 0L)
         seenSecondsToday += seconds
-        maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
+        maxEntrySeconds = maxOf(maxEntrySeconds, seconds)
         val entrySeconds = if (stacked) seenSecondsToday else seconds
         lines[group]?.add(Entry(dayStart.toFloat(), entrySeconds.toFloat()))
           ?: error("$group missing from area chart data sets")

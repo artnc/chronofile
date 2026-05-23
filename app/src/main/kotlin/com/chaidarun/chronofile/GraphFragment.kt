@@ -23,8 +23,8 @@ abstract class GraphFragment : BaseFragment() {
         // Must append a day's worth of seconds to the range to make it inclusive
         graphConfig.endTime + DAY_SECONDS
       }
-    val rangeEnd = Math.min(historyEnd, pickerEnd)
-    var rangeStart = Math.max(historyStart, pickerStart)
+    val rangeEnd = minOf(historyEnd, pickerEnd)
+    var rangeStart = maxOf(historyStart, pickerStart)
     if (graphConfig.metric == Metric.AVERAGE) {
       rangeStart = rangeEnd - (rangeEnd - rangeStart) / DAY_SECONDS * DAY_SECONDS
     }
@@ -57,7 +57,7 @@ abstract class GraphFragment : BaseFragment() {
       }
 
       // Get slice(s) depending on whether entry crosses midnight
-      val startTime = Math.max(entry.startTime, rangeStart)
+      val startTime = maxOf(entry.startTime, rangeStart)
       val bucketIncrements: Map<Long, Long> =
         when (aggregation) {
           Aggregation.DAY,
@@ -108,9 +108,8 @@ abstract class GraphFragment : BaseFragment() {
     sliceList.add(OTHER_SLICE_NAME to sliceMap.values.sum() - sliceList.map { it.second }.sum())
     val nonOtherSlices = sliceList.map { it.first }.toSet()
     val bucketsWithOther = buckets.mapValues { (_, value) ->
-      val newMap = value.filter { it.key in nonOtherSlices }.toMutableMap()
-      newMap[OTHER_SLICE_NAME] = value.filter { it.key !in nonOtherSlices }.map { it.value }.sum()
-      newMap
+      val (matching, other) = value.entries.partition { it.key in nonOtherSlices }
+      matching.associate { it.key to it.value } + (OTHER_SLICE_NAME to other.sumOf { it.value })
     }
 
     return Pair(bucketsWithOther, sliceList)

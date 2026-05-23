@@ -9,15 +9,11 @@ class GraphPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activ
 
   override fun getItemCount() = Tab.entries.size
 
-  override fun createFragment(position: Int) = Tab.get(position).create()
+  override fun createFragment(position: Int) = Tab.entries[position].create()
 
   enum class Tab(val title: String, val create: () -> GraphFragment) {
     RADAR("Radar", { RadarFragment() }),
     PIE("Pie", { PieFragment() }),
-    AREA("Area", { AreaFragment() });
-
-    companion object {
-      fun get(index: Int) = Tab.entries[index]
-    }
+    AREA("Area", { AreaFragment() }),
   }
 }

@@ -19,14 +19,13 @@ data class Config(
   @Expose @SerializedName("nfc") val nfcTags: Map<String, List<String>>? = null,
 ) {
   private val activityGroups by lazy {
-    mutableMapOf<String, String>().apply {
-      unnormalizedActivityGroups?.entries?.forEach { (groupName, groupMembers) ->
-        groupMembers.forEach { this[it] = groupName }
-      }
-    }
+    unnormalizedActivityGroups
+      .orEmpty()
+      .flatMap { (groupName, groupMembers) -> groupMembers.map { it to groupName } }
+      .toMap()
   }
 
-  fun getActivityGroup(activity: String) = activityGroups.getOrDefault(activity, activity)
+  fun getActivityGroup(activity: String) = activityGroups[activity] ?: activity
 
   fun serialize(): String = gson.toJson(this)
 

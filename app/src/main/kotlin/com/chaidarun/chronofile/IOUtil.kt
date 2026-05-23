@@ -8,9 +8,7 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import java.io.BufferedReader
 import java.io.FileOutputStream
-import java.io.InputStreamReader
 import java.util.concurrent.Executors
 import kotlin.system.measureTimeMillis
 
@@ -18,8 +16,10 @@ object IOUtil {
   /** Name of SharedPreferences key for recording the user's desired save directory */
   const val STORAGE_DIR_PREF = "STORAGE_DIR"
 
-  /** Serial executor for file writes (mirrors the old AsyncTask serial behavior) */
-  private val writeExecutor = Executors.newSingleThreadExecutor()
+  /** Serial executor for file I/O (mirrors the old AsyncTask serial behavior) */
+  private val ioExecutor = Executors.newSingleThreadExecutor()
+
+  fun runAsync(block: () -> Unit) = ioExecutor.execute(block)
 
   /**
    * Ideally this would use [android.preference.PreferenceManager.getDefaultSharedPreferences], but
@@ -41,8 +41,8 @@ object IOUtil {
   // https://developer.android.com/training/data-storage/shared/documents-files#input_stream
   private fun readDocumentFile(documentFile: DocumentFile) =
     try {
-      App.ctx.contentResolver.openInputStream(documentFile.uri)?.use { inputStream ->
-        BufferedReader(InputStreamReader(inputStream)).use { it.readText() }
+      App.ctx.contentResolver.openInputStream(documentFile.uri)?.bufferedReader()?.use {
+        it.readText()
       }
     } catch (e: Exception) {
       e.printStackTrace()
@@ -80,7 +80,7 @@ object IOUtil {
   }
 
   fun writeFile(filename: String, text: String) {
-    writeExecutor.execute {
+    ioExecutor.execute {
       Log.i(TAG, "Writing $filename")
       var isSuccess = false
       val elapsedMs = measureTimeMillis {

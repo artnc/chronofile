@@ -16,6 +16,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import io.reactivex.disposables.CompositeDisposable
 import java.text.DateFormatSymbols
 import java.util.Locale
+import kotlin.math.sqrt
 
 class RadarFragment : GraphFragment() {
   private var _binding: FragmentRadarBinding? = null
@@ -102,8 +103,8 @@ class RadarFragment : GraphFragment() {
       val radarEntries =
         (1L until 8L).map { dayOfWeek ->
           val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
-          maxEntrySeconds = Math.max(maxEntrySeconds, seconds)
-          RadarEntry(Math.sqrt(seconds.toDouble()).toFloat())
+          maxEntrySeconds = maxOf(maxEntrySeconds, seconds)
+          RadarEntry(sqrt(seconds.toDouble()).toFloat())
         }
       RadarDataSet(radarEntries, slice).apply {
         color = COLORS[i % COLORS.size]

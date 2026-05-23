@@ -39,11 +39,6 @@ abstract class BaseFragment : Fragment() {
     return super.onCreateView(inflater, container, savedInstanceState)
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    logLifecycleEvent("onActivityCreated()")
-    super.onActivityCreated(savedInstanceState)
-  }
-
   override fun onDestroyView() {
     logLifecycleEvent("onDestroyView")
     super.onDestroyView()

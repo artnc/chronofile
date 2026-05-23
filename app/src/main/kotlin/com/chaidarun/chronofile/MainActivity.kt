@@ -6,7 +6,6 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
@@ -20,6 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
+import androidx.core.net.toUri
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chaidarun.chronofile.databinding.ActivityMainBinding
@@ -36,7 +36,7 @@ class MainActivity : BaseActivity() {
         return@registerForActivityResult
       }
       binding.changeSaveDirBanner.visibility = View.GONE
-      App.toast("Successfully changed storage location")
+      App.toast("Successfully set storage location")
       IOUtil.setPref(IOUtil.STORAGE_DIR_PREF, uri.toString())
       IOUtil.persistAndCheckStoragePermission()
       hydrateStoreFromFiles()
@@ -109,7 +109,7 @@ class MainActivity : BaseActivity() {
     when (item.itemId) {
       R.id.action_about ->
         startActivity(
-          Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/artnc/chronofile#chronofile"))
+          Intent(Intent.ACTION_VIEW, "https://github.com/artnc/chronofile#chronofile".toUri())
         )
       R.id.action_change_save_dir -> requestStorageAccess()
       R.id.action_search -> {
@@ -168,7 +168,6 @@ class MainActivity : BaseActivity() {
     }
   }
 
-  @OptIn(ExperimentalStdlibApi::class, ExperimentalUnsignedTypes::class)
   private fun processNfcIntent(intent: Intent) {
     // Prevent intent from being processed by multiple lifecycle events - fixes a bug where
     // backgrounding and then foregrounding calls onResume with the same intent again
@@ -241,8 +240,14 @@ class MainActivity : BaseActivity() {
   }
 
   private fun hydrateStoreFromFiles() {
-    Store.dispatch(Action.SetConfigFromFile(Config.fromFile()))
-    Store.dispatch(Action.SetHistory(History.fromFile()))
+    IOUtil.runAsync {
+      val config = Config.fromFile()
+      val history = History.fromFile()
+      runOnUiThread {
+        Store.dispatch(Action.SetConfigFromFile(config))
+        Store.dispatch(Action.SetHistory(history))
+      }
+    }
   }
 
   companion object {

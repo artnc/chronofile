@@ -33,21 +33,18 @@ class GraphActivity : BaseActivity() {
       setCurrentItem(GraphPagerAdapter.Tab.PIE.ordinal, false)
     }
     TabLayoutMediator(binding.graphTabs, binding.graphViewPager) { tab, position ->
-        tab.text = GraphPagerAdapter.Tab.get(position).title
+        tab.text = GraphPagerAdapter.Tab.entries[position].title
       }
       .attach()
 
     // Set tab font
     // https://stackoverflow.com/a/31067431
-    with(binding.graphTabs.getChildAt(0) as ViewGroup) {
-      val tabsCount = childCount
-      for (i in 0 until tabsCount) {
-        with(getChildAt(i) as ViewGroup) {
-          val tabChildsCount = childCount
-          (0 until tabChildsCount)
-            .map { getChildAt(it) }
-            .forEach { (it as? TextView)?.typeface = resources.getFont(R.font.exo2_regular) }
-        }
+    val tabFont = resources.getFont(R.font.exo2_regular)
+    val tabStrip = binding.graphTabs.getChildAt(0) as ViewGroup
+    for (i in 0 until tabStrip.childCount) {
+      val tab = tabStrip.getChildAt(i) as ViewGroup
+      for (j in 0 until tab.childCount) {
+        (tab.getChildAt(j) as? TextView)?.typeface = tabFont
       }
     }
 
@@ -113,8 +110,7 @@ class GraphActivity : BaseActivity() {
   private fun setPresetRange(history: History, presetRange: PresetRange) {
     Log.i(TAG, "Setting range to $presetRange")
     val now = history.currentActivityStartTime
-    val startTime =
-      Math.max(now - presetRange.duration, history.entries.getOrNull(0)?.startTime ?: 0)
+    val startTime = maxOf(now - presetRange.duration, history.entries.getOrNull(0)?.startTime ?: 0)
     Store.dispatch(Action.SetGraphRangeStart(startTime))
     Store.dispatch(Action.SetGraphRangeEnd(now))
   }
