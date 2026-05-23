@@ -11,6 +11,7 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.chaidarun.chronofile.databinding.ActivityGraphBinding
+import com.google.android.material.tabs.TabLayoutMediator
 import io.reactivex.disposables.CompositeDisposable
 
 class GraphActivity : BaseActivity() {
@@ -27,11 +28,14 @@ class GraphActivity : BaseActivity() {
     super.onCreate(savedInstanceState)
     setSupportActionBar(binding.graphToolbar)
     binding.graphViewPager.run {
-      adapter = GraphPagerAdapter(supportFragmentManager)
-      currentItem = GraphPagerAdapter.Tab.PIE.ordinal
+      adapter = GraphPagerAdapter(this@GraphActivity)
       offscreenPageLimit = GraphPagerAdapter.Tab.entries.size
+      setCurrentItem(GraphPagerAdapter.Tab.PIE.ordinal, false)
     }
-    binding.graphTabs.setupWithViewPager(binding.graphViewPager)
+    TabLayoutMediator(binding.graphTabs, binding.graphViewPager) { tab, position ->
+        tab.text = GraphPagerAdapter.Tab.get(position).title
+      }
+      .attach()
 
     // Set tab font
     // https://stackoverflow.com/a/31067431

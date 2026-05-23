@@ -49,9 +49,5 @@
       android:name=".GraphActivity"
       android:parentActivityName=".MainActivity"
     />
-    <service
-      android:exported="false"
-      android:name=".FetchAddressIntentService"
-    />
   </application>
 </manifest>

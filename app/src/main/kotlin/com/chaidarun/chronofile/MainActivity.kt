@@ -15,9 +15,11 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.chaidarun.chronofile.databinding.ActivityMainBinding
@@ -27,6 +29,18 @@ import com.chaidarun.chronofile.databinding.FormSearchBinding
 class MainActivity : BaseActivity() {
   val binding by viewBinding(ActivityMainBinding::inflate)
   private var nfcFlow: NfcFlow? = null
+  private val openDocumentTreeLauncher =
+    registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+      if (uri == null) {
+        App.toast("Storage location not changed")
+        return@registerForActivityResult
+      }
+      binding.changeSaveDirBanner.visibility = View.GONE
+      App.toast("Successfully changed storage location")
+      IOUtil.setPref(IOUtil.STORAGE_DIR_PREF, uri.toString())
+      IOUtil.persistAndCheckStoragePermission()
+      hydrateStoreFromFiles()
+    }
 
   private data class NfcFlow(
     val id1: String,
@@ -122,24 +136,6 @@ class MainActivity : BaseActivity() {
     return true
   }
 
-  override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
-    super.onActivityResult(requestCode, resultCode, resultData)
-    when (requestCode) {
-      STORAGE_REQUEST_CODE -> {
-        val uri = resultData?.data
-        if (resultCode != RESULT_OK || uri == null) {
-          App.toast("Storage location not changed")
-          return
-        }
-        binding.changeSaveDirBanner.visibility = View.GONE
-        App.toast("Successfully changed storage location")
-        IOUtil.persistAndCheckStoragePermission()
-        IOUtil.setPref(IOUtil.STORAGE_DIR_PREF, uri.toString())
-        hydrateStoreFromFiles()
-      }
-    }
-  }
-
   override fun onRequestPermissionsResult(
     requestCode: Int,
     permissions: Array<out String>,
@@ -179,7 +175,8 @@ class MainActivity : BaseActivity() {
     // https://stackoverflow.com/a/30836555
     setIntent(Intent())
 
-    val tag = intent.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG) ?: return
+    val tag =
+      IntentCompat.getParcelableExtra(intent, NfcAdapter.EXTRA_TAG, Tag::class.java) ?: return
     val id = tag.id.toHexString().uppercase()
     Log.i(TAG, "Detected NFC tag: $id")
     val nfcFlow = nfcFlow
@@ -240,7 +237,7 @@ class MainActivity : BaseActivity() {
   }
 
   private fun requestStorageAccess() {
-    startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), STORAGE_REQUEST_CODE)
+    openDocumentTreeLauncher.launch(null)
   }
 
   private fun hydrateStoreFromFiles() {
@@ -258,6 +255,5 @@ class MainActivity : BaseActivity() {
         NfcAdapter.ACTION_TAG_DISCOVERED,
       )
     private const val PERMISSION_REQUEST_CODE = 1
-    private const val STORAGE_REQUEST_CODE = 2
   }
 }

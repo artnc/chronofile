@@ -4,6 +4,8 @@ package com.chaidarun.chronofile
 
 import android.app.Application
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 
 class App : Application() {
@@ -20,6 +22,10 @@ class App : Application() {
     val ctx: Context
       get() = instance.applicationContext
 
-    fun toast(message: String) = Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    fun toast(message: String) = mainHandler.post {
+      Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
+    }
   }
 }

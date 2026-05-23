@@ -2,11 +2,7 @@
 
 package com.chaidarun.chronofile
 
-import android.content.Intent
-import android.location.Location
-import android.os.Bundle
-import android.os.Handler
-import android.os.ResultReceiver
+import android.location.Geocoder
 import android.util.Log
 import android.view.ActionMode
 import android.view.LayoutInflater
@@ -23,6 +19,8 @@ import com.chaidarun.chronofile.databinding.ItemDateBinding
 import com.chaidarun.chronofile.databinding.ItemEntryBinding
 import com.chaidarun.chronofile.databinding.ItemTimeBinding
 import java.util.Date
+import java.util.Locale
+import java.util.concurrent.Executors
 import kotlin.system.measureTimeMillis
 
 enum class ViewType {
@@ -49,15 +47,7 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
   private var itemList = listOf<ListItem>()
   private var itemListLength = 0
   private var selectedEntry: Entry? = null
-  private val receiver by lazy {
-    object : ResultReceiver(Handler()) {
-      override fun onReceiveResult(resultCode: Int, resultData: Bundle) {
-        if (resultCode == FetchAddressIntentService.SUCCESS_CODE) {
-          resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY)?.let { App.toast(it) }
-        }
-      }
-    }
-  }
+  private val geocoderExecutor = Executors.newSingleThreadExecutor()
   private val actionModeCallback by lazy {
     object : ActionMode.Callback {
       override fun onActionItemClicked(mode: ActionMode, item: MenuItem?): Boolean {
@@ -90,15 +80,14 @@ class HistoryListAdapter(private val appActivity: MainActivity) :
               if (entry.latLong == null) {
                 App.toast("No location data available")
               } else {
-                val location =
-                  Location("dummyprovider").apply {
-                    latitude = entry.latLong.first
-                    longitude = entry.latLong.second
-                  }
-                val intent = Intent(App.ctx, FetchAddressIntentService::class.java)
-                intent.putExtra(FetchAddressIntentService.RECEIVER, receiver)
-                intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, location)
-                App.ctx.startService(intent)
+                val (lat, long) = entry.latLong
+                geocoderExecutor.execute {
+                  try {
+                    @Suppress("DEPRECATION")
+                    val address = Geocoder(App.ctx, Locale.US).getFromLocation(lat, long, 1)!![0]
+                    App.toast(address.getAddressLine(0))
+                  } catch (_: Exception) {}
+                }
               }
             }
             else -> App.toast("Unknown action!")

@@ -2,16 +2,14 @@
 
 package com.chaidarun.chronofile
 
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class GraphPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+class GraphPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
 
-  override fun getCount() = Tab.entries.size
+  override fun getItemCount() = Tab.entries.size
 
-  override fun getPageTitle(position: Int) = Tab.get(position).title
-
-  override fun getItem(position: Int) = Tab.get(position).create()
+  override fun createFragment(position: Int) = Tab.get(position).create()
 
   enum class Tab(val title: String, val create: () -> GraphFragment) {
     RADAR("Radar", { RadarFragment() }),

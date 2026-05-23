@@ -4,7 +4,6 @@ package com.chaidarun.chronofile
 
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.os.AsyncTask
 import android.util.Log
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -12,11 +11,15 @@ import androidx.documentfile.provider.DocumentFile
 import java.io.BufferedReader
 import java.io.FileOutputStream
 import java.io.InputStreamReader
+import java.util.concurrent.Executors
 import kotlin.system.measureTimeMillis
 
 object IOUtil {
   /** Name of SharedPreferences key for recording the user's desired save directory */
   const val STORAGE_DIR_PREF = "STORAGE_DIR"
+
+  /** Serial executor for file writes (mirrors the old AsyncTask serial behavior) */
+  private val writeExecutor = Executors.newSingleThreadExecutor()
 
   /**
    * Ideally this would use [android.preference.PreferenceManager.getDefaultSharedPreferences], but
@@ -77,7 +80,7 @@ object IOUtil {
   }
 
   fun writeFile(filename: String, text: String) {
-    AsyncTask.execute {
+    writeExecutor.execute {
       Log.i(TAG, "Writing $filename")
       var isSuccess = false
       val elapsedMs = measureTimeMillis {
