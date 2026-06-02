@@ -15,7 +15,7 @@
       android:exported="true"
       android:launchMode="singleInstance"
       android:name=".MainActivity"
-      android:theme="@style/AppTheme.NoActionBar"
+      android:windowSoftInputMode="adjustResize"
     >
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -38,15 +38,5 @@
         android:resource="@xml/nfc_tech_filter"
       />
     </activity>
-    <activity
-      android:exported="false"
-      android:name=".EditorActivity"
-      android:parentActivityName=".MainActivity"
-    />
-    <activity
-      android:exported="false"
-      android:name=".GraphActivity"
-      android:parentActivityName=".MainActivity"
-    />
   </application>
 </manifest>

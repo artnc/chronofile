@@ -2,263 +2,147 @@
 
 package com.chaidarun.chronofile
 
-import android.Manifest
-import android.app.Dialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.IntentCompat
-import androidx.core.net.toUri
-import androidx.core.widget.addTextChangedListener
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.chaidarun.chronofile.databinding.ActivityMainBinding
-import com.chaidarun.chronofile.databinding.FormNfcBinding
-import com.chaidarun.chronofile.databinding.FormSearchBinding
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import kotlinx.serialization.Serializable
 
-class MainActivity : BaseActivity() {
-  val binding by viewBinding(ActivityMainBinding::inflate)
-  private var nfcFlow: NfcFlow? = null
-  private val openDocumentTreeLauncher =
-    registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-      if (uri == null) {
-        App.toast("Storage location not changed")
-        return@registerForActivityResult
-      }
-      binding.changeSaveDirBanner.visibility = View.GONE
-      App.toast("Successfully set storage location")
-      IOUtil.setPref(IOUtil.STORAGE_DIR_PREF, uri.toString())
-      IOUtil.persistAndCheckStoragePermission()
-      hydrateStoreFromFiles()
-    }
+/** Type-safe navigation destinations; see [androidx.navigation.compose.composable] reified overload */
+@Serializable data object Editor
 
-  private data class NfcFlow(
-    val id1: String,
-    val id2: String? = null,
-    val dialog: AlertDialog,
-    val binding: FormNfcBinding,
-  )
+@Serializable data object Graph
+
+@Serializable data object Timeline
+
+class MainActivity : ComponentActivity() {
+
+  private val viewModel: MainViewModel by viewModels()
+  private var refreshTick by mutableIntStateOf(0)
+  private var nfcState by mutableStateOf<NfcDialogState?>(null)
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    Log.d(TAG, "MainActivity onCreate")
     super.onCreate(savedInstanceState)
-    setSupportActionBar(binding.toolbar)
+    enableEdgeToEdge()
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-    hydrateStoreFromFiles()
+    viewModel.hydrate()
 
-    // Hook up list view
-    binding.historyList.layoutManager =
-      LinearLayoutManager(this@MainActivity).apply { stackFromEnd = true }
-    binding.historyList.adapter = HistoryListAdapter(this@MainActivity)
-
-    // Set up listeners
-    binding.changeSaveDirButton.setOnClickListener { requestStorageAccess() }
-    binding.grantLocationButton.setOnClickListener {
-      ActivityCompat.requestPermissions(this@MainActivity, APP_PERMISSIONS, PERMISSION_REQUEST_CODE)
-    }
-    binding.addEntry.setOnClickListener {
-      History.addEntry(
-        binding.addEntryActivity.text.toString(),
-        binding.addEntryNote.text.toString(),
-      )
-      binding.addEntryActivity.text.clear()
-      binding.addEntryNote.text.clear()
-      currentFocus?.clearFocus()
-    }
-    binding.addEntryActivity.addTextChangedListener(
-      afterTextChanged = {
-        val shouldEnable = binding.addEntryActivity.text.toString().isNotBlank()
-        binding.addEntry.alpha = if (shouldEnable) 1f else 0.5f
-        binding.addEntry.isEnabled = shouldEnable
-      }
-    )
-
-    // Check for missing permissions
-    if (
-      !APP_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-      }
-    ) {
-      Log.i(TAG, "Found ungranted permissions")
-      binding.grantLocationBanner.visibility = View.VISIBLE
-    }
-    if (
-      IOUtil.getPref(IOUtil.STORAGE_DIR_PREF).isNullOrEmpty() ||
-        !IOUtil.persistAndCheckStoragePermission()
-    ) {
-      Log.i(TAG, "Found ungranted storage access")
-      binding.changeSaveDirBanner.visibility = View.VISIBLE
-    }
-  }
-
-  override fun onCreateOptionsMenu(menu: Menu): Boolean {
-    menuInflater.inflate(R.menu.menu_main, menu)
-    return true
-  }
-
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    when (item.itemId) {
-      R.id.action_about ->
-        startActivity(
-          Intent(Intent.ACTION_VIEW, "https://github.com/artnc/chronofile#chronofile".toUri())
-        )
-      R.id.action_change_save_dir -> requestStorageAccess()
-      R.id.action_search -> {
-        val formBinding = FormSearchBinding.inflate(LayoutInflater.from(this), null, false)
-        val view = formBinding.root
-        with(AlertDialog.Builder(this, R.style.MyAlertDialogTheme)) {
-          setTitle("Search timeline")
-          formBinding.formSearchQuery.setText(Store.state.searchQuery ?: "")
-          setView(view)
-          fun search(input: String?) {
-            val query = if (input.isNullOrBlank()) null else input.trim()
-            Store.dispatch(Action.SetSearchQuery(query))
-            binding.toolbar.title = if (query == null) "Timeline" else "\"$query\""
+    setContent {
+      ChronofileTheme {
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = Timeline) {
+          composable<Timeline> {
+            TimelineScreen(
+              viewModel = viewModel,
+              refreshTick = refreshTick,
+              onOpenSettings = { navController.navigate(Editor) },
+              onOpenStats = { navController.navigate(Graph) },
+            )
           }
-          setPositiveButton("Go") { _, _ -> search(formBinding.formSearchQuery.text.toString()) }
-          setNegativeButton("Clear") { _, _ -> search(null) }
-          show()
+          composable<Editor> {
+            EditorScreen(
+              initialText = viewModel.state.value.config?.serialize() ?: "",
+              onSave = { viewModel.dispatch(Action.SetConfigFromText(it)) },
+              onNavigateUp = { navController.popBackStack() },
+            )
+          }
+          composable<Graph> {
+            GraphScreen(viewModel = viewModel, onNavigateUp = { navController.popBackStack() })
+          }
+        }
+        nfcState?.let { nfc ->
+          NfcDialog(
+            state = nfc,
+            onActivityChange = { v ->
+              (nfc as? NfcDialogState.Ready)?.let { nfcState = it.copy(activity = v) }
+            },
+            onNoteChange = { v ->
+              (nfc as? NfcDialogState.Ready)?.let { nfcState = it.copy(note = v) }
+            },
+            onConfirm = {
+              if (nfc is NfcDialogState.Ready && nfc.activity.isNotBlank()) {
+                val inputs = listOfNotNull(nfc.activity, nfc.note.takeIf { it.isNotBlank() })
+                viewModel.dispatch(Action.RegisterNfcTag(nfc.tagId, inputs))
+                App.toast("NFC tag registered - try tapping it!")
+              }
+              nfcState = null
+            },
+            onDismiss = { nfcState = null },
+          )
         }
       }
-      R.id.action_settings -> startActivity(Intent(this, EditorActivity::class.java))
-      R.id.action_stats -> startActivity(Intent(this, GraphActivity::class.java))
-      else -> return super.onOptionsItemSelected(item)
-    }
-    return true
-  }
-
-  override fun onRequestPermissionsResult(
-    requestCode: Int,
-    permissions: Array<out String>,
-    grantResults: IntArray,
-  ) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    when (requestCode) {
-      PERMISSION_REQUEST_CODE ->
-        if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-          binding.grantLocationBanner.visibility = View.GONE
-          App.toast("Permissions granted successfully :)")
-        } else {
-          App.toast("You denied permission :(")
-        }
-    }
-  }
-
-  override fun onNewIntent(intent: Intent?) {
-    super.onNewIntent(intent)
-    if (intent != null && intent.action in NFC_INTENT_ACTIONS) {
-      processNfcIntent(intent)
     }
   }
 
   override fun onResume() {
+    Log.d(TAG, "MainActivity onResume")
     super.onResume()
-    binding.historyList.adapter?.notifyDataSetChanged() // Reformat times in case time zone changed
-    if (intent.action in NFC_INTENT_ACTIONS) {
-      processNfcIntent(intent)
-    }
+    // Reformat times in case time zone changed
+    refreshTick++
+    if (intent.action in NFC_INTENT_ACTIONS) processNfcIntent(intent)
+  }
+
+  override fun onNewIntent(intent: Intent) {
+    Log.d(TAG, "MainActivity onNewIntent")
+    super.onNewIntent(intent)
+    if (intent.action in NFC_INTENT_ACTIONS) processNfcIntent(intent)
   }
 
   private fun processNfcIntent(intent: Intent) {
-    // Prevent intent from being processed by multiple lifecycle events - fixes a bug where
-    // backgrounding and then foregrounding calls onResume with the same intent again
-    // https://stackoverflow.com/a/30836555
+    // Prevent intent from being processed by multiple lifecycle events
     setIntent(Intent())
 
     val tag =
       IntentCompat.getParcelableExtra(intent, NfcAdapter.EXTRA_TAG, Tag::class.java) ?: return
     val id = tag.id.toHexString().uppercase()
     Log.i(TAG, "Detected NFC tag: $id")
-    val nfcFlow = nfcFlow
-    val entryToAdd = Store.state.config?.nfcTags?.get(id)
-    when {
-      entryToAdd != null -> History.addEntry(entryToAdd[0], entryToAdd.getOrNull(1))
-      nfcFlow == null -> {
-        // Step 1 of NFC tag registration flow
-        val binding = FormNfcBinding.inflate(LayoutInflater.from(this), null, false)
-        val dialog =
-          AlertDialog.Builder(this, R.style.MyAlertDialogTheme)
-            .setTitle("Found new NFC tag")
-            .setView(binding.root)
-            .setOnDismissListener { this@MainActivity.nfcFlow = null }
-            .setPositiveButton("OK") { _, _ ->
-              val nfcFlow = this@MainActivity.nfcFlow
-              if (nfcFlow != null && nfcFlow.id1 == nfcFlow.id2) {
-                val inputs = mutableListOf(nfcFlow.binding.formNfcActivity.text.toString())
-                val note = nfcFlow.binding.formNfcNote.text.toString()
-                if (note.isNotBlank()) {
-                  inputs.add(note)
-                }
-                Store.dispatch(Action.RegisterNfcTag(id, inputs))
-                App.toast("NFC tag registered - try tapping it!")
-              }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-        dialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.GONE
-        this.nfcFlow = NfcFlow(id1 = id, dialog = dialog, binding = binding)
+    val entryToAdd = viewModel.state.value.config?.nfcTags?.get(id)
+    val current = nfcState
+    nfcState =
+      when {
+        entryToAdd != null -> {
+          viewModel.addEntry(entryToAdd[0], entryToAdd.getOrNull(1))
+          return
+        }
+        current == null -> NfcDialogState.Initial(tagId = id)
+        current.tagId != id -> NfcDialogState.Mismatch(tagId = current.tagId)
+        else -> NfcDialogState.Ready(tagId = current.tagId)
       }
-      nfcFlow.id1 != id -> {
-        // Error screen
-        nfcFlow.dialog.setTitle("Unusable NFC tag")
-        nfcFlow.binding.formNfcTapAgain.visibility = View.GONE
-        nfcFlow.binding.formNfcMismatch.visibility = View.VISIBLE
-        nfcFlow.dialog.getButton(Dialog.BUTTON_POSITIVE).visibility = View.VISIBLE
-        nfcFlow.dialog.getButton(Dialog.BUTTON_NEGATIVE).visibility = View.GONE
-      }
-      else -> {
-        // Step 2 of NFC tag registration flow
-        nfcFlow.dialog.setTitle("Register NFC tag")
-        nfcFlow.binding.formNfcTapAgain.visibility = View.GONE
-        nfcFlow.binding.formNfcEnterInfo.visibility = View.VISIBLE
-        val okButton = nfcFlow.dialog.getButton(Dialog.BUTTON_POSITIVE)
-        nfcFlow.binding.formNfcActivity.addTextChangedListener(
-          afterTextChanged = {
-            okButton.isEnabled = nfcFlow.binding.formNfcActivity.text.toString().isNotBlank()
-          }
-        )
-        nfcFlow.binding.formNfcInputs.visibility = View.VISIBLE
-        nfcFlow.binding.formNfcActivity.requestFocus()
-        okButton.isEnabled = false
-        okButton.visibility = View.VISIBLE
-        this.nfcFlow = nfcFlow.copy(id2 = id)
-      }
-    }
-  }
-
-  private fun requestStorageAccess() {
-    openDocumentTreeLauncher.launch(null)
-  }
-
-  private fun hydrateStoreFromFiles() {
-    IOUtil.runAsync {
-      val config = Config.fromFile()
-      val history = History.fromFile()
-      runOnUiThread {
-        Store.dispatch(Action.SetConfigFromFile(config))
-        Store.dispatch(Action.SetHistory(history))
-      }
-    }
   }
 
   companion object {
-    private val APP_PERMISSIONS =
-      arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
     private val NFC_INTENT_ACTIONS =
       arrayOf(
         NfcAdapter.ACTION_NDEF_DISCOVERED,
         NfcAdapter.ACTION_TECH_DISCOVERED,
         NfcAdapter.ACTION_TAG_DISCOVERED,
       )
-    private const val PERMISSION_REQUEST_CODE = 1
   }
+}
+
+sealed interface NfcDialogState {
+  val tagId: String
+
+  data class Initial(override val tagId: String) : NfcDialogState
+
+  data class Mismatch(override val tagId: String) : NfcDialogState
+
+  data class Ready(override val tagId: String, val activity: String = "", val note: String = "") :
+    NfcDialogState
 }

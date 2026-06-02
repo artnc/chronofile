@@ -4,9 +4,9 @@ package com.chaidarun.chronofile
 
 import android.app.Application
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 class App : Application() {
 
@@ -22,10 +22,10 @@ class App : Application() {
     val ctx: Context
       get() = instance.applicationContext
 
-    private val mainHandler = Handler(Looper.getMainLooper())
+    private val mainScope = MainScope()
 
-    fun toast(message: String) = mainHandler.post {
-      Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
+    fun toast(message: String) {
+      mainScope.launch { Toast.makeText(ctx, message, Toast.LENGTH_LONG).show() }
     }
   }
 }

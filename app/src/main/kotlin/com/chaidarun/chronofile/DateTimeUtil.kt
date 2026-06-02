@@ -19,9 +19,8 @@ private val DATE_FORMAT = DateTimeFormatter.ofPattern("EE, d MMM yyyy", Locale.U
 private val TIME_FORMAT = DateTimeFormatter.ofPattern("H:mm", Locale.US)
 private val SEARCH_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd", Locale.US)
 
-fun formatDate(date: Date) = DATE_FORMAT.format(date.toInstant().atZone(ZoneId.systemDefault()))
-
-fun formatDate(seconds: Long) = formatDate(Date(seconds * 1000))
+fun formatDate(seconds: Long) =
+  DATE_FORMAT.format(Instant.ofEpochSecond(seconds).atZone(ZoneId.systemDefault()))
 
 fun formatTime(date: Date) = TIME_FORMAT.format(date.toInstant().atZone(ZoneId.systemDefault()))
 
@@ -56,7 +55,7 @@ fun formatDuration(seconds: Long, showDays: Boolean = false, showMinutes: Boolea
   return pieces.joinToString(" ")
 }
 
-private fun getDate(timestamp: Long): LocalDate =
+fun getDate(timestamp: Long): LocalDate =
   LocalDateTime.ofInstant(Instant.ofEpochSecond(timestamp), ZoneId.systemDefault()).toLocalDate()
 
 /** Gets the timestamp of the last midnight that occurred before the given timestamp */

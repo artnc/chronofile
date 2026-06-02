@@ -5,6 +5,7 @@ package com.chaidarun.chronofile
 import android.util.Log
 import com.google.android.gms.location.LocationServices
 import kotlin.random.Random
+import kotlinx.coroutines.tasks.await
 
 data class History(val entries: List<Entry>, val currentActivityStartTime: Long) {
 
@@ -104,29 +105,14 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     private fun sanitizeActivityAndNote(activity: String, note: String?) =
       Pair(activity.trim(), if (note.isNullOrBlank()) null else note.trim())
 
-    private fun getLocation(callback: (Pair<Double, Double>?) -> Unit) {
+    /** Acquires the device's last known location, or null if unavailable or not permitted */
+    suspend fun getCurrentLocation(): Pair<Double, Double>? =
       try {
-        locationClient.lastLocation.addOnCompleteListener {
-          if (it.isSuccessful && it.result != null) {
-            callback(Pair(it.result.latitude, it.result.longitude))
-          } else {
-            callback(null)
-          }
-        }
-        return
-      } catch (_: SecurityException) {
+        locationClient.lastLocation.await()?.let { Pair(it.latitude, it.longitude) }
+      } catch (_: Exception) {
         Log.i(TAG, "Failed to get location")
+        null
       }
-      callback(null)
-    }
-
-    /** Acquires current location before dispatching action to create new entry */
-    fun addEntry(activity: String, note: String?) {
-      getLocation {
-        Store.dispatch(Action.AddEntry(activity, note, it))
-        App.toast("Recorded $activity")
-      }
-    }
 
     fun fromFile(): History {
       // Read lines

@@ -7,21 +7,23 @@
   public static *** w(...);
 }
 
-# Gson
-# https://github.com/google/gson/blob/04f66f993cc650be48ab472bbf41f5e9b568ff38/examples/android-proguard-example/proguard.cfg
--keepattributes Signature
--keepattributes *Annotation*
--dontwarn sun.misc.**
--keep class com.google.gson.examples.android.model.** { <fields>; }
--keep class * extends com.google.gson.TypeAdapter
--keep class * implements com.google.gson.TypeAdapterFactory
--keep class * implements com.google.gson.JsonSerializer
--keep class * implements com.google.gson.JsonDeserializer
--keepclassmembers,allowobfuscation class * {
-  @com.google.gson.annotations.SerializedName <fields>;
+# kotlinx.serialization
+# https://github.com/Kotlin/kotlinx.serialization#android
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+
+# Keep `Companion` object fields of serializable classes
+-if @kotlinx.serialization.Serializable class **
+-keepclassmembers class <1> {
+  static <1>$Companion Companion;
 }
--keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
--keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+
+# Keep `serializer()` on companion objects of serializable classes
+-if @kotlinx.serialization.Serializable class ** {
+  static **$* *;
+}
+-keepclassmembers class <2>$<3> {
+  kotlinx.serialization.KSerializer serializer(...);
+}
 
 # MPAndroidChart
 -keep class com.github.mikephil.charting.** { *; }

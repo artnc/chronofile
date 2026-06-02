@@ -2,22 +2,25 @@
 
 package com.chaidarun.chronofile
 
-import com.google.gson.GsonBuilder
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
+import android.util.Log
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
+@Serializable
 data class Config(
   /**
    * Map of arbitrary group names to (mutually exclusive) lists of activities.
    *
    * This is used to create buckets of activities to show in graphs.
    */
-  @Expose
-  @SerializedName("activityGroups")
+  @SerialName("activityGroups")
   private val unnormalizedActivityGroups: Map<String, List<String>>? = null,
   /** Map of NFC tag IDs to [activity, note] pairs as registered by the user. */
-  @Expose @SerializedName("nfc") val nfcTags: Map<String, List<String>>? = null,
+  @SerialName("nfc") val nfcTags: Map<String, List<String>>? = null,
 ) {
+  // Delegated (lazy) properties aren't serialized, so this stays out of the JSON
   private val activityGroups by lazy {
     unnormalizedActivityGroups
       .orEmpty()
@@ -27,27 +30,36 @@ data class Config(
 
   fun getActivityGroup(activity: String) = activityGroups[activity] ?: activity
 
-  fun serialize(): String = gson.toJson(this)
+  fun serialize(): String = json.encodeToString(serializer(), this)
 
   fun save() = IOUtil.writeFile(FILENAME, serialize())
 
   companion object {
-    private val gson by lazy {
-      GsonBuilder()
-        .disableHtmlEscaping()
-        .excludeFieldsWithoutExposeAnnotation()
-        .setPrettyPrinting()
-        .create()
+    @OptIn(ExperimentalSerializationApi::class)
+    private val json = Json {
+      // Tolerate hand-edited configs: extra keys, and lenient JSON (trailing commas etc.) that the
+      // old Gson reader accepted, so a hand-edited file can't hard-crash startup
+      ignoreUnknownKeys = true
+      isLenient = true
+      prettyPrint = true
+      prettyPrintIndent = "  "
     }
     private const val FILENAME = "chronofile.json"
 
-    private fun deserialize(text: String) = gson.fromJson(text, Config::class.java)
+    private fun deserialize(text: String) = json.decodeFromString(serializer(), text)
 
     fun fromText(text: String): Config = deserialize(text).apply { save() }
 
     fun fromFile(): Config {
-      val text = IOUtil.readFile(FILENAME)
-      return if (text == null) Config().apply { save() } else deserialize(text)
+      val text = IOUtil.readFile(FILENAME) ?: return Config().apply { save() }
+      return try {
+        deserialize(text)
+      } catch (e: Exception) {
+        // Don't save() over the unparseable file; keep it so the user can fix it by hand
+        Log.w(TAG, "Failed to parse config; falling back to empty config", e)
+        App.toast("Failed to load config")
+        Config()
+      }
     }
   }
 }

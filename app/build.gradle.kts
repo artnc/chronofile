@@ -1,7 +1,11 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-plugins { id("com.android.application") }
+plugins {
+  alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.kotlin.serialization)
+}
 
 // https://developer.android.com/studio/publish/app-signing#secure_key
 val keystoreProperties = Properties()
@@ -42,8 +46,8 @@ android {
   }
 
   buildFeatures {
-    viewBinding = true
     buildConfig = true
+    compose = true
   }
 
   buildTypes {
@@ -54,6 +58,7 @@ android {
     release {
       isDebuggable = false
       isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("config")
     }
@@ -61,17 +66,25 @@ android {
 }
 
 dependencies {
-  implementation("androidx.appcompat:appcompat:1.7.1")
-  implementation("androidx.cardview:cardview:1.0.0")
-  implementation("androidx.documentfile:documentfile:1.1.0")
-  implementation("androidx.recyclerview:recyclerview:1.4.0")
-  implementation("androidx.viewpager2:viewpager2:1.1.0")
-  implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
-  implementation("com.google.android.gms:play-services-location:21.3.0")
-  implementation("com.google.android.material:material:1.14.0")
-  implementation("com.google.code.gson:gson:2.14.0")
-  implementation("com.jakewharton.rxrelay2:rxrelay:2.1.1")
-  implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
+  implementation(platform(libs.androidx.compose.bom))
+  implementation(libs.androidx.activity.compose)
+  implementation(libs.androidx.compose.material.icons.extended)
+  implementation(libs.androidx.compose.material3)
+  implementation(libs.androidx.compose.ui)
+  implementation(libs.androidx.compose.ui.tooling.preview)
+  implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.documentfile)
+  implementation(libs.androidx.lifecycle.runtime.compose)
+  implementation(libs.androidx.lifecycle.viewmodel.compose)
+  implementation(libs.androidx.navigation.compose)
+  implementation(libs.kotlin.stdlib)
+  implementation(libs.kotlinx.coroutines.android)
+  implementation(libs.kotlinx.coroutines.play.services)
+  implementation(libs.kotlinx.serialization.json)
+  implementation(libs.mpandroidchart)
+  implementation(libs.play.services.location)
 
-  coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+  debugImplementation(libs.androidx.compose.ui.tooling)
+
+  coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

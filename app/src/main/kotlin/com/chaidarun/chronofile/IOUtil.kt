@@ -9,17 +9,22 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import java.io.FileOutputStream
-import java.util.concurrent.Executors
 import kotlin.system.measureTimeMillis
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 object IOUtil {
   /** Name of SharedPreferences key for recording the user's desired save directory */
   const val STORAGE_DIR_PREF = "STORAGE_DIR"
 
-  /** Serial executor for file I/O (mirrors the old AsyncTask serial behavior) */
-  private val ioExecutor = Executors.newSingleThreadExecutor()
-
-  fun runAsync(block: () -> Unit) = ioExecutor.execute(block)
+  /**
+   * Serial I/O scope; limitedParallelism(1) keeps writes ordered like the old single-thread pool
+   */
+  @OptIn(ExperimentalCoroutinesApi::class)
+  private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
 
   /**
    * Ideally this would use [android.preference.PreferenceManager.getDefaultSharedPreferences], but
@@ -80,11 +85,11 @@ object IOUtil {
   }
 
   fun writeFile(filename: String, text: String) {
-    ioExecutor.execute {
+    ioScope.launch {
       Log.i(TAG, "Writing $filename")
       var isSuccess = false
       val elapsedMs = measureTimeMillis {
-        val storageDir = getStorageDir() ?: return@execute
+        val storageDir = getStorageDir() ?: return@launch
         var documentFile = storageDir.findFile(filename)
         when {
           documentFile == null -> {
@@ -99,13 +104,13 @@ object IOUtil {
               )
             if (documentFile == null) {
               Log.i(TAG, "Failed to create $filename")
-              return@execute
+              return@launch
             }
             Log.i(TAG, "Created $filename")
           }
           readDocumentFile(documentFile) == text -> {
             Log.i(TAG, "File $filename unchanged; skipping write")
-            return@execute
+            return@launch
           }
         }
 
