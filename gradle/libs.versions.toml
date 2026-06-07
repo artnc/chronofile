@@ -1,6 +1,7 @@
 [versions]
 activityCompose = "1.11.0"
 agp = "9.2.0"
+androidchart = "5.2.1"
 composeBom = "2025.10.01"
 coreKtx = "1.18.0"
 coroutines = "1.10.2"
@@ -8,12 +9,12 @@ desugar = "2.1.5"
 documentfile = "1.1.0"
 kotlin = "2.3.21"
 lifecycle = "2.10.0"
-mpandroidchart = "v3.1.0"
 navigationCompose = "2.9.8"
 playServicesLocation = "21.3.0"
 serializationJson = "1.11.0"
 
 [libraries]
+androidchart = { module = "com.github.AppDevNext.AndroidChart:chartLib", version.ref = "androidchart" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -31,7 +32,6 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serializationJson" }
-mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]

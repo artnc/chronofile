@@ -58,24 +58,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.charts.RadarChart
-import com.github.mikephil.charting.components.AxisBase
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.LimitLine
-import com.github.mikephil.charting.components.YAxis
-import com.github.mikephil.charting.data.Entry as ChartEntry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.data.RadarData
-import com.github.mikephil.charting.data.RadarDataSet
-import com.github.mikephil.charting.data.RadarEntry
-import com.github.mikephil.charting.formatter.IFillFormatter
-import com.github.mikephil.charting.formatter.ValueFormatter
+import info.appdev.charting.charts.LineChart
+import info.appdev.charting.charts.PieChart
+import info.appdev.charting.charts.RadarChart
+import info.appdev.charting.components.AxisBase
+import info.appdev.charting.components.Legend
+import info.appdev.charting.components.LimitLine
+import info.appdev.charting.components.YAxis
+import info.appdev.charting.data.EntryFloat as ChartEntry
+import info.appdev.charting.data.LineData
+import info.appdev.charting.data.LineDataSet
+import info.appdev.charting.data.PieData
+import info.appdev.charting.data.PieDataSet
+import info.appdev.charting.data.PieEntryFloat
+import info.appdev.charting.data.RadarData
+import info.appdev.charting.data.RadarDataSet
+import info.appdev.charting.data.RadarEntryFloat
+import info.appdev.charting.formatter.IAxisValueFormatter
+import info.appdev.charting.formatter.IFillFormatter
+import info.appdev.charting.formatter.IValueFormatter
+import info.appdev.charting.interfaces.dataprovider.LineDataProvider
+import info.appdev.charting.interfaces.datasets.ILineDataSet
+import info.appdev.charting.interfaces.datasets.IRadarDataSet
+import info.appdev.charting.utils.ViewPortHandler
 import java.text.DateFormatSymbols
 import java.time.Instant
 import java.time.ZoneId
@@ -254,8 +259,8 @@ private fun chartTypeface(): Typeface = remember {
 
 /** Hide an axis line, its gridlines, and its labels */
 private fun AxisBase.hide() {
-  setDrawAxisLine(false)
-  setDrawGridLines(false)
+  isDrawAxisLine = false
+  isDrawGridLines = false
   setDrawLabels(false)
 }
 
@@ -339,7 +344,7 @@ private fun PresetRangeDialog(onPick: (PresetRange) -> Unit, onDismiss: () -> Un
 }
 
 /**
- * Shared envelope for the three chart tabs: hosts the MPAndroidChart [factory] view above a
+ * Shared envelope for the three chart tabs: hosts the AndroidChart [factory] view above a
  * [controls] row and runs [render] only once data is ready (config/history loaded and the selected
  * range non-empty), handing it the resolved non-null values plus the range bounds
  */
@@ -395,7 +400,7 @@ private fun PieScreen(
         setCenterTextColor(CHART_LABEL_COLOR)
         setCenterTextSize(CHART_LABEL_FONT_SIZE)
         setCenterTextTypeface(typeface)
-        setDrawEntryLabels(false)
+        isDrawEntryLabels = false
         setExtraOffsets(50f, 0f, 50f, 0f)
         setHoleColor(AndroidColor.TRANSPARENT)
         setTouchEnabled(false)
@@ -428,11 +433,14 @@ private fun PieScreen(
     val rangeSeconds = rangeEnd - rangeStart
     val (_, sliceList) =
       aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.TOTAL)
-    val pieEntries = sliceList.map { (key, value) -> PieEntry(value.toFloat(), key) }
+    val pieEntries =
+      sliceList
+        .map { (key, value) -> PieEntryFloat(value.toFloat()).apply { label = key } }
+        .toMutableList()
     val metric = graphConfig.metric
     val pieDataSet =
       PieDataSet(pieEntries, "Time").apply {
-        colors = CHART_COLORS
+        setColors(CHART_COLORS.toMutableList())
         valueLineColor = AndroidColor.TRANSPARENT
         valueLinePart1Length = 0.45f
         valueLinePart2Length = 0f
@@ -440,14 +448,20 @@ private fun PieScreen(
         valueTextSize = CHART_LABEL_FONT_SIZE
         valueTypeface = typeface
         valueFormatter =
-          object : ValueFormatter() {
-            override fun getPieLabel(value: Float, pieEntry: PieEntry?): String {
+          object : IValueFormatter {
+            // Pie passes the slice's y-value (seconds); entry carries the label
+            override fun getFormattedValue(
+              value: Float,
+              entryFloat: ChartEntry?,
+              dataSetIndex: Int,
+              viewPortHandler: ViewPortHandler?,
+            ): String {
               val num =
                 when (metric) {
                   Metric.AVERAGE -> formatDuration(value.toLong() * DAY_SECONDS / rangeSeconds)
                   Metric.TOTAL -> formatDuration(value.toLong())
                 }
-              return "${pieEntry?.label}: $num"
+              return "${(entryFloat as? PieEntryFloat)?.label}: $num"
             }
           }
         yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
@@ -531,21 +545,27 @@ private fun AreaScreen(
           ?: error("$group missing from area chart data sets")
       }
     }
-    val dataSets = groups.mapIndexed { i, group ->
-      LineDataSet(lines[group], group).apply {
+    val dataSets: List<ILineDataSet<ChartEntry>> = groups.mapIndexed { i, group ->
+      LineDataSet<ChartEntry>(lines.getValue(group), group).apply {
         val mColor = CHART_COLORS[i % CHART_COLORS.size].apply { setCircleColor(this) }
         axisDependency = YAxis.AxisDependency.LEFT
         color = mColor
         lineWidth = if (stacked) 0f else 1f
         fillAlpha = if (stacked) 255 else 0
         fillColor = mColor
-        fillFormatter = IFillFormatter { _, _ -> chart.axisLeft.axisMinimum }
-        setDrawCircles(false)
-        setDrawCircleHole(false)
-        setDrawFilled(true)
-        setDrawHorizontalHighlightIndicator(false)
-        setDrawValues(false)
-        setDrawVerticalHighlightIndicator(false)
+        fillFormatter =
+          object : IFillFormatter {
+            override fun getFillLinePosition(
+              dataSet: ILineDataSet<*>?,
+              dataProvider: LineDataProvider,
+            ) = chart.axisLeft.axisMinimum
+          }
+        isDrawCircles = false
+        isDrawCircleHoleEnabled = false
+        isDrawFilled = true
+        isHorizontalHighlightIndicator = false
+        isDrawValues = false
+        isVerticalHighlightIndicator = false
       }
     }
     with(chart.axisLeft) {
@@ -553,7 +573,7 @@ private fun AreaScreen(
       removeAllLimitLines()
       if (!stacked) addLimitLine(areaLimitLine)
     }
-    chart.data = LineData(dataSets)
+    chart.data = LineData(dataSets.toMutableList())
     chart.isScaleYEnabled = !stacked
     graphConfig.startTime?.toFloat()?.let { chart.moveViewToX(it) }
     chart.invalidate()
@@ -587,12 +607,15 @@ private fun RadarScreen(
       RadarChart(it).apply {
         description.isEnabled = false
         legend.applyStyle(font)
-        setDrawWeb(false)
+        // 5.x dropped setDrawWeb; hide the web by zeroing its alpha. A transparent webColor
+        // won't work: the renderer overrides the color's alpha with webAlpha, so transparent
+        // (0x00000000) would draw as opaque black.
+        webAlpha = 0
         setTouchEnabled(false)
         xAxis.run {
           valueFormatter =
-            object : ValueFormatter() {
-              override fun getAxisLabel(value: Float, axis: AxisBase?) =
+            object : IAxisValueFormatter {
+              override fun getFormattedValue(value: Float, axis: AxisBase?) =
                 SHORT_WEEKDAYS[((value.toInt() + 1) % 7) + 1]
             }
           textColor = CHART_LABEL_COLOR
@@ -616,18 +639,20 @@ private fun RadarScreen(
   ) { chart, config, history, rangeStart, rangeEnd ->
     val (buckets, sliceList) =
       aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.DAY_OF_WEEK)
-    val radarDataSets = sliceList.mapIndexed { i, (slice, _) ->
+    val radarDataSets: List<IRadarDataSet> = sliceList.mapIndexed { i, (slice, _) ->
       val radarEntries =
-        (1L until 8L).map { dayOfWeek ->
-          val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
-          RadarEntry(sqrt(seconds.toDouble()).toFloat())
-        }
+        (1L until 8L)
+          .map { dayOfWeek ->
+            val seconds = buckets.getOrDefault(dayOfWeek, emptyMap()).getOrDefault(slice, 0)
+            RadarEntryFloat(sqrt(seconds.toDouble()).toFloat())
+          }
+          .toMutableList()
       RadarDataSet(radarEntries, slice).apply {
         color = CHART_COLORS[i % CHART_COLORS.size]
-        setDrawValues(false)
+        isDrawValues = false
       }
     }
-    chart.data = RadarData(radarDataSets)
+    chart.data = RadarData(radarDataSets.toMutableList())
     chart.invalidate()
   }
 }

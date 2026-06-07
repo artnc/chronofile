@@ -25,5 +25,5 @@
   kotlinx.serialization.KSerializer serializer(...);
 }
 
-# MPAndroidChart
--keep class com.github.mikephil.charting.** { *; }
+# AndroidChart (AppDevNext fork)
+-keep class info.appdev.charting.** { *; }
