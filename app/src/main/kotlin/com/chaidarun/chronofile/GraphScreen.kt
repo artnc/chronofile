@@ -205,7 +205,6 @@ fun GraphScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GraphDatePickerDialog(
   initialSeconds: Long,

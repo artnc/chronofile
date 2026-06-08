@@ -10,9 +10,9 @@ import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import java.io.FileOutputStream
 import kotlin.system.measureTimeMillis
+import kotlin.time.measureTimedValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
@@ -23,7 +23,6 @@ object IOUtil {
   /**
    * Serial I/O scope; limitedParallelism(1) keeps writes ordered like the old single-thread pool
    */
-  @OptIn(ExperimentalCoroutinesApi::class)
   private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
 
   /**
@@ -73,13 +72,14 @@ object IOUtil {
 
   fun readFile(filename: String): String? {
     Log.i(TAG, "Reading $filename")
-    var result: String? = null
-    val elapsedMs = measureTimeMillis {
-      result = readDocumentFile(getStorageDir()?.findFile(filename) ?: return@measureTimeMillis)
-    }
+    val (result, elapsed) =
+      measureTimedValue {
+        readDocumentFile(getStorageDir()?.findFile(filename) ?: return@measureTimedValue null)
+      }
     Log.i(
       TAG,
-      if (result == null) "Failed to read $filename" else "Read $filename in $elapsedMs ms",
+      if (result == null) "Failed to read $filename"
+      else "Read $filename in ${elapsed.inWholeMilliseconds} ms",
     )
     return result
   }

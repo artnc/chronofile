@@ -22,7 +22,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
 
-/** Type-safe navigation destinations; see [androidx.navigation.compose.composable] reified overload */
+/**
+ * Type-safe navigation destinations; see [androidx.navigation.compose.composable] reified overload
+ */
 @Serializable data object Editor
 
 @Serializable data object Graph
@@ -110,7 +112,7 @@ class MainActivity : ComponentActivity() {
 
     val tag =
       IntentCompat.getParcelableExtra(intent, NfcAdapter.EXTRA_TAG, Tag::class.java) ?: return
-    val id = tag.id.toHexString().uppercase()
+    val id = tag.id.toHexString(HexFormat.UpperCase)
     Log.i(TAG, "Detected NFC tag: $id")
     val entryToAdd = viewModel.state.value.config?.nfcTags?.get(id)
     val current = nfcState

@@ -6,6 +6,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -78,7 +79,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.Date
 import java.util.Locale
-import kotlin.system.measureTimeMillis
+import kotlin.time.measureTimedValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -218,9 +219,8 @@ fun TimelineScreen(
     remember(history, query, refreshTick) {
       if (history == null) TimelineBuild(emptyList(), 0, 0L)
       else {
-        var result: TimelineBuild
-        val ms = measureTimeMillis { result = buildTimeline(history, query) }
-        android.util.Log.i(TAG, "Rendered history view in $ms ms")
+        val (result, elapsed) = measureTimedValue { buildTimeline(history, query) }
+        Log.i(TAG, "Rendered history view in ${elapsed.inWholeMilliseconds} ms")
         result
       }
     }
@@ -595,7 +595,6 @@ private fun InlineTextField(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchDialog(
   initial: String,
@@ -628,7 +627,6 @@ private fun SearchDialog(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EntryEditDialog(
   entry: Entry,
@@ -680,7 +678,6 @@ private fun EntryEditDialog(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NfcDialog(
   state: NfcDialogState,

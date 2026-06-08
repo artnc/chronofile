@@ -38,9 +38,9 @@ android {
 
   defaultConfig {
     applicationId = "com.chaidarun.chronofile"
-    compileSdk = 36
+    compileSdk = 37
     minSdk = 23
-    targetSdk = 36
+    targetSdk = 37
     versionCode = 6
     versionName = "1.1.1"
   }

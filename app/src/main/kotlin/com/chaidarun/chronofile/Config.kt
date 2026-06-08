@@ -3,7 +3,6 @@
 package com.chaidarun.chronofile
 
 import android.util.Log
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -35,7 +34,6 @@ data class Config(
   fun save() = IOUtil.writeFile(FILENAME, serialize())
 
   companion object {
-    @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
       // Tolerate hand-edited configs: extra keys, and lenient JSON (trailing commas etc.) that the
       // old Gson reader accepted, so a hand-edited file can't hard-crash startup
