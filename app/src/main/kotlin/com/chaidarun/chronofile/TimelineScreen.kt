@@ -45,6 +45,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,8 +57,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,14 +68,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -82,7 +80,6 @@ import java.util.Locale
 import kotlin.time.measureTimedValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val MAX_ENTRIES_TO_SHOW = 1000
@@ -173,7 +170,6 @@ fun TimelineScreen(
   val query = state.searchQuery
   val context = LocalContext.current
   val focusManager = LocalFocusManager.current
-  val scope = rememberCoroutineScope()
   var showSearchDialog by remember { mutableStateOf(false) }
   var showMenu by remember { mutableStateOf(false) }
   var editingEntry by remember { mutableStateOf<Entry?>(null) }
@@ -337,8 +333,6 @@ fun TimelineScreen(
                 item,
                 onClick = { viewModel.addEntry(item.entry.activity, item.entry.note) },
                 onEdit = { editingEntry = item.entry },
-                onDelete = { viewModel.dispatch(Action.RemoveEntry(item.entry.startTime)) },
-                onShowLocation = { scope.launch { toastEntryLocation(item.entry) } },
               )
           }
         }
@@ -371,6 +365,10 @@ fun TimelineScreen(
   editingEntry?.let { entry ->
     EntryEditDialog(
       entry = entry,
+      onDelete = {
+        viewModel.dispatch(Action.RemoveEntry(entry.startTime))
+        editingEntry = null
+      },
       onDismiss = { editingEntry = null },
       onConfirm = { startTime, activity, note ->
         viewModel.dispatch(Action.EditEntry(entry.startTime, startTime, activity, note))
@@ -380,23 +378,31 @@ fun TimelineScreen(
   }
 }
 
-/** Reverse-geocodes an entry's coordinates and toasts the resulting address */
-private suspend fun toastEntryLocation(entry: Entry) {
-  val latLon = entry.latLon
-  if (latLon == null) {
-    App.toast("No location data available")
-    return
+/** In-memory cache of resolved addresses keyed by (lat, lon), reused across dialog opens */
+private val geocodeCache = mutableMapOf<Pair<Double, Double>, String>()
+
+/** Trailing zip code and country, stripped from displayed addresses only */
+private val addressSuffixRegex = Regex(",? \\d{5},? USA?$")
+
+/** Reverse-geocodes an entry's coordinates into a human-readable address, or null if unavailable */
+private suspend fun geocodeEntry(entry: Entry): String? {
+  val latLon = entry.latLon ?: return null
+  geocodeCache[latLon]?.let {
+    return it
   }
-  val address =
-    withContext(Dispatchers.IO) {
+  return withContext(Dispatchers.IO) {
       try {
         @Suppress("DEPRECATION")
-        Geocoder(App.ctx, Locale.US).getFromLocation(latLon.first, latLon.second, 1)?.firstOrNull()
+        Geocoder(App.ctx, Locale.US)
+          .getFromLocation(latLon.first, latLon.second, 1)
+          ?.firstOrNull()
+          ?.getAddressLine(0)
       } catch (_: Exception) {
         null
       }
     }
-  address?.getAddressLine(0)?.let { App.toast(it) }
+    // Cache only successful lookups so transient failures get retried
+    ?.also { geocodeCache[latLon] = it }
 }
 
 @Composable
@@ -443,79 +449,28 @@ private fun TimeRow(item: TimelineItem.TimeItem) {
 }
 
 @Composable
-private fun EntryRow(
-  item: TimelineItem.EntryItem,
-  onClick: () -> Unit,
-  onEdit: () -> Unit,
-  onDelete: () -> Unit,
-  onShowLocation: () -> Unit,
-) {
+private fun EntryRow(item: TimelineItem.EntryItem, onClick: () -> Unit, onEdit: () -> Unit) {
   val entry = item.entry
-  var showMenu by remember { mutableStateOf(false) }
-  Box {
-    Row(
-      modifier =
-        Modifier.fillMaxWidth()
-          .pointerInput(entry) {
-            detectTapGestures(onLongPress = { showMenu = true }, onTap = { onClick() })
-          }
-          .padding(start = 16.dp, end = 20.dp),
-      verticalAlignment = Alignment.Top,
-    ) {
-      val entryStyle = MaterialTheme.typography.bodyLarge
-      Text(text = entry.activity, color = ColorSecondaryText, style = entryStyle)
-      Spacer(Modifier.width(8.dp))
-      Text(
-        text = entry.note.orEmpty(),
-        color = ColorFadedText,
-        style = entryStyle,
-        modifier = Modifier.weight(1f),
-      )
-      Text(text = item.duration, color = ColorSecondaryText, style = entryStyle)
-    }
-    if (showMenu) {
-      // Horizontal floating action bar (like the system text-selection toolbar) instead of a
-      // vertical dropdown, anchored just above the long-pressed row
-      Popup(
-        alignment = Alignment.TopCenter,
-        offset = with(LocalDensity.current) { IntOffset(0, -8.dp.roundToPx()) },
-        onDismissRequest = { showMenu = false },
-        properties = PopupProperties(focusable = true),
-      ) {
-        Surface(shape = RoundedCornerShape(8.dp), color = ColorPrimary, shadowElevation = 4.dp) {
-          val actionColors = ButtonDefaults.textButtonColors(contentColor = Color.White)
-          Row {
-            TextButton(
-              onClick = {
-                showMenu = false
-                onEdit()
-              },
-              colors = actionColors,
-            ) {
-              Text("Edit")
-            }
-            TextButton(
-              onClick = {
-                showMenu = false
-                onShowLocation()
-              },
-              colors = actionColors,
-            ) {
-              Text("View location")
-            }
-            TextButton(
-              onClick = {
-                showMenu = false
-                onDelete()
-              },
-              colors = actionColors,
-            ) {
-              Text("Remove")
-            }
-          }
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        // Long-press opens the edit dialog directly; tap re-logs the activity
+        .pointerInput(entry) {
+          detectTapGestures(onLongPress = { onEdit() }, onTap = { onClick() })
         }
-      }
-    }
+        .padding(start = 16.dp, end = 20.dp),
+    verticalAlignment = Alignment.Top,
+  ) {
+    val entryStyle = MaterialTheme.typography.bodyLarge
+    Text(text = entry.activity, color = ColorSecondaryText, style = entryStyle)
+    Spacer(Modifier.width(8.dp))
+    Text(
+      text = entry.note.orEmpty(),
+      color = ColorFadedText,
+      style = entryStyle,
+      modifier = Modifier.weight(1f),
+    )
+    Text(text = item.duration, color = ColorSecondaryText, style = entryStyle)
   }
 }
 
@@ -630,50 +585,75 @@ private fun SearchDialog(
 @Composable
 private fun EntryEditDialog(
   entry: Entry,
+  onDelete: () -> Unit,
   onDismiss: () -> Unit,
   onConfirm: (startTime: String, activity: String, note: String) -> Unit,
 ) {
   var startTime by remember { mutableStateOf("") }
   var activity by remember { mutableStateOf(entry.activity) }
   var note by remember { mutableStateOf(entry.note.orEmpty()) }
+  // Title shows the entry's reverse-geocoded location, resolved asynchronously
+  val title by
+    produceState("Locating…", entry) {
+      // Strip the trailing zip code and country from the displayed address only (cache keeps it)
+      value = geocodeEntry(entry)?.replace(addressSuffixRegex, "") ?: "No location"
+    }
   // Auto-focus the first field (and pop the keyboard) when the dialog opens
   val focusRequester = remember { FocusRequester() }
   LaunchedEffect(Unit) {
     delay(100)
     focusRequester.requestFocus()
   }
+  // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than input
+  // text
+  val fieldColors =
+    OutlinedTextFieldDefaults.colors(
+      focusedLabelColor = ColorFadedText,
+      unfocusedLabelColor = ColorFadedText,
+    )
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("Edit entry") },
+    title = { Text(title, style = MaterialTheme.typography.bodyMedium) },
     text = {
-      Column {
-        OutlinedTextField(
-          value = startTime,
-          onValueChange = { startTime = it },
-          label = { Text("Start time") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-        )
-        OutlinedTextField(
-          value = activity,
-          onValueChange = { activity = it },
-          label = { Text("Activity") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-        )
-        OutlinedTextField(
-          value = note,
-          onValueChange = { note = it },
-          label = { Text("Note") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-        )
+      // AlertDialog forces bodyMedium onto its text slot; restore bodyLarge for all fields at once
+      ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
+        Column {
+          OutlinedTextField(
+            value = startTime,
+            onValueChange = { startTime = it },
+            label = { Text("Start time") },
+            singleLine = true,
+            colors = fieldColors,
+            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+          )
+          OutlinedTextField(
+            value = activity,
+            onValueChange = { activity = it },
+            label = { Text("Activity") },
+            singleLine = true,
+            colors = fieldColors,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+          )
+          OutlinedTextField(
+            value = note,
+            onValueChange = { note = it },
+            label = { Text("Note") },
+            singleLine = true,
+            colors = fieldColors,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+          )
+        }
       }
     },
     confirmButton = {
-      TextButton(onClick = { onConfirm(startTime, activity, note) }) { Text("OK") }
+      // Delete sits far left (away from Cancel/Save) so it's harder to misclick
+      Row(modifier = Modifier.fillMaxWidth()) {
+        TextButton(onClick = onDelete) { Text("Delete") }
+        Spacer(Modifier.weight(1f))
+        TextButton(onClick = onDismiss) { Text("Cancel") }
+        TextButton(onClick = { onConfirm(startTime, activity, note) }) { Text("Save") }
+      }
     },
-    dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     containerColor = ColorPrimaryDark,
   )
 }
