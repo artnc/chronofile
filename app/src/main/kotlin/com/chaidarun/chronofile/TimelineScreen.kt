@@ -60,6 +60,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -67,8 +68,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -79,7 +82,7 @@ import java.util.Date
 import java.util.Locale
 import kotlin.time.measureTimedValue
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 private const val MAX_ENTRIES_TO_SHOW = 1000
@@ -550,6 +553,26 @@ private fun InlineTextField(
   )
 }
 
+/**
+ * Auto-focuses this field (popping the soft keyboard) as a dialog opens, replacing the old fixed
+ * `delay(100)` guess. Requesting focus needs two things to be true at once: the field's node must
+ * be laid out, and the dialog window must hold focus (else the IME can't attach). We wait for both
+ * via [onGloballyPositioned] and [WindowInfo.isWindowFocused], then request once. Gating on
+ * placement is what fixes the intermittent miss: a bare window-focus listener can fire its only
+ * emission before the field is placed, and since the value never changes again it's never retried
+ */
+@Composable
+private fun Modifier.autoFocus(): Modifier {
+  val focusRequester = remember { FocusRequester() }
+  val windowInfo = LocalWindowInfo.current
+  var placed by remember { mutableStateOf(false) }
+  LaunchedEffect(focusRequester) {
+    snapshotFlow { placed && windowInfo.isWindowFocused }.first { it }
+    focusRequester.requestFocus()
+  }
+  return focusRequester(focusRequester).onGloballyPositioned { placed = true }
+}
+
 @Composable
 private fun SearchDialog(
   initial: String,
@@ -558,13 +581,6 @@ private fun SearchDialog(
   onClear: () -> Unit,
 ) {
   var text by remember { mutableStateOf(initial) }
-  // Auto-focus the field (and pop the keyboard) when the dialog opens, like the old AppCompat
-  // dialog
-  val focusRequester = remember { FocusRequester() }
-  LaunchedEffect(Unit) {
-    delay(100)
-    focusRequester.requestFocus()
-  }
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text("Search timeline") },
@@ -573,7 +589,8 @@ private fun SearchDialog(
         value = text,
         onValueChange = { text = it },
         singleLine = true,
-        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+        // Auto-focus (and pop the keyboard) when the dialog opens, like the old AppCompat dialog
+        modifier = Modifier.fillMaxWidth().autoFocus(),
       )
     },
     confirmButton = { TextButton(onClick = { onSubmit(text) }) { Text("Go") } },
@@ -598,12 +615,6 @@ private fun EntryEditDialog(
       // Strip the trailing zip code and country from the displayed address only (cache keeps it)
       value = geocodeEntry(entry)?.replace(addressSuffixRegex, "") ?: "No location"
     }
-  // Auto-focus the first field (and pop the keyboard) when the dialog opens
-  val focusRequester = remember { FocusRequester() }
-  LaunchedEffect(Unit) {
-    delay(100)
-    focusRequester.requestFocus()
-  }
   // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than input
   // text
   val fieldColors =
@@ -624,7 +635,8 @@ private fun EntryEditDialog(
             label = { Text("Start time") },
             singleLine = true,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+            // Auto-focus the first field (and pop the keyboard) when the dialog opens
+            modifier = Modifier.fillMaxWidth().autoFocus(),
           )
           OutlinedTextField(
             value = activity,
@@ -672,7 +684,6 @@ fun NfcDialog(
       is NfcDialogState.Mismatch -> "Unusable NFC tag"
       is NfcDialogState.Ready -> "Register NFC tag"
     }
-  val focusRequester = remember { FocusRequester() }
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text(title) },
@@ -691,11 +702,6 @@ fun NfcDialog(
                 " phones and credit cards."
             )
           is NfcDialogState.Ready -> {
-            // Auto-focus the activity field (and pop the keyboard) once we reach the Ready step
-            LaunchedEffect(Unit) {
-              delay(100)
-              focusRequester.requestFocus()
-            }
             Text(
               "Enter the activity name and note to record whenever you tap this tag from now on." +
                 " You can edit or delete this later in Settings."
@@ -706,7 +712,8 @@ fun NfcDialog(
                 onValueChange = onActivityChange,
                 label = { Text("Activity") },
                 singleLine = true,
-                modifier = Modifier.weight(1f).padding(end = 4.dp).focusRequester(focusRequester),
+                // Auto-focus the activity field (and pop the keyboard) once we reach the Ready step
+                modifier = Modifier.weight(1f).padding(end = 4.dp).autoFocus(),
               )
               OutlinedTextField(
                 value = state.note,
