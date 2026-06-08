@@ -630,21 +630,12 @@ private fun EntryEditDialog(
       ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
         Column {
           OutlinedTextField(
-            value = startTime,
-            onValueChange = { startTime = it },
-            label = { Text("Start time") },
-            singleLine = true,
-            colors = fieldColors,
-            // Auto-focus the first field (and pop the keyboard) when the dialog opens
-            modifier = Modifier.fillMaxWidth().autoFocus(),
-          )
-          OutlinedTextField(
             value = activity,
             onValueChange = { activity = it },
             label = { Text("Activity") },
             singleLine = true,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
           )
           OutlinedTextField(
             value = note,
@@ -653,6 +644,15 @@ private fun EntryEditDialog(
             singleLine = true,
             colors = fieldColors,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+          )
+          OutlinedTextField(
+            value = startTime,
+            onValueChange = { startTime = it },
+            label = { Text("Start time") },
+            singleLine = true,
+            colors = fieldColors,
+            // Auto-focus the time field (and pop the keyboard) when the dialog opens
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).autoFocus(),
           )
         }
       }
