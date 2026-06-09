@@ -5,7 +5,6 @@ package com.chaidarun.chronofile
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Geocoder
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,9 +29,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -79,11 +79,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.Date
-import java.util.Locale
 import kotlin.time.measureTimedValue
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
 
 private const val MAX_ENTRIES_TO_SHOW = 1000
 
@@ -165,6 +162,7 @@ private fun buildTimeline(history: History, query: String?): TimelineBuild {
 fun TimelineScreen(
   viewModel: MainViewModel,
   refreshTick: Int,
+  onOpenEarth: () -> Unit,
   onOpenSettings: () -> Unit,
   onOpenStats: () -> Unit,
 ) {
@@ -249,8 +247,11 @@ fun TimelineScreen(
           IconButton(onClick = { showSearchDialog = true }) {
             Icon(Icons.Filled.Search, contentDescription = "Search")
           }
+          IconButton(onClick = onOpenEarth) {
+            Icon(Icons.Filled.Public, contentDescription = "Map")
+          }
           IconButton(onClick = onOpenStats) {
-            Icon(Icons.Filled.Visibility, contentDescription = "Stats")
+            Icon(Icons.Filled.BarChart, contentDescription = "Stats")
           }
           IconButton(onClick = { showMenu = true }) {
             Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
@@ -379,33 +380,6 @@ fun TimelineScreen(
       },
     )
   }
-}
-
-/** In-memory cache of resolved addresses keyed by (lat, lon), reused across dialog opens */
-private val geocodeCache = mutableMapOf<Pair<Double, Double>, String>()
-
-/** Trailing zip code and country, stripped from displayed addresses only */
-private val addressSuffixRegex = Regex(",? \\d{5},? USA?$")
-
-/** Reverse-geocodes an entry's coordinates into a human-readable address, or null if unavailable */
-private suspend fun geocodeEntry(entry: Entry): String? {
-  val latLon = entry.latLon ?: return null
-  geocodeCache[latLon]?.let {
-    return it
-  }
-  return withContext(Dispatchers.IO) {
-      try {
-        @Suppress("DEPRECATION")
-        Geocoder(App.ctx, Locale.US)
-          .getFromLocation(latLon.first, latLon.second, 1)
-          ?.firstOrNull()
-          ?.getAddressLine(0)
-      } catch (_: Exception) {
-        null
-      }
-    }
-    // Cache only successful lookups so transient failures get retried
-    ?.also { geocodeCache[latLon] = it }
 }
 
 @Composable
@@ -610,11 +584,7 @@ private fun EntryEditDialog(
   var activity by remember { mutableStateOf(entry.activity) }
   var note by remember { mutableStateOf(entry.note.orEmpty()) }
   // Title shows the entry's reverse-geocoded location, resolved asynchronously
-  val title by
-    produceState("Locating…", entry) {
-      // Strip the trailing zip code and country from the displayed address only (cache keeps it)
-      value = geocodeEntry(entry)?.replace(addressSuffixRegex, "") ?: "No location"
-    }
+  val title by produceState("Locating…", entry) { value = geocodeEntry(entry) ?: "No location" }
   // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than input
   // text
   val fieldColors =

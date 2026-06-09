@@ -25,6 +25,8 @@ import kotlinx.serialization.Serializable
 /**
  * Type-safe navigation destinations; see [androidx.navigation.compose.composable] reified overload
  */
+@Serializable data object Earth
+
 @Serializable data object Editor
 
 @Serializable data object Graph
@@ -53,9 +55,13 @@ class MainActivity : ComponentActivity() {
             TimelineScreen(
               viewModel = viewModel,
               refreshTick = refreshTick,
+              onOpenEarth = { navController.navigate(Earth) },
               onOpenSettings = { navController.navigate(Editor) },
               onOpenStats = { navController.navigate(Graph) },
             )
+          }
+          composable<Earth> {
+            EarthScreen(viewModel = viewModel, onNavigateUp = { navController.popBackStack() })
           }
           composable<Editor> {
             EditorScreen(
