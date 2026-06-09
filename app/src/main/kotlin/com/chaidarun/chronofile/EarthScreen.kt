@@ -9,14 +9,12 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,7 +50,6 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -523,28 +519,15 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
             .clip(RoundedCornerShape(12.dp))
             .background(ColorPrimaryDark)
             .selectableGroup()
-            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .padding(vertical = 8.dp, horizontal = 14.dp)
       ) {
         for (m in MapMode.entries) {
-          Row(
-            modifier =
-              Modifier.selectable(
-                  selected = mode == m,
-                  onClick = { mode = m },
-                  role = Role.RadioButton,
-                )
-                .padding(vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            // onClick = null so the row's selectable owns the click and a11y semantics
-            RadioButton(selected = mode == m, onClick = null)
-            Text(
-              m.name,
-              color = Color.White,
-              modifier = Modifier.padding(start = 4.dp),
-              style = MaterialTheme.typography.bodyMedium,
-            )
-          }
+          AppRadio(
+            selected = mode == m,
+            onClick = { mode = m },
+            label = m.name,
+            modifier = Modifier.padding(vertical = 4.dp),
+          )
         }
       }
     }

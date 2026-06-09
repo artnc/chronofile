@@ -11,22 +11,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,8 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -53,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
@@ -653,51 +644,5 @@ private fun RadarScreen(
     }
     chart.data = RadarData(radarDataSets.toMutableList())
     chart.invalidate()
-  }
-}
-
-// ─── Shared bits ─────────────────────────────────────────────────────────────
-
-@Composable
-private fun AppCheckbox(
-  checked: Boolean,
-  onCheckedChange: (Boolean) -> Unit,
-  label: String,
-  modifier: Modifier = Modifier,
-) {
-  Row(
-    modifier =
-      modifier.toggleable(value = checked, role = Role.Checkbox, onValueChange = onCheckedChange),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Checkbox(
-      checked = checked,
-      onCheckedChange = null,
-      colors =
-        CheckboxDefaults.colors(
-          checkedColor = ColorAccent,
-          uncheckedColor = Color.White,
-          checkmarkColor = ColorPrimaryDark,
-        ),
-    )
-    Spacer(Modifier.width(4.dp))
-    Text(label, color = Color.White, style = MaterialTheme.typography.bodyMedium)
-  }
-}
-
-@Composable
-private fun AppRadio(selected: Boolean, onClick: () -> Unit, label: String) {
-  Row(
-    modifier = Modifier.selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    RadioButton(
-      selected = selected,
-      onClick = null,
-      colors =
-        RadioButtonDefaults.colors(selectedColor = ColorAccent, unselectedColor = Color.White),
-    )
-    Spacer(Modifier.width(4.dp))
-    Text(label, color = Color.White, style = MaterialTheme.typography.bodyMedium)
   }
 }
