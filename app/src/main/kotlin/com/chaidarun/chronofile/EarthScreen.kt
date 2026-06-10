@@ -59,8 +59,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.util.Date
+import kotlin.math.asin
+import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -101,6 +106,42 @@ private val MAX_RADIUS_DP = 18.dp
 
 /** Minimum empty space kept between neighboring cluster circles */
 private val GAP_DP = 2.dp
+
+/** Activities that mark a run as airport transit, making it a layover candidate */
+private val TRANSIT_ACTIVITIES =
+  setOf(
+    "air",
+    "air travel",
+    "airport",
+    "airplane",
+    "airplane flight",
+    "flight",
+    "fly",
+    "flying",
+    "layover",
+    "plane",
+    "plane flight",
+  )
+
+/** Max distance from a layover's first located entry for the rest to count as the same airport */
+private const val LAYOVER_RADIUS_MI = 4.0
+
+/**
+ * A jump at least this far (miles) between neighboring located entries implies a flight, not ground
+ * travel, between them. In the data, ground hops between logged points top out ~35mi while the
+ * shortest flight leg is ~44mi, so 40 cleanly splits them
+ */
+private const val LAYOVER_JUMP_MI = 40.0
+
+/** Great-circle distance in miles between two (lat, lon) points */
+private fun haversineMi(a: Pair<Double, Double>, b: Pair<Double, Double>): Double {
+  val dLat = Math.toRadians(b.first - a.first)
+  val dLon = Math.toRadians(b.second - a.second)
+  val s =
+    sin(dLat / 2).pow(2) +
+      cos(Math.toRadians(a.first)) * cos(Math.toRadians(b.first)) * sin(dLon / 2).pow(2)
+  return 2 * 3958.8 * asin(sqrt(s))
+}
 
 /** Style for the count label drawn inside a multi-entry cluster circle */
 private val countLabelStyle =
@@ -310,12 +351,42 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
       history?.entries.orEmpty().mapNotNull { e -> e.latLon?.let { normalize(it) to e } }
     }
 
+  // Start times of entries that belong to an airport layover. A layover is a tight (<=4mi) run of
+  // transit entries we both flew into and out of, spotted by a long location jump on either side.
+  // Going by jumps rather than logged flights catches connections even when a flight leg wasn't
+  // logged, and folds in frozen-GPS in-flight entries that pile up at the departure airport.
+  // Origins
+  // (drove in, flew out) and destinations (flew in, drove out) have a jump on only one side, so
+  // they
+  // survive. Keyed by startTime (unique) so membership tests stay cheap. See TRANSIT_ACTIVITIES
+  val layovers =
+    remember(points) {
+      val located = points.map { it.second }
+      val ll = located.map { it.latLon!! }
+      buildSet {
+        var s = 0
+        while (s < located.size) {
+          // Grow a run of entries within 4mi of its first entry (a single airport)
+          var e = s
+          while (e + 1 < located.size && haversineMi(ll[e + 1], ll[s]) <= LAYOVER_RADIUS_MI) e++
+          // Hide it only if it is airport transit reached and left by air (a jump on both sides)
+          val isTransit = (s..e).any { located[it].activity.lowercase() in TRANSIT_ACTIVITIES }
+          val flewIn = s > 0 && haversineMi(ll[s - 1], ll[s]) >= LAYOVER_JUMP_MI
+          val flewOut = e < located.size - 1 && haversineMi(ll[e + 1], ll[e]) >= LAYOVER_JUMP_MI
+          if (isTransit && flewIn && flewOut) for (k in s..e) add(located[k].startTime)
+          s = e + 1
+        }
+      }
+    }
+
   var canvasSize by remember { mutableStateOf(IntSize.Zero) }
   var scale by remember { mutableFloatStateOf(1f) }
   var offset by remember { mutableStateOf(Offset.Unspecified) }
   var selected by remember { mutableStateOf<List<Entry>?>(null) }
   // Whether circles count every entry or only the distinct days they fall on
   var mode by remember { mutableStateOf(MapMode.Activities) }
+  // Whether layover (airport connection) entries are shown; off by default to declutter the map
+  var includeLayovers by remember { mutableStateOf(false) }
   // Stop auto-fitting once the user pans/zooms so we don't yank the view back under their finger
   var userMoved by remember { mutableStateOf(false) }
   // Longitude to center on initially; defaults to the prime meridian, refined once location
@@ -354,13 +425,19 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
       }
   }
 
+  // Drop layover entries unless the user opts to include them
+  val visiblePoints =
+    remember(points, layovers, includeLayovers) {
+      if (includeLayovers) points else points.filterNot { (_, e) -> e.startTime in layovers }
+    }
+
   // Re-cluster on the throttled zoom or a data change, never on pan
   val clusters =
-    remember(points, clusterScale, baseW) {
+    remember(visiblePoints, clusterScale, baseW) {
       if (baseW == 0f) emptyList()
       else
         clusterEntries(
-          points,
+          visiblePoints,
           baseW,
           baseH,
           clusterScale,
@@ -518,17 +595,24 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
             .padding(16.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(ColorPrimaryDark)
-            .selectableGroup()
             .padding(vertical = 8.dp, horizontal = 14.dp)
       ) {
-        for (m in MapMode.entries) {
-          AppRadio(
-            selected = mode == m,
-            onClick = { mode = m },
-            label = m.name,
-            modifier = Modifier.padding(vertical = 4.dp),
-          )
+        Column(Modifier.selectableGroup()) {
+          for (m in MapMode.entries) {
+            AppRadio(
+              selected = mode == m,
+              onClick = { mode = m },
+              label = m.name,
+              modifier = Modifier.padding(vertical = 4.dp),
+            )
+          }
         }
+        AppCheckbox(
+          checked = includeLayovers,
+          onCheckedChange = { includeLayovers = it },
+          label = "Include layovers",
+          modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+        )
       }
     }
   }
