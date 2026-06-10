@@ -157,8 +157,8 @@ private enum class MapMode {
 }
 
 // Minimal GeoJSON shapes. mapshaper emits a GeometryCollection (not a FeatureCollection) once all
-// feature properties are stripped. Geometry entries are nullable since Natural Earth can emit empty
-// ones
+// feature properties are stripped. Geometry entries are nullable since Natural Earth can emit
+// empty ones
 @Serializable private class GeometryCollection(val geometries: List<Geometry?>)
 
 @Serializable private class Geometry(val coordinates: JsonElement, val type: String)
@@ -355,10 +355,9 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   // transit entries we both flew into and out of, spotted by a long location jump on either side.
   // Going by jumps rather than logged flights catches connections even when a flight leg wasn't
   // logged, and folds in frozen-GPS in-flight entries that pile up at the departure airport.
-  // Origins
-  // (drove in, flew out) and destinations (flew in, drove out) have a jump on only one side, so
-  // they
-  // survive. Keyed by startTime (unique) so membership tests stay cheap. See TRANSIT_ACTIVITIES
+  // Origins (drove in, flew out) and destinations (flew in, drove out) have a jump on only one
+  // side, so they survive. Keyed by startTime (unique) so membership tests stay cheap.
+  // See TRANSIT_ACTIVITIES
   val layovers =
     remember(points) {
       val located = points.map { it.second }
@@ -389,8 +388,8 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   var includeLayovers by remember { mutableStateOf(false) }
   // Stop auto-fitting once the user pans/zooms so we don't yank the view back under their finger
   var userMoved by remember { mutableStateOf(false) }
-  // Longitude to center on initially; defaults to the prime meridian, refined once location
-  // resolves
+  // Longitude to center on initially; defaults to the prime meridian, refined once
+  // location resolves
   var initialLon by remember { mutableStateOf(0.0) }
 
   val baseW = canvasSize.width.toFloat()
@@ -449,10 +448,8 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
     }
 
   // Country paths in scale-1 pixel space (normalized × base dims), rebuilt only when the geometry
-  // or
-  // canvas width changes. The draw pass then re-applies just a pan+zoom transform each frame
-  // instead
-  // of allocating a fresh Path and re-projecting every vertex
+  // or canvas width changes. The draw pass then re-applies just a pan+zoom transform each frame
+  // instead of allocating a fresh Path and re-projecting every vertex
   val countryPaths =
     remember(countries, baseW) {
       countries.map { ring ->
@@ -510,8 +507,8 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
         modifier =
           Modifier.fillMaxSize()
             .onSizeChanged { canvasSize = it }
-            // scale/offset are MutableState so reads stay live; key on canvasSize to refresh
-            // baseW/baseH
+            // scale/offset are MutableState so reads stay live; key on canvasSize to
+            // refresh baseW/baseH
             .pointerInput(canvasSize) {
               detectTransformGestures { centroid, pan, zoom, _ ->
                 userMoved = true
@@ -525,8 +522,8 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
             // Key on clusters too so the hit-test sees the current grouping after a zoom
             .pointerInput(canvasSize, clusters) {
               detectTapGestures { tap ->
-                // Select the nearest cluster within the hit radius and list its entries, newest
-                // first
+                // Select the nearest cluster within the hit radius and list its entries,
+                // newest first
                 val hit =
                   clusters
                     .map {
@@ -549,8 +546,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
         // scale so the outline stays 1dp wide after the transform scales it back up
         // Opaque equivalent of a 22%-white line over the ocean. Opaque strokes don't accumulate, so
         // internal country borders (stroked twice, once per adjacent country) render the same as
-        // the
-        // single-stroked coastlines instead of looking brighter
+        // the single-stroked coastlines instead of looking brighter
         val outlineColor = Color.White.copy(alpha = 0.22f).compositeOver(ColorPrimaryDark)
         val outlineStroke = Stroke(width = 1.dp.toPx() / scale)
         withTransform({

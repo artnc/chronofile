@@ -108,8 +108,8 @@ fun GraphScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   // Which date-range endpoint the picker is editing (true = start, false = end, null = closed)
   var datePickerForStart by remember { mutableStateOf<Boolean?>(null) }
 
-  // Apply the default preset range the first time history becomes available; on cold start
-  // the hydrate runs async and history is null when this screen first composes.
+  // Apply the default preset range the first time history becomes available; on cold start the
+  // hydrate runs async and history is null when this screen first composes.
   LaunchedEffect(history) {
     if (history != null && graphConfig.startTime == null && graphConfig.endTime == null) {
       setPresetRange(viewModel, history, PresetRange.PAST_MONTH)
@@ -202,8 +202,8 @@ private fun GraphDatePickerDialog(
   onPick: (Long) -> Unit,
   onDismiss: () -> Unit,
 ) {
-  // The Material3 picker speaks UTC-midnight millis; translate to/from the local calendar date so
-  // a picked day maps to that day's local midnight (matching the old GregorianCalendar behavior)
+  // The Material3 picker speaks UTC-midnight millis; translate to/from the local calendar date so a
+  // picked day maps to that day's local midnight (matching the old GregorianCalendar behavior)
   val initialMillis =
     remember(initialSeconds) {
       getDate(initialSeconds).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
@@ -597,9 +597,9 @@ private fun RadarScreen(
       RadarChart(it).apply {
         description.isEnabled = false
         legend.applyStyle(font)
-        // 5.x dropped setDrawWeb; hide the web by zeroing its alpha. A transparent webColor
-        // won't work: the renderer overrides the color's alpha with webAlpha, so transparent
-        // (0x00000000) would draw as opaque black.
+        // 5.x dropped setDrawWeb; hide the web by zeroing its alpha. A transparent webColor won't
+        // work: the renderer overrides the color's alpha with webAlpha, so transparent (0x00000000)
+        // would draw as opaque black.
         webAlpha = 0
         setTouchEnabled(false)
         xAxis.run {

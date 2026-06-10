@@ -114,8 +114,8 @@ object IOUtil {
           }
         }
 
-        // Google's docs are somewhat buggy in specifying a mode of "w" instead of "wt". Without
-        // "t" (truncate), writing the byte "C" to a file containing "AB" can result in "CB"
+        // Google's docs are somewhat buggy in specifying a mode of "w" instead of "wt". Without "t"
+        // (truncate), writing the byte "C" to a file containing "AB" can result in "CB"
         // https://developer.android.com/training/data-storage/shared/documents-files#edit
         // https://developer.android.com/reference/android/content/ContentResolver#openFileDescriptor(android.net.Uri,%20java.lang.String,%20android.os.CancellationSignal)
         try {

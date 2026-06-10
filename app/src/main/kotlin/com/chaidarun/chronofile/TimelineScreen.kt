@@ -223,8 +223,8 @@ fun TimelineScreen(
     }
   val items = build.items
 
-  // Toast search-result counts only when the search itself or underlying history changes (not
-  // on time-zone refreshTick bumps, which would re-toast on every resume)
+  // Toast search-result counts only when the search itself or underlying history changes (not on
+  // time-zone refreshTick bumps, which would re-toast on every resume)
   LaunchedEffect(history, query) {
     if (query != null && history != null) {
       App.toast(
@@ -585,8 +585,8 @@ private fun EntryEditDialog(
   var note by remember { mutableStateOf(entry.note.orEmpty()) }
   // Title shows the entry's reverse-geocoded location, resolved asynchronously
   val title by produceState("Locating…", entry) { value = geocodeEntry(entry) ?: "No location" }
-  // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than input
-  // text
+  // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than
+  // input text
   val fieldColors =
     OutlinedTextFieldDefaults.colors(
       focusedLabelColor = ColorFadedText,
