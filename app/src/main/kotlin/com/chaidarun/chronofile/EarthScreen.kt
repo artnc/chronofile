@@ -595,12 +595,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
       ) {
         Column(Modifier.selectableGroup()) {
           for (m in MapMode.entries) {
-            AppRadio(
-              selected = mode == m,
-              onClick = { mode = m },
-              label = m.name,
-              modifier = Modifier.padding(vertical = 4.dp),
-            )
+            AppRadio(selected = mode == m, onClick = { mode = m }, label = m.name)
           }
         }
         AppCheckbox(

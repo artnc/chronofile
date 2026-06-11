@@ -4,6 +4,7 @@ package com.chaidarun.chronofile
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
@@ -32,14 +33,16 @@ fun AppCheckbox(
 ) {
   Row(
     modifier =
-      modifier.toggleable(
-        value = checked,
-        // No ripple: the checkmark already signals state
-        interactionSource = null,
-        indication = null,
-        role = Role.Checkbox,
-        onValueChange = onCheckedChange,
-      ),
+      modifier
+        .toggleable(
+          value = checked,
+          // No ripple: the checkmark already signals state
+          interactionSource = null,
+          indication = null,
+          role = Role.Checkbox,
+          onValueChange = onCheckedChange,
+        )
+        .padding(vertical = 2.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
     Checkbox(
@@ -70,6 +73,7 @@ fun AppRadio(selected: Boolean, onClick: () -> Unit, label: String, modifier: Mo
           role = Role.RadioButton,
           onClick = onClick,
         )
+        .padding(vertical = 2.dp)
         .then(modifier),
     verticalAlignment = Alignment.CenterVertically,
   ) {

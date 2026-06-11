@@ -8,10 +8,12 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -45,15 +47,26 @@ private val AppColors =
     surfaceVariant = ColorPrimary,
   )
 
-private val baseTextStyle = TextStyle(fontFamily = Exo2)
+// letterSpacing 0 matches the old TextView default. M3's per-role typography bakes in non-zero
+// tracking (bodyMedium 0.25sp, bodyLarge 0.5sp) which widened text vs the pre-Compose look
+private val baseTextStyle = TextStyle(fontFamily = Exo2, letterSpacing = 0.sp)
 
 private val AppTypography =
   Typography().run {
     Typography(
       // 18sp matches the old item_entry's TextAppearance.AppCompat.Medium (the timeline entry rows
-      // are the sole bodyLarge consumer)
-      bodyLarge = bodyLarge.merge(baseTextStyle).copy(fontSize = 18.sp),
-      bodyMedium = bodyMedium.merge(baseTextStyle).copy(fontSize = 15.sp),
+      // are the sole bodyLarge consumer). Unspecified lineHeight + includeFontPadding=true
+      // reproduce the old TextView's font-metric line box exactly, undoing M3's compression
+      // (shorter default lineHeight and includeFontPadding=false)
+      bodyLarge =
+        bodyLarge
+          .merge(baseTextStyle)
+          .copy(
+            fontSize = 18.sp,
+            lineHeight = TextUnit.Unspecified,
+            platformStyle = PlatformTextStyle(includeFontPadding = true),
+          ),
+      bodyMedium = bodyMedium.merge(baseTextStyle).copy(fontSize = 15.sp, lineHeight = 18.sp),
       bodySmall = bodySmall.merge(baseTextStyle),
       displayLarge = displayLarge.merge(baseTextStyle),
       displayMedium = displayMedium.merge(baseTextStyle),

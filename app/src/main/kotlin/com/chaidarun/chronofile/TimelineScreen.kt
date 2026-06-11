@@ -14,6 +14,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -326,6 +327,7 @@ fun TimelineScreen(
         modifier = Modifier.fillMaxWidth().weight(1f),
         state = listState,
         reverseLayout = true,
+        contentPadding = PaddingValues(vertical = 6.dp),
       ) {
         items(items.asReversed()) { item ->
           when (item) {
@@ -509,7 +511,8 @@ private fun InlineTextField(
     onValueChange = onValueChange,
     singleLine = true,
     textStyle = LocalTextStyle.current.copy(color = Color.White),
-    cursorBrush = SolidColor(Color.White),
+    // Green caret to match the M3 TextFields in the edit modal (cursor defaults to primary)
+    cursorBrush = SolidColor(ColorAccent),
     interactionSource = interactionSource,
     modifier = modifier,
     decorationBox = { inner ->
