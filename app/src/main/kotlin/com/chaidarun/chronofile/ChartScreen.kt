@@ -44,6 +44,7 @@ private enum class PresetRange(val text: String, val duration: Long) {
   TODAY("Today", DAY_SECONDS),
   PAST_WEEK("Past week", 7 * DAY_SECONDS),
   PAST_MONTH("Past month", 30 * DAY_SECONDS),
+  PAST_QUARTER("Past quarter", 91 * DAY_SECONDS),
   PAST_YEAR("Past year", 365 * DAY_SECONDS),
   ALL_TIME("All time", Long.MAX_VALUE),
 }
