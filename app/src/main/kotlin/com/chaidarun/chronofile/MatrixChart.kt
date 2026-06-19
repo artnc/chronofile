@@ -133,22 +133,6 @@ private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface:
     }
   }
 
-  // Overlay faint gridlines to separate adjacent same-colored cells
-  val gridColor = Color.White.copy(alpha = 0.12f)
-  for (k in 0..n) {
-    val offset = k * cell
-    drawLine(
-      gridColor,
-      Offset(gridLeft + offset, gridTop),
-      Offset(gridLeft + offset, gridTop + n * cell),
-    )
-    drawLine(
-      gridColor,
-      Offset(gridLeft, gridTop + offset),
-      Offset(gridLeft + n * cell, gridTop + offset),
-    )
-  }
-
   // Draw labels: activity names horizontally down the left, then rotated 90° clockwise on top
   for (i in 0 until n) {
     val rowCenter = gridTop + i * cell + cell / 2
