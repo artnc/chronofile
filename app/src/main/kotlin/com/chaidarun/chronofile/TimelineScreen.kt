@@ -602,8 +602,7 @@ private fun EntryEditDialog(
   var note by remember { mutableStateOf(TextFieldValue(entry.note.orEmpty())) }
   // Title shows the entry's reverse-geocoded location, resolved asynchronously
   val title by rememberGeocodedTitle(entry)
-  // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than
-  // input text
+  // Faded labels so resting (placeholder-position) label reads as a hint, dimmer than input text
   val fieldColors =
     OutlinedTextFieldDefaults.colors(
       focusedLabelColor = ColorFadedText,

@@ -150,9 +150,8 @@ private enum class MapMode {
   Activities,
 }
 
-// Minimal GeoJSON shapes. mapshaper emits a GeometryCollection (not a FeatureCollection) once all
-// feature properties are stripped. Geometry entries are nullable since Natural Earth can emit
-// empty ones
+// Minimal GeoJSON shapes: mapshaper emits a GeometryCollection (not FeatureCollection) once feature
+// properties are stripped. Geometry entries are nullable since Natural Earth emits empty ones
 @Serializable private class GeometryCollection(val geometries: List<Geometry?>)
 
 @Serializable private class Geometry(val coordinates: JsonElement, val type: String)
@@ -352,8 +351,8 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   // Going by jumps rather than logged flights catches connections even when a flight leg wasn't
   // logged, and folds in frozen-GPS in-flight entries that pile up at the departure airport.
   // Origins (drove in, flew out) and destinations (flew in, drove out) have a jump on only one
-  // side, so they survive. Keyed by startTime (unique) so membership tests stay cheap.
-  // See TRANSIT_ACTIVITIES
+  // side, so they survive. Keyed by startTime (unique) so membership tests stay cheap; see
+  // TRANSIT_ACTIVITIES for the set.
   val layovers =
     remember(points) {
       val located = points.map { it.second }
@@ -518,8 +517,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
           Modifier.fillMaxSize()
             .alpha(contentAlpha)
             .onSizeChanged { canvasSize = it }
-            // scale/offset are MutableState so reads stay live; key on canvasSize to
-            // refresh baseW/baseH
+            // scale/offset are MutableState so reads live; key on canvasSize to refresh baseW/baseH
             .pointerInput(canvasSize) {
               detectTransformGestures { centroid, pan, zoom, _ ->
                 userMoved = true
@@ -533,8 +531,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
             // Key on clusters too so the hit-test sees the current grouping after a zoom
             .pointerInput(canvasSize, clusters) {
               detectTapGestures { tap ->
-                // Select the nearest cluster within the hit radius and list its entries,
-                // newest first
+                // Pick the nearest cluster within the hit radius and list its entries, newest first
                 val hit =
                   clusters
                     .map {
@@ -572,7 +569,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
 
         // Draw every cluster (clustering already guarantees no two circles overlap): a value of 1
         // (one entry, or one distinct day in Days mode) renders as a small unlabeled pin, more as a
-        // value-labeled circle
+        // larger value-labeled circle
         clusters.forEachIndexed { i, cluster ->
           val s = toScreen(cluster.center, baseW, baseH, scale, offset)
           // Cull clusters outside the viewport (plus a margin for partially-visible circles)
