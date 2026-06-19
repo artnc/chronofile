@@ -64,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
@@ -71,7 +72,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -448,9 +451,9 @@ private fun EntryRow(item: TimelineItem.EntryItem, onClick: () -> Unit, onEdit: 
 
 @Composable
 private fun AddEntryBar(onAdd: (String, String) -> Unit) {
-  var activity by remember { mutableStateOf("") }
-  var note by remember { mutableStateOf("") }
-  val enabled = activity.isNotBlank()
+  var activity by remember { mutableStateOf(TextFieldValue()) }
+  var note by remember { mutableStateOf(TextFieldValue()) }
+  val enabled = activity.text.isNotBlank()
   Row(
     modifier = Modifier.fillMaxWidth().background(ColorPrimary).padding(16.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -471,9 +474,9 @@ private fun AddEntryBar(onAdd: (String, String) -> Unit) {
     Spacer(Modifier.width(8.dp))
     Button(
       onClick = {
-        onAdd(activity, note)
-        activity = ""
-        note = ""
+        onAdd(activity.text, note.text)
+        activity = TextFieldValue()
+        note = TextFieldValue()
       },
       enabled = enabled,
       shape = ButtonShape,
@@ -492,8 +495,8 @@ private fun AddEntryBar(onAdd: (String, String) -> Unit) {
 
 @Composable
 private fun InlineTextField(
-  value: String,
-  onValueChange: (String) -> Unit,
+  value: TextFieldValue,
+  onValueChange: (TextFieldValue) -> Unit,
   hint: String,
   modifier: Modifier = Modifier,
 ) {
@@ -507,11 +510,11 @@ private fun InlineTextField(
     // Green caret to match the M3 TextFields in the edit modal (cursor defaults to primary)
     cursorBrush = SolidColor(ColorAccent),
     interactionSource = interactionSource,
-    modifier = modifier,
+    modifier = modifier.selectAllOnFocus(value, onValueChange),
     decorationBox = { inner ->
       Column {
         Box(modifier = Modifier.padding(bottom = 4.dp)) {
-          if (value.isEmpty()) {
+          if (value.text.isEmpty()) {
             Text(hint, color = Color.White.copy(alpha = 0.5f), style = LocalTextStyle.current)
           }
           inner()
@@ -521,6 +524,18 @@ private fun InlineTextField(
       }
     },
   )
+}
+
+/**
+ * Selects all text when the field gains focus, so tapping a prefilled field replaces its content
+ */
+private fun Modifier.selectAllOnFocus(
+  value: TextFieldValue,
+  onValueChange: (TextFieldValue) -> Unit,
+): Modifier = onFocusChanged {
+  if (it.isFocused) {
+    onValueChange(value.copy(selection = TextRange(0, value.text.length)))
+  }
 }
 
 /**
@@ -550,7 +565,7 @@ private fun SearchDialog(
   onSubmit: (String) -> Unit,
   onClear: () -> Unit,
 ) {
-  var text by remember { mutableStateOf(initial) }
+  var text by remember { mutableStateOf(TextFieldValue(initial)) }
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text("Search timeline") },
@@ -560,10 +575,10 @@ private fun SearchDialog(
         onValueChange = { text = it },
         singleLine = true,
         // Auto-focus (and pop the keyboard) when the dialog opens, like the old AppCompat dialog
-        modifier = Modifier.fillMaxWidth().autoFocus(),
+        modifier = Modifier.fillMaxWidth().autoFocus().selectAllOnFocus(text) { text = it },
       )
     },
-    confirmButton = { TextButton(onClick = { onSubmit(text) }) { Text("Go") } },
+    confirmButton = { TextButton(onClick = { onSubmit(text.text) }) { Text("Go") } },
     dismissButton = { TextButton(onClick = onClear) { Text("Clear") } },
     containerColor = ColorPrimaryDark,
   )
@@ -576,9 +591,9 @@ private fun EntryEditDialog(
   onDismiss: () -> Unit,
   onConfirm: (startTime: String, activity: String, note: String) -> Unit,
 ) {
-  var startTime by remember { mutableStateOf("") }
-  var activity by remember { mutableStateOf(entry.activity) }
-  var note by remember { mutableStateOf(entry.note.orEmpty()) }
+  var startTime by remember { mutableStateOf(TextFieldValue()) }
+  var activity by remember { mutableStateOf(TextFieldValue(entry.activity)) }
+  var note by remember { mutableStateOf(TextFieldValue(entry.note.orEmpty())) }
   // Title shows the entry's reverse-geocoded location, resolved asynchronously
   val title by rememberGeocodedTitle(entry)
   // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than
@@ -601,7 +616,7 @@ private fun EntryEditDialog(
             label = { Text("Activity") },
             singleLine = true,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().selectAllOnFocus(activity) { activity = it },
           )
           OutlinedTextField(
             value = note,
@@ -609,7 +624,8 @@ private fun EntryEditDialog(
             label = { Text("Note") },
             singleLine = true,
             colors = fieldColors,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier =
+              Modifier.fillMaxWidth().padding(top = 8.dp).selectAllOnFocus(note) { note = it },
           )
           OutlinedTextField(
             value = startTime,
@@ -618,7 +634,10 @@ private fun EntryEditDialog(
             singleLine = true,
             colors = fieldColors,
             // Auto-focus the time field (and pop the keyboard) when the dialog opens
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).autoFocus(),
+            modifier =
+              Modifier.fillMaxWidth().padding(top = 8.dp).autoFocus().selectAllOnFocus(startTime) {
+                startTime = it
+              },
           )
         }
       }
@@ -629,7 +648,9 @@ private fun EntryEditDialog(
         TextButton(onClick = onDelete) { Text("Delete") }
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onDismiss) { Text("Cancel") }
-        TextButton(onClick = { onConfirm(startTime, activity, note) }) { Text("Save") }
+        TextButton(onClick = { onConfirm(startTime.text, activity.text, note.text) }) {
+          Text("Save")
+        }
       }
     },
     containerColor = ColorPrimaryDark,
@@ -668,25 +689,38 @@ fun NfcDialog(
                 " phones and credit cards."
             )
           is NfcDialogState.Ready -> {
+            // Local mirrors so we can drive selection; forward edits to the external String state
+            var activity by remember { mutableStateOf(TextFieldValue(state.activity)) }
+            var note by remember { mutableStateOf(TextFieldValue(state.note)) }
             Text(
               "Enter the activity name and note to record whenever you tap this tag from now on." +
                 " You can edit or delete this later in Settings."
             )
             Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
               OutlinedTextField(
-                value = state.activity,
-                onValueChange = onActivityChange,
+                value = activity,
+                onValueChange = {
+                  activity = it
+                  onActivityChange(it.text)
+                },
                 label = { Text("Activity") },
                 singleLine = true,
                 // Auto-focus the activity field (and pop the keyboard) once we reach the Ready step
-                modifier = Modifier.weight(1f).padding(end = 4.dp).autoFocus(),
+                modifier =
+                  Modifier.weight(1f).padding(end = 4.dp).autoFocus().selectAllOnFocus(activity) {
+                    activity = it
+                  },
               )
               OutlinedTextField(
-                value = state.note,
-                onValueChange = onNoteChange,
+                value = note,
+                onValueChange = {
+                  note = it
+                  onNoteChange(it.text)
+                },
                 label = { Text("Note (optional)") },
                 singleLine = true,
-                modifier = Modifier.weight(1f).padding(start = 4.dp),
+                modifier =
+                  Modifier.weight(1f).padding(start = 4.dp).selectAllOnFocus(note) { note = it },
               )
             }
           }
