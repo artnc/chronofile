@@ -3,6 +3,7 @@
 package com.chaidarun.chronofile
 
 import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -40,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -101,8 +103,8 @@ private val CLUSTER_DP = 44.dp
 /** Radius of a single-entry pin */
 private val PIN_RADIUS_DP = 5.dp
 
-/** Cap on a multi-entry cluster circle's radius so big clusters stay bounded */
-private val MAX_RADIUS_DP = 18.dp
+/** Radius the largest cluster reaches; every smaller circle scales down from this */
+private val MAX_RADIUS_DP = 40.dp
 
 /** Minimum empty space kept between neighboring cluster circles */
 private val GAP_DP = 2.dp
@@ -152,8 +154,8 @@ private val countLabelStyle =
  * counts the distinct calendar days those entries fall on
  */
 private enum class MapMode {
-  Activities,
   Days,
+  Activities,
 }
 
 // Minimal GeoJSON shapes. mapshaper emits a GeometryCollection (not a FeatureCollection) once all
@@ -199,7 +201,9 @@ private class MutCluster(val entries: MutableList<Entry>, var sumX: Float, var s
 }
 
 /**
- * Radius in pixels of a cluster's circle; grows with count up to a cap so big clusters stay bounded
+ * Space (in pixels) a cluster reserves while merging, by entry count: grows with count up to
+ * [maxRadius] so big clusters stay bounded. The drawn radius is scaled separately (see the draw
+ * pass) and clamped to this, so no two circles overlap regardless of the active mode
  */
 private fun clusterRadius(count: Int, pinRadius: Float, maxRadius: Float) =
   if (count == 1) pinRadius else (pinRadius + ln(count.toFloat()) * 4f).coerceAtMost(maxRadius)
@@ -331,9 +335,10 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   val pinRadiusPx = with(density) { PIN_RADIUS_DP.toPx() }
 
   // Parse the basemap once off the main thread; an empty list (missing/corrupt asset) still draws
-  // the pins on a blank background rather than crashing
+  // the pins on a blank background rather than crashing. Null while still parsing so the fade-in
+  // waits for the real result instead of flashing the empty initial value
   val countries by
-    produceState(emptyList<List<Offset>>()) {
+    produceState<List<List<Offset>>?>(null) {
       value =
         withContext(Dispatchers.Default) {
           try {
@@ -383,19 +388,20 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   var offset by remember { mutableStateOf(Offset.Unspecified) }
   var selected by remember { mutableStateOf<List<Entry>?>(null) }
   // Whether circles count every entry or only the distinct days they fall on
-  var mode by remember { mutableStateOf(MapMode.Activities) }
+  var mode by remember { mutableStateOf(MapMode.Days) }
   // Whether layover (airport connection) entries are shown; off by default to declutter the map
   var includeLayovers by remember { mutableStateOf(false) }
   // Stop auto-fitting once the user pans/zooms so we don't yank the view back under their finger
   var userMoved by remember { mutableStateOf(false) }
-  // Longitude to center on initially; defaults to the prime meridian, refined once
-  // location resolves
-  var initialLon by remember { mutableStateOf(0.0) }
+  // Longitude to center on initially: the newest located timeline entry, or the prime meridian if
+  // none. Entries are chronological, so the last one with coordinates is the most recent
+  val initialLon =
+    remember(history) {
+      history?.entries.orEmpty().lastOrNull { it.latLon != null }?.latLon?.second ?: 0.0
+    }
 
   val baseW = canvasSize.width.toFloat()
   val baseH = baseW / 2f
-
-  LaunchedEffect(Unit) { History.getCurrentLocation()?.second?.let { initialLon = it } }
 
   // Fit latitudes 90..INITIAL_SOUTH_LAT to the viewport height (the Arctic flush with the top edge,
   // the cropped southern latitude with the bottom) and center horizontally on initialLon. Re-runs
@@ -414,12 +420,14 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
 
   // Throttle re-clustering: the merge pass is expensive, so regroup only ~150ms after the last zoom
   // change (i.e. once a pinch settles), not on every intermediate frame. collectLatest cancels the
-  // pending delay whenever the zoom changes again, debouncing it
+  // pending delay whenever the zoom changes again, debouncing it. Skip the delay until the user
+  // first pans/zooms so the initial fit clusters at the right scale immediately, instead of merging
+  // into one blob at the default scale and visibly splitting apart ~150ms later
   var clusterScale by remember { mutableFloatStateOf(scale) }
   LaunchedEffect(Unit) {
     snapshotFlow { scale }
       .collectLatest {
-        delay(150)
+        if (userMoved) delay(150)
         clusterScale = it
       }
   }
@@ -452,7 +460,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   // instead of allocating a fresh Path and re-projecting every vertex
   val countryPaths =
     remember(countries, baseW) {
-      countries.map { ring ->
+      countries.orEmpty().map { ring ->
         Path().apply {
           ring.forEachIndexed { i, n ->
             if (i == 0) moveTo(n.x * baseW, n.y * baseH) else lineTo(n.x * baseW, n.y * baseH)
@@ -463,13 +471,34 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
     }
 
   // Per-cluster number to size and label by: entry count in Activities mode, distinct-day count in
-  // Days mode. Recomputed only on a re-cluster or mode flip, not per frame. In Days mode this is
-  // always <= the entry count, so circles only shrink and never start overlapping
+  // Days mode. Recomputed only on a re-cluster or mode flip, not per frame
   val clusterValues =
     remember(clusters, mode) {
       clusters.map {
         if (mode == MapMode.Days) it.entries.distinctBy { e -> getDate(e.startTime) }.size
         else it.entries.size
+      }
+    }
+
+  // Largest value across clusters in the active mode. The cluster holding it is drawn at the full
+  // MAX_RADIUS and every other circle scales down from there
+  val globalMax = remember(clusterValues) { clusterValues.maxOrNull() ?: 1 }
+
+  // Drawn radius per cluster, on a log curve so the global-max cluster reaches MAX_RADIUS and
+  // smaller ones shrink in proportion (value 1 stays a pin). Clamp to the space the clustering pass
+  // reserved for this cluster (sized by entry count) so circles never overlap, even though grouping
+  // is mode-independent while this value is per-mode. Precomputed (not per frame) since it changes
+  // only on a re-cluster or mode flip
+  val clusterRadii =
+    remember(clusters, clusterValues, globalMax) {
+      val lnMax = ln(globalMax.toFloat())
+      clusters.mapIndexed { i, cluster ->
+        if (globalMax <= 1) pinRadiusPx
+        else
+          minOf(
+            pinRadiusPx + (maxRadiusPx - pinRadiusPx) * (ln(clusterValues[i].toFloat()) / lnMax),
+            clusterRadius(cluster.entries.size, pinRadiusPx, maxRadiusPx),
+          )
       }
     }
 
@@ -482,6 +511,14 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
         .distinct()
         .associateWith { textMeasurer.measure(it.toString(), style = countLabelStyle) }
     }
+
+  // Fade the map in once the basemap has parsed and the view is fit, instead of flashing an empty
+  // ocean for the ~0.5s the off-thread parse takes
+  val contentAlpha by
+    animateFloatAsState(
+      if (countries != null && offset != Offset.Unspecified) 1f else 0f,
+      label = "earthFade",
+    )
 
   Scaffold(
     topBar = {
@@ -506,6 +543,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
       Canvas(
         modifier =
           Modifier.fillMaxSize()
+            .alpha(contentAlpha)
             .onSizeChanged { canvasSize = it }
             // scale/offset are MutableState so reads stay live; key on canvasSize to
             // refresh baseW/baseH
@@ -568,11 +606,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
           if (s.x < -50 || s.y < -50 || s.x > size.width + 50 || s.y > size.height + 50)
             return@forEachIndexed
           val value = clusterValues[i]
-          drawCircle(
-            ColorAccent,
-            radius = clusterRadius(value, pinRadiusPx, maxRadiusPx),
-            center = s,
-          )
+          drawCircle(ColorAccent, radius = clusterRadii[i], center = s)
           if (value > 1) {
             val label = countLabels.getValue(value)
             drawText(
