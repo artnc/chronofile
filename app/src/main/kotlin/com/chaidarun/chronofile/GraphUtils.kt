@@ -4,6 +4,7 @@ package com.chaidarun.chronofile
 
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
+import kotlin.math.sqrt
 
 /** D3.js schemeTableau10 and schemeDark2 */
 val CHART_COLORS by lazy {
@@ -145,4 +146,55 @@ fun aggregateEntries(
   }
 
   return Pair(bucketsWithOther, sliceList)
+}
+
+/**
+ * Result of [buildCorrelationMatrix]: parallel [labels] alongside an NxN [values] grid where cell
+ * [i][j] holds the Pearson correlation of daily durations between activities i and j (NaN when
+ * undefined, i.e. either activity has no day-to-day variance)
+ */
+class CorrelationMatrix(val labels: List<String>, val values: Array<DoubleArray>)
+
+/** Pearson correlation coefficient of two equal-length series, or NaN if either has no variance */
+fun pearson(x: List<Double>, y: List<Double>): Double {
+  val meanX = x.average()
+  val meanY = y.average()
+  var sumXY = 0.0
+  var sumXX = 0.0
+  var sumYY = 0.0
+  for (i in x.indices) {
+    val dx = x[i] - meanX
+    val dy = y[i] - meanY
+    sumXY += dx * dy
+    sumXX += dx * dx
+    sumYY += dy * dy
+  }
+  // Zero variance on either axis leaves correlation undefined (e.g. an activity never recorded)
+  val denominator = sqrt(sumXX * sumYY)
+  return if (denominator == 0.0) Double.NaN else sumXY / denominator
+}
+
+/**
+ * Builds a Pearson-correlation matrix of daily activity durations over
+ * [rangeStart, rangeEnd), reusing [aggregateEntries]'s per-day buckets and filtered slice list
+ * (dropping the "Other" bucket). Each recorded day is one observation; an activity not done that
+ * day counts as 0 seconds.
+ */
+fun buildCorrelationMatrix(
+  config: Config,
+  history: History,
+  graphConfig: GraphConfig,
+  rangeStart: Long,
+  rangeEnd: Long,
+): CorrelationMatrix {
+  val (buckets, sliceList) =
+    aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.DAY)
+  val labels = sliceList.map { it.first }.filter { it != OTHER_SLICE_NAME }
+  val days = buckets.keys.sorted()
+  val series = labels.map { label -> days.map { (buckets[it]?.get(label) ?: 0L).toDouble() } }
+  val values =
+    Array(labels.size) { i ->
+      DoubleArray(labels.size) { j -> if (i == j) 1.0 else pearson(series[i], series[j]) }
+    }
+  return CorrelationMatrix(labels, values)
 }
