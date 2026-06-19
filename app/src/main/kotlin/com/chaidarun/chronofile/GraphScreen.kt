@@ -133,7 +133,7 @@ fun GraphScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   Scaffold(
     topBar = {
       TopAppBar(
-        title = { Text("Statistics") },
+        title = { Text("Analytics") },
         navigationIcon = {
           IconButton(onClick = onNavigateUp) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Up")
