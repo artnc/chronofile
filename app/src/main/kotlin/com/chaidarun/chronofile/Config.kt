@@ -37,7 +37,7 @@ data class Config(
 
   fun serialize(): String = json.encodeToString(serializer(), this)
 
-  fun save() = IOUtil.writeFile(FILENAME, serialize())
+  fun save() = IOUtil.writeFile(FILENAME) { serialize() }
 
   companion object {
     private val json = Json {

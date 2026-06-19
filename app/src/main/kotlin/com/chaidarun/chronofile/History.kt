@@ -78,29 +78,36 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
     private const val FILENAME = "chronofile.tsv"
     private val locationClient by lazy { LocationServices.getFusedLocationProviderClient(App.ctx) }
 
-    private fun normalizeAndSave(entries: Collection<Entry>, currentActivityStartTime: Long) =
-      entries
-        .toMutableList()
-        .apply {
-          // Normalize
-          Log.i(TAG, "Normalizing entries")
-          sortBy { it.startTime }
-          var lastSeenActivity: String? = null
-          var lastSeenNote: String? = null
-          removeAll {
-            val shouldRemove = it.activity == lastSeenActivity && it.note == lastSeenNote
-            lastSeenActivity = it.activity
-            lastSeenNote = it.note
-            shouldRemove
-          }
+    private fun normalizeAndSave(
+      entries: Collection<Entry>,
+      currentActivityStartTime: Long,
+      save: Boolean = true,
+    ): List<Entry> {
+      // Normalize
+      Log.i(TAG, "Normalizing entries")
+      val normalized = entries.toMutableList()
+      normalized.sortBy { it.startTime }
+      var lastSeenActivity: String? = null
+      var lastSeenNote: String? = null
+      normalized.removeAll {
+        val shouldRemove = it.activity == lastSeenActivity && it.note == lastSeenNote
+        lastSeenActivity = it.activity
+        lastSeenNote = it.note
+        shouldRemove
+      }
 
-          // Save
-          IOUtil.writeFile(
-            FILENAME,
-            joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n",
-          )
+      // Save, building the full TSV string inside the IO coroutine (off the caller's main thread).
+      // The serialized snapshot is the just-normalized list, which is never mutated after this
+      // since
+      // every mutation builds a fresh list, so the deferred read stays consistent
+      if (save) {
+        IOUtil.writeFile(FILENAME) {
+          normalized.joinToString("") { it.toTsvRow() } + "\t\t\t\t$currentActivityStartTime\n"
         }
-        .toList()
+      }
+
+      return normalized
+    }
 
     private fun sanitizeActivityAndNote(activity: String, note: String?) =
       Pair(activity.trim(), if (note.isNullOrBlank()) null else note.trim())
@@ -134,7 +141,12 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
         }
       }
 
-      return History(normalizeAndSave(entries, currentActivityStartTime), currentActivityStartTime)
+      // Don't save() on load: we'd re-serialize the whole file and read it back just to produce a
+      // no-op write. The next mutation persists the normalized form anyway
+      return History(
+        normalizeAndSave(entries, currentActivityStartTime, save = false),
+        currentActivityStartTime,
+      )
     }
   }
 }

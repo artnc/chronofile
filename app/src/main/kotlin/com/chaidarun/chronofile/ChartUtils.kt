@@ -102,7 +102,10 @@ fun aggregateEntries(
   var endTime = rangeEnd
   val buckets = mutableMapOf<Long, MutableMap<String, Long>>()
   val sliceMap = mutableMapOf<String, Long>()
-  for (entry in history.entries.reversed()) {
+  // Walk newest-first by index (no full reversed() copy of the history)
+  val entries = history.entries
+  for (i in entries.indices.reversed()) {
+    val entry = entries[i]
     // Skip entries from after date range
     if (entry.startTime >= rangeEnd) {
       continue
@@ -201,25 +204,6 @@ fun activityCounts(
  */
 class CorrelationMatrix(val labels: List<String>, val values: Array<DoubleArray>)
 
-/** Pearson correlation coefficient of two equal-length series, or NaN if either has no variance */
-fun pearson(x: List<Double>, y: List<Double>): Double {
-  val meanX = x.average()
-  val meanY = y.average()
-  var sumXY = 0.0
-  var sumXX = 0.0
-  var sumYY = 0.0
-  for (i in x.indices) {
-    val dx = x[i] - meanX
-    val dy = y[i] - meanY
-    sumXY += dx * dy
-    sumXX += dx * dx
-    sumYY += dy * dy
-  }
-  // Zero variance on either axis leaves correlation undefined (e.g. an activity never recorded)
-  val denominator = sqrt(sumXX * sumYY)
-  return if (denominator == 0.0) Double.NaN else sumXY / denominator
-}
-
 /**
  * Builds a Pearson-correlation matrix of daily activity durations over
  * [rangeStart, rangeEnd), reusing [aggregateEntries]'s per-day buckets and filtered slice list
@@ -237,11 +221,37 @@ fun buildCorrelationMatrix(
     aggregateEntries(config, history, chartConfig, rangeStart, rangeEnd, Aggregation.DAY)
   val labels = sliceList.map { it.first }.filter { it != OTHER_SLICE_NAME }
   val days = buckets.keys.sorted()
-  val series = labels.map { label -> days.map { (buckets[it]?.get(label) ?: 0L).toDouble() } }
-  val values =
-    Array(labels.size) { i ->
-      DoubleArray(labels.size) { j -> if (i == j) 1.0 else pearson(series[i], series[j]) }
+  // Per label, the daily-duration series mean-centered once, plus its norm, so each of the N² cells
+  // is a single dot product instead of re-deriving both means and re-centering on every pair. A
+  // zero
+  // norm means no day-to-day variance, leaving correlations with that activity undefined (NaN)
+  val centered = labels.map { label ->
+    val series = DoubleArray(days.size) { (buckets[days[it]]?.get(label) ?: 0L).toDouble() }
+    val mean = series.average()
+    for (k in series.indices) series[k] -= mean
+    series
+  }
+  val norms = centered.map { c -> sqrt(c.sumOf { it * it }) }
+  val n = labels.size
+  val values = Array(n) { DoubleArray(n) }
+  for (i in 0 until n) {
+    values[i][i] = 1.0
+    for (j in i + 1 until n) {
+      val r =
+        if (norms[i] == 0.0 || norms[j] == 0.0) {
+          Double.NaN
+        } else {
+          val ci = centered[i]
+          val cj = centered[j]
+          var dot = 0.0
+          for (k in ci.indices) dot += ci[k] * cj[k]
+          dot / (norms[i] * norms[j])
+        }
+      // The matrix is symmetric, so fill both off-diagonal cells from the one dot product
+      values[i][j] = r
+      values[j][i] = r
     }
+  }
   return CorrelationMatrix(labels, values)
 }
 

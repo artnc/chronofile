@@ -83,9 +83,13 @@ object IOUtil {
     return result
   }
 
-  fun writeFile(filename: String, text: String) {
+  fun writeFile(filename: String, getText: () -> String) {
     ioScope.launch {
       Log.i(TAG, "Writing $filename")
+      // Serialize inside the coroutine so large payloads (e.g. the full history TSV) don't get
+      // built
+      // on the caller's (often main) thread
+      val text = getText()
       val (isSuccess, elapsed) =
         measureTimedValue {
           val storageDir = getStorageDir() ?: return@launch

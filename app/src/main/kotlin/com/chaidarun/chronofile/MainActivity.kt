@@ -22,6 +22,7 @@ import androidx.core.content.IntentCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import java.util.TimeZone
 import kotlinx.serialization.Serializable
 
 /**
@@ -40,6 +41,8 @@ class MainActivity : ComponentActivity() {
   private val viewModel: MainViewModel by viewModels()
   private var refreshTick by mutableIntStateOf(0)
   private var nfcState by mutableStateOf<NfcDialogState?>(null)
+  // Time zone the timeline was last formatted in, so onResume only forces a rebuild when it changes
+  private var lastTimeZone = TimeZone.getDefault().id
 
   override fun onCreate(savedInstanceState: Bundle?) {
     Log.d(TAG, "MainActivity onCreate")
@@ -111,8 +114,13 @@ class MainActivity : ComponentActivity() {
   override fun onResume() {
     Log.d(TAG, "MainActivity onResume")
     super.onResume()
-    // Reformat times in case time zone changed
-    refreshTick++
+    // Reformat times only when the time zone actually changed (e.g. travel), instead of rebuilding
+    // the whole timeline on every resume
+    val timeZone = TimeZone.getDefault().id
+    if (timeZone != lastTimeZone) {
+      lastTimeZone = timeZone
+      refreshTick++
+    }
     if (intent.action in NFC_INTENT_ACTIONS) processNfcIntent(intent)
   }
 

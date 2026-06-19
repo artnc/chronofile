@@ -113,7 +113,10 @@ private fun buildTimeline(history: History, query: String?): TimelineBuild {
   // Hoisted out of the per-entry loop since they don't depend on the entry
   val queryLower = query?.lowercase()
   val queryIsNumeric = query?.toIntOrNull() != null
-  for (entry in history.entries.reversed()) {
+  // Walk newest-first by index (no full reversed() copy of the history)
+  val entries = history.entries
+  for (i in entries.indices.reversed()) {
+    val entry = entries[i]
     if (
       query == null ||
         queryLower!! in "${entry.activity}|${entry.note ?: ""}".lowercase() ||
@@ -123,6 +126,9 @@ private fun buildTimeline(history: History, query: String?): TimelineBuild {
       if (++matchCount <= MAX_ENTRIES_TO_SHOW) {
         entriesToShow.add(Pair(entry, lastSeenStartTime))
       }
+      // When not searching, matchCount/matchSeconds go unused (the result toast is gated on a
+      // non-null query), so stop once the visible window is full instead of scanning all history
+      if (query == null && matchCount >= MAX_ENTRIES_TO_SHOW) break
     }
     lastSeenStartTime = entry.startTime
   }
