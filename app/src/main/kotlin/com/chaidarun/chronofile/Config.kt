@@ -29,6 +29,12 @@ data class Config(
 
   fun getActivityGroup(activity: String) = activityGroups[activity] ?: activity
 
+  /**
+   * Whether the user has defined any activity groups (used to gate the "Group activities" toggle)
+   */
+  val hasGroups
+    get() = !unnormalizedActivityGroups.isNullOrEmpty()
+
   fun serialize(): String = json.encodeToString(serializer(), this)
 
   fun save() = IOUtil.writeFile(FILENAME, serialize())

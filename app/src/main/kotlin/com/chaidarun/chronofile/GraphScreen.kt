@@ -367,6 +367,17 @@ private fun <T : View> ChartScaffold(
   }
 }
 
+/**
+ * Toggles activity grouping, warning via toast when grouping is enabled but no groups exist yet so
+ * the user knows why the chart looks unchanged
+ */
+private fun toggleGrouping(viewModel: MainViewModel, config: Config?, grouped: Boolean) {
+  if (grouped && config?.hasGroups != true) {
+    App.toast("You haven't defined any groups yet in Settings!")
+  }
+  viewModel.dispatch(Action.SetGraphGrouping(grouped))
+}
+
 // ─── Pie chart ────────────────────────────────────────────────────────────────
 
 @Composable
@@ -402,8 +413,8 @@ private fun PieScreen(
       Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         AppCheckbox(
           checked = graphConfig.grouped,
-          onCheckedChange = { viewModel.dispatch(Action.SetGraphGrouping(it)) },
-          label = "Group similar",
+          onCheckedChange = { toggleGrouping(viewModel, config, it) },
+          label = "Group activities",
           modifier = Modifier.weight(1f),
         )
         Column(modifier = Modifier.weight(1f)) {
@@ -498,8 +509,8 @@ private fun AreaScreen(
       Row(modifier = Modifier.fillMaxWidth()) {
         AppCheckbox(
           checked = graphConfig.grouped,
-          onCheckedChange = { viewModel.dispatch(Action.SetGraphGrouping(it)) },
-          label = "Group similar",
+          onCheckedChange = { toggleGrouping(viewModel, config, it) },
+          label = "Group activities",
           modifier = Modifier.weight(1f).padding(16.dp),
         )
         AppCheckbox(
@@ -622,8 +633,8 @@ private fun RadarScreen(
     controls = {
       AppCheckbox(
         checked = graphConfig.grouped,
-        onCheckedChange = { viewModel.dispatch(Action.SetGraphGrouping(it)) },
-        label = "Group similar",
+        onCheckedChange = { toggleGrouping(viewModel, config, it) },
+        label = "Group activities",
         modifier = Modifier.fillMaxWidth().padding(16.dp),
       )
     },
