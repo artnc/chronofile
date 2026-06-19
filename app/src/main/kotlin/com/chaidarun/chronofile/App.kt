@@ -25,7 +25,7 @@ class App : Application() {
     private val mainScope = MainScope()
 
     fun toast(message: String) {
-      mainScope.launch { Toast.makeText(ctx, message, Toast.LENGTH_LONG).show() }
+      mainScope.launch { Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show() }
     }
   }
 }
