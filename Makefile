@@ -26,3 +26,10 @@ log:
 	adb logcat -v time,color --pid=$$(adb shell pidof -s com.chaidarun.chronofile) \
 	  | sed -uE 's/ .\/[A-Za-z]+\([0-9]+\)://' \
 	  | sed -uE 's/[0-9]{2}-[0-9]{2} ([0-9]{2}:[0-9]{2}:[0-9]{2})/\1/'
+
+.PHONY: release
+release:
+	echo '$(V)' | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo 'Usage: make release V=X.Y.Z'; exit 1; }
+	perl -i -pe 's/(versionCode = )(\d+)/$$1.($$2+1)/e; s/(versionName = ").*(")/$${1}$(V)$$2/' app/build.gradle.kts
+	git commit -am 'Release v$(V)'
+	git tag $(V)
