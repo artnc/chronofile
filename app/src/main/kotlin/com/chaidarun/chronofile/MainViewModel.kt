@@ -33,6 +33,8 @@ sealed class Action {
 
   data class SetConfigFromFile(val config: Config) : Action()
 
+  data class SetGraphCountMetric(val countMetric: CountMetric) : Action()
+
   data class SetGraphGrouping(val grouped: Boolean) : Action()
 
   data class SetGraphMetric(val metric: Metric) : Action()
@@ -89,6 +91,8 @@ private fun reduce(state: State, action: Action): State =
           this
         }
       is Action.SetConfigFromFile -> copy(config = action.config)
+      is Action.SetGraphCountMetric ->
+        copy(graphConfig = graphConfig.copy(countMetric = action.countMetric))
       is Action.SetGraphGrouping -> copy(graphConfig = graphConfig.copy(grouped = action.grouped))
       is Action.SetGraphMetric -> copy(graphConfig = graphConfig.copy(metric = action.metric))
       is Action.SetGraphRangeEnd -> {

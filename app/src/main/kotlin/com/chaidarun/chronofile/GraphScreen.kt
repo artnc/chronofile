@@ -11,13 +11,17 @@ import android.view.View
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -101,10 +105,11 @@ private enum class PresetRange(val text: String, val duration: Long) {
 }
 
 private enum class GraphTab(val title: String) {
-  CORRELATION("Correlation"),
+  MATRIX("Matrix"),
   RADAR("Radar"),
   PIE("Pie"),
   AREA("Area"),
+  COUNT("Count"),
 }
 
 // Locale-constant short weekday names (Sun..Sat); cached so the radar axis formatter doesn't
@@ -172,9 +177,10 @@ fun GraphScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
       }
       HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth().weight(1f)) { page ->
         when (GraphTab.entries[page]) {
-          GraphTab.CORRELATION -> CorrelationScreen(viewModel, config, history, graphConfig)
+          GraphTab.MATRIX -> MatrixScreen(viewModel, config, history, graphConfig)
           GraphTab.PIE -> PieScreen(viewModel, config, history, graphConfig)
           GraphTab.AREA -> AreaScreen(viewModel, config, history, graphConfig)
+          GraphTab.COUNT -> CountScreen(viewModel, config, history, graphConfig)
           GraphTab.RADAR -> RadarScreen(viewModel, config, history, graphConfig)
         }
       }
@@ -676,7 +682,7 @@ private fun RadarScreen(
 // ─── Correlation matrix ─────────────────────────────────────────────────────────
 
 @Composable
-private fun CorrelationScreen(
+private fun MatrixScreen(
   viewModel: MainViewModel,
   config: Config?,
   history: History?,
@@ -702,6 +708,14 @@ private fun CorrelationScreen(
       modifier = Modifier.fillMaxWidth().padding(16.dp),
     )
   }
+}
+
+/** Trim [text] with a trailing ellipsis until it fits within [maxW] when measured by [paint] */
+private fun fit(paint: Paint, text: String, maxW: Float): String {
+  if (paint.measureText(text) <= maxW) return text
+  var s = text
+  while (s.isNotEmpty() && paint.measureText("$s…") > maxW) s = s.dropLast(1)
+  return "$s…"
 }
 
 /** Signed two-decimal correlation label with the leading zero stripped, e.g. "+.42", "-1.00" */
@@ -738,14 +752,6 @@ private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface:
   // Center the labels-plus-grid block vertically so the gap above its top labels equals the gap
   // below its bottom row
   val gridTop = topH + (size.height - topH - n * cell) / 2
-
-  // Trim a label with a trailing ellipsis so it fits within maxW
-  fun fit(text: String, maxW: Float): String {
-    if (labelPaint.measureText(text) <= maxW) return text
-    var s = text
-    while (s.isNotEmpty() && labelPaint.measureText("$s…") > maxW) s = s.dropLast(1)
-    return "$s…"
-  }
 
   // Size the value paint so the widest possible label ("+1.00") fits inside a cell
   val valuePaint =
@@ -813,7 +819,7 @@ private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface:
   for (i in 0 until n) {
     val rowCenter = gridTop + i * cell + cell / 2
     canvas.drawText(
-      fit(matrix.labels[i], gutterW - pad),
+      fit(labelPaint, matrix.labels[i], gutterW - pad),
       gutterW - pad,
       rowCenter - labelBaseline,
       labelPaint,
@@ -825,7 +831,121 @@ private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface:
     val anchorY = gridTop - pad
     canvas.save()
     canvas.rotate(90f, anchorX, anchorY)
-    canvas.drawText(fit(matrix.labels[i], topH - pad), anchorX, anchorY, labelPaint)
+    canvas.drawText(fit(labelPaint, matrix.labels[i], topH - pad), anchorX, anchorY, labelPaint)
     canvas.restore()
+  }
+}
+
+// ─── Count chart ────────────────────────────────────────────────────────────────
+
+@Composable
+private fun CountScreen(
+  viewModel: MainViewModel,
+  config: Config?,
+  history: History?,
+  graphConfig: GraphConfig,
+) {
+  val typeface = chartTypeface()
+  // Recompute only when inputs change; null until data is ready or the selected range is empty
+  val counts =
+    remember(config, history, graphConfig) {
+      if (config == null || history == null) return@remember null
+      val (rangeStart, rangeEnd) = getChartRange(history, graphConfig)
+      if (rangeEnd - rangeStart <= 0) return@remember null
+      activityCounts(config, history, graphConfig, rangeStart, rangeEnd)
+    }
+  Column(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
+      // Size the canvas to fit every bar so the column scrolls when they overflow, but never below
+      // the viewport so a short list still centers vertically
+      val n = counts?.size ?: 0
+      val canvasHeight =
+        maxOf(
+          COUNT_BAR_THICKNESS * n +
+            COUNT_BAR_GAP * (n - 1).coerceAtLeast(0) +
+            COUNT_CHART_PADDING * 2,
+          maxHeight,
+        )
+      Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Canvas(
+          modifier = Modifier.fillMaxWidth().height(canvasHeight).padding(COUNT_CHART_PADDING)
+        ) {
+          counts?.let { drawCountChart(it, typeface) }
+        }
+      }
+    }
+    Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+      AppCheckbox(
+        checked = graphConfig.grouped,
+        onCheckedChange = { toggleGrouping(viewModel, config, it) },
+        label = "Group activities",
+        modifier = Modifier.weight(1f),
+      )
+      Column(modifier = Modifier.weight(1f)) {
+        AppRadio(
+          selected = graphConfig.countMetric == CountMetric.UNIQUE_DAYS,
+          onClick = { viewModel.dispatch(Action.SetGraphCountMetric(CountMetric.UNIQUE_DAYS)) },
+          label = "Unique days",
+        )
+        AppRadio(
+          selected = graphConfig.countMetric == CountMetric.OCCURRENCES,
+          onClick = { viewModel.dispatch(Action.SetGraphCountMetric(CountMetric.OCCURRENCES)) },
+          label = "Total occurrences",
+        )
+      }
+    }
+  }
+}
+
+private val COUNT_BAR_THICKNESS = 12.dp
+private val COUNT_BAR_GAP = 6.dp
+private val COUNT_CHART_PADDING = 8.dp
+
+/**
+ * Draws [counts] (activities paired with their counts, sorted descending) as horizontal bars: a
+ * right-aligned activity name in a left gutter, a thin accent-colored bar whose length is
+ * proportional to the count, and the count drawn just past the bar's end. The bar block is
+ * vertically centered, which matters only when it's shorter than the canvas (the caller sizes the
+ * canvas to fit every bar, so a longer list fills the canvas exactly and the column scrolls).
+ */
+private fun DrawScope.drawCountChart(counts: List<Pair<String, Int>>, typeface: Typeface) {
+  if (counts.isEmpty()) return
+  val pad = 4.dp.toPx()
+  val barThickness = COUNT_BAR_THICKNESS.toPx()
+  val gap = COUNT_BAR_GAP.toPx()
+  val n = counts.size
+
+  // Configure the gutter (right-aligned name) and count (left-aligned, past the bar) paints
+  val labelPaint =
+    Paint(Paint.ANTI_ALIAS_FLAG).apply {
+      color = CHART_LABEL_COLOR
+      this.typeface = typeface
+      textAlign = Paint.Align.RIGHT
+      textSize = 11.sp.toPx()
+    }
+  val countPaint = Paint(labelPaint).apply { textAlign = Paint.Align.LEFT }
+  // Baseline shift to vertically center text on a bar's midline
+  val baseline = labelPaint.fontMetrics.let { (it.ascent + it.descent) / 2 }
+
+  // Reserve a left gutter for names (capped at 40% width) and a right margin for the widest count
+  val maxCount = counts.first().second
+  val gutterW = minOf(counts.maxOf { labelPaint.measureText(it.first) } + pad, size.width * 0.4f)
+  val barAreaW = size.width - gutterW - (countPaint.measureText(maxCount.toString()) + pad)
+  if (barAreaW <= 0f) return
+
+  val top = (size.height - (n * barThickness + (n - 1) * gap)) / 2
+  val canvas = drawContext.canvas.nativeCanvas
+  counts.forEachIndexed { i, (label, count) ->
+    val barTop = top + i * (barThickness + gap)
+    val center = barTop + barThickness / 2
+    val barW = barAreaW * count / maxCount
+    drawRect(ColorAccent, topLeft = Offset(gutterW, barTop), size = Size(barW, barThickness))
+    canvas.drawText(
+      fit(labelPaint, label, gutterW - pad),
+      gutterW - pad,
+      center - baseline,
+      labelPaint,
+    )
+    canvas.drawText(count.toString(), gutterW + barW + pad, center - baseline, countPaint)
   }
 }

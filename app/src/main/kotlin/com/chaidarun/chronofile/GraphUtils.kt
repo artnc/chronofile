@@ -149,6 +149,34 @@ fun aggregateEntries(
 }
 
 /**
+ * Counts each activity (or group, when [GraphConfig.grouped]) over entries starting within
+ * [rangeStart, rangeEnd), returned as (slice, count) pairs sorted by descending count. Per [GraphConfig.countMetric]
+ * the count is either the raw number of recordings ([CountMetric.OCCURRENCES]) or the number of
+ * distinct local days on which it was recorded ([CountMetric.UNIQUE_DAYS]). Either way an entry is
+ * attributed to the single day it started on.
+ */
+fun activityCounts(
+  config: Config,
+  history: History,
+  graphConfig: GraphConfig,
+  rangeStart: Long,
+  rangeEnd: Long,
+): List<Pair<String, Int>> {
+  val uniqueDays = graphConfig.countMetric == CountMetric.UNIQUE_DAYS
+  // Per slice, collect a set of distinct keys then count them: for UNIQUE_DAYS the key is the
+  // entry's start-day midnight (so same-day recordings collapse to one), and for OCCURRENCES it's
+  // the entry's own start time, which is unique per entry so every recording counts once
+  val keySets = mutableMapOf<String, MutableSet<Long>>()
+  for (entry in history.entries) {
+    if (entry.startTime < rangeStart || entry.startTime >= rangeEnd) continue
+    val slice = if (graphConfig.grouped) config.getActivityGroup(entry.activity) else entry.activity
+    val key = if (uniqueDays) getPreviousMidnight(entry.startTime) else entry.startTime
+    keySets.getOrPut(slice) { mutableSetOf() }.add(key)
+  }
+  return keySets.mapValues { it.value.size }.toList().sortedByDescending { it.second }
+}
+
+/**
  * Result of [buildCorrelationMatrix]: parallel [labels] alongside an NxN [values] grid where cell
  * [i][j] holds the Pearson correlation of daily durations between activities i and j (NaN when
  * undefined, i.e. either activity has no day-to-day variance)
