@@ -121,12 +121,10 @@ data class History(val entries: List<Entry>, val currentActivityStartTime: Long)
 
       // Parse lines
       val entries = mutableListOf<Entry>()
-      lines.forEach {
-        if (it.isEmpty()) {
-          return@forEach
-        }
+      for (line in lines) {
+        if (line.isEmpty()) continue
 
-        val (activity, lat, lon, note, startTime) = it.split("\t")
+        val (activity, lat, lon, note, startTime) = line.split("\t")
         val latLon =
           if (lat.isNotEmpty() && lon.isNotEmpty()) Pair(lat.toDouble(), lon.toDouble()) else null
         if (activity.isNotEmpty()) {

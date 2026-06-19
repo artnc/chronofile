@@ -53,12 +53,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -290,12 +288,7 @@ fun TimelineScreen(
             )
           }
         },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = ColorPrimary,
-            titleContentColor = Color.White,
-            actionIconContentColor = Color.White,
-          ),
+        colors = appTopAppBarColors(),
       )
     },
     containerColor = ColorPrimaryDark,
@@ -587,7 +580,7 @@ private fun EntryEditDialog(
   var activity by remember { mutableStateOf(entry.activity) }
   var note by remember { mutableStateOf(entry.note.orEmpty()) }
   // Title shows the entry's reverse-geocoded location, resolved asynchronously
-  val title by produceState("Locating…", entry) { value = geocodeEntry(entry) ?: "No location" }
+  val title by rememberGeocodedTitle(entry)
   // Faded labels so the resting (placeholder-position) label reads as a hint, dimmer than
   // input text
   val fieldColors =

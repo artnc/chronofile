@@ -119,11 +119,9 @@ fun aggregateEntries(
               mapOf(midnightBeforeStart to (endTime - startTime))
             }
 
-          when (aggregation) {
-            Aggregation.DAY -> pieces
-            Aggregation.DAY_OF_WEEK -> pieces.mapKeys { getDayOfWeek(it.key).value.toLong() }
-            Aggregation.TOTAL -> error("unreachable")
-          }
+          if (aggregation == Aggregation.DAY_OF_WEEK)
+            pieces.mapKeys { getDayOfWeek(it.key).value.toLong() }
+          else pieces
         }
         Aggregation.TOTAL -> mapOf(0L to (endTime - startTime))
       }
@@ -131,8 +129,8 @@ fun aggregateEntries(
     // Record slices
     val slice = if (grouped) config.getActivityGroup(entry.activity) else entry.activity
     bucketIncrements.forEach { (bucket, increment) ->
-      val bucketGractivities = buckets.getOrPut(bucket) { mutableMapOf() }
-      bucketGractivities[slice] = bucketGractivities.getOrDefault(slice, 0) + increment
+      val bucketSlices = buckets.getOrPut(bucket) { mutableMapOf() }
+      bucketSlices[slice] = bucketSlices.getOrDefault(slice, 0) + increment
       sliceMap[slice] = sliceMap.getOrDefault(slice, 0) + increment
     }
     endTime = startTime

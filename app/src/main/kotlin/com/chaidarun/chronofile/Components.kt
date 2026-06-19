@@ -2,18 +2,28 @@
 
 package com.chaidarun.chronofile
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,4 +96,45 @@ fun AppRadio(selected: Boolean, onClick: () -> Unit, label: String, modifier: Mo
     Spacer(Modifier.width(4.dp))
     Text(label, color = Color.White, style = MaterialTheme.typography.bodyMedium)
   }
+}
+
+/** Material 3 top-app-bar colors shared by every screen: white content on the ColorPrimary bar */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun appTopAppBarColors() =
+  TopAppBarDefaults.topAppBarColors(
+    actionIconContentColor = Color.White,
+    containerColor = ColorPrimary,
+    navigationIconContentColor = Color.White,
+    titleContentColor = Color.White,
+  )
+
+/**
+ * Scaffold for the back-arrow screens (Chart, Editor, Earth): a [title], an up-button wired to
+ * [onNavigateUp], optional [actions], and the app's dark background
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppScaffold(
+  title: String,
+  onNavigateUp: () -> Unit,
+  actions: @Composable RowScope.() -> Unit = {},
+  content: @Composable (PaddingValues) -> Unit,
+) {
+  Scaffold(
+    topBar = {
+      TopAppBar(
+        title = { Text(title) },
+        navigationIcon = {
+          IconButton(onClick = onNavigateUp) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Up")
+          }
+        },
+        actions = actions,
+        colors = appTopAppBarColors(),
+      )
+    },
+    containerColor = ColorPrimaryDark,
+    content = content,
+  )
 }

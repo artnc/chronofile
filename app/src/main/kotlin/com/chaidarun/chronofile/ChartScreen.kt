@@ -4,7 +4,6 @@ package com.chaidarun.chronofile
 
 import android.util.Log
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,24 +11,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -83,25 +75,7 @@ fun ChartScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
     }
   }
 
-  Scaffold(
-    topBar = {
-      TopAppBar(
-        title = { Text("Analytics") },
-        navigationIcon = {
-          IconButton(onClick = onNavigateUp) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Up")
-          }
-        },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = ColorPrimary,
-            titleContentColor = Color.White,
-            navigationIconContentColor = Color.White,
-          ),
-      )
-    },
-    containerColor = ColorPrimaryDark,
-  ) { padding ->
+  AppScaffold(title = "Analytics", onNavigateUp = onNavigateUp) { padding ->
     Column(modifier = Modifier.fillMaxSize().padding(padding)) {
       val pagerState =
         rememberPagerState(initialPage = ChartTab.PIE.ordinal) { ChartTab.entries.size }
@@ -212,14 +186,6 @@ private fun setPresetRange(viewModel: MainViewModel, history: History, presetRan
 }
 
 @Composable
-private fun Modifier.clickableNoRipple(onClick: () -> Unit): Modifier =
-  clickable(
-    interactionSource = remember { MutableInteractionSource() },
-    indication = null,
-    onClick = onClick,
-  )
-
-@Composable
 private fun DateRangeBar(
   chartConfig: ChartConfig,
   onPickStart: () -> Unit,
@@ -243,7 +209,9 @@ private fun DateRangeBar(
     Text(
       "to",
       color = Color.White,
-      modifier = Modifier.padding(horizontal = 12.dp).clickableNoRipple(onPickPreset),
+      modifier =
+        Modifier.padding(horizontal = 12.dp)
+          .clickable(interactionSource = null, indication = null, onClick = onPickPreset),
     )
     Button(
       onClick = onPickEnd,

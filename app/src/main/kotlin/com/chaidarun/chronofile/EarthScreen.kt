@@ -18,18 +18,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -321,7 +313,6 @@ private fun clampOffset(
   return Offset(x, y)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -520,25 +511,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
       label = "earthFade",
     )
 
-  Scaffold(
-    topBar = {
-      TopAppBar(
-        title = { Text("Map") },
-        navigationIcon = {
-          IconButton(onClick = onNavigateUp) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Up")
-          }
-        },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = ColorPrimary,
-            navigationIconContentColor = Color.White,
-            titleContentColor = Color.White,
-          ),
-      )
-    },
-    containerColor = ColorPrimaryDark,
-  ) { padding ->
+  AppScaffold(title = "Map", onNavigateUp = onNavigateUp) { padding ->
     Box(modifier = Modifier.fillMaxSize().padding(padding)) {
       Canvas(
         modifier =
@@ -644,8 +617,7 @@ fun EarthScreen(viewModel: MainViewModel, onNavigateUp: () -> Unit) {
 
   selected?.let { entries ->
     // Reverse-geocode the newest entry's coordinates to label the cluster by location
-    val title by
-      produceState("Locating…", entries) { value = geocodeEntry(entries.first()) ?: "No location" }
+    val title by rememberGeocodedTitle(entries.first())
     AlertDialog(
       onDismissRequest = { selected = null },
       title = { Text(title, style = MaterialTheme.typography.bodyLarge) },

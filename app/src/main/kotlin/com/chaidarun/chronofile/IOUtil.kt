@@ -9,7 +9,6 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import java.io.FileOutputStream
-import kotlin.system.measureTimeMillis
 import kotlin.time.measureTimedValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -87,47 +86,49 @@ object IOUtil {
   fun writeFile(filename: String, text: String) {
     ioScope.launch {
       Log.i(TAG, "Writing $filename")
-      var isSuccess = false
-      val elapsedMs = measureTimeMillis {
-        val storageDir = getStorageDir() ?: return@launch
-        var documentFile = storageDir.findFile(filename)
-        when {
-          documentFile == null -> {
-            documentFile =
-              storageDir.createFile(
-                when {
-                  filename.endsWith(".json") -> "application/json"
-                  filename.endsWith(".tsv") -> "text/tab-separated-values"
-                  else -> "text/plain"
-                },
-                filename,
-              )
-            if (documentFile == null) {
-              Log.i(TAG, "Failed to create $filename")
+      val (isSuccess, elapsed) =
+        measureTimedValue {
+          val storageDir = getStorageDir() ?: return@launch
+          var documentFile = storageDir.findFile(filename)
+          when {
+            documentFile == null -> {
+              documentFile =
+                storageDir.createFile(
+                  when {
+                    filename.endsWith(".json") -> "application/json"
+                    filename.endsWith(".tsv") -> "text/tab-separated-values"
+                    else -> "text/plain"
+                  },
+                  filename,
+                )
+              if (documentFile == null) {
+                Log.i(TAG, "Failed to create $filename")
+                return@launch
+              }
+              Log.i(TAG, "Created $filename")
+            }
+            readDocumentFile(documentFile) == text -> {
+              Log.i(TAG, "File $filename unchanged; skipping write")
               return@launch
             }
-            Log.i(TAG, "Created $filename")
           }
-          readDocumentFile(documentFile) == text -> {
-            Log.i(TAG, "File $filename unchanged; skipping write")
-            return@launch
-          }
-        }
 
-        // Google's docs are somewhat buggy in specifying a mode of "w" instead of "wt". Without "t"
-        // (truncate), writing the byte "C" to a file containing "AB" can result in "CB"
-        // https://developer.android.com/training/data-storage/shared/documents-files#edit
-        // https://developer.android.com/reference/android/content/ContentResolver#openFileDescriptor(android.net.Uri,%20java.lang.String,%20android.os.CancellationSignal)
-        try {
-          App.ctx.contentResolver.openFileDescriptor(documentFile.uri, "wt")?.use {
-            FileOutputStream(it.fileDescriptor).use { it.write(text.toByteArray()) }
-            isSuccess = true
+          // Google's docs are somewhat buggy in specifying a mode of "w" instead of "wt". Without
+          // "t" (truncate), writing the byte "C" to a file containing "AB" can result in "CB"
+          // https://developer.android.com/training/data-storage/shared/documents-files#edit
+          // https://developer.android.com/reference/android/content/ContentResolver#openFileDescriptor(android.net.Uri,%20java.lang.String,%20android.os.CancellationSignal)
+          // Success only when the descriptor actually opened; a null fd means failure, so we toast
+          try {
+            App.ctx.contentResolver.openFileDescriptor(documentFile.uri, "wt")?.use {
+              FileOutputStream(it.fileDescriptor).use { it.write(text.toByteArray()) }
+              true
+            } ?: false
+          } catch (e: Exception) {
+            e.printStackTrace()
+            false
           }
-        } catch (e: Exception) {
-          e.printStackTrace()
         }
-      }
-      Log.i(TAG, "Wrote $filename in $elapsedMs ms")
+      Log.i(TAG, "Wrote $filename in ${elapsed.inWholeMilliseconds} ms")
       if (!isSuccess) {
         App.toast("Failed to save $filename :(")
       }

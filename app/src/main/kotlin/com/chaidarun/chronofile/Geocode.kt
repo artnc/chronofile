@@ -3,6 +3,9 @@
 package com.chaidarun.chronofile
 
 import android.location.Geocoder
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.produceState
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -40,3 +43,11 @@ suspend fun geocodeEntry(entry: Entry): String? {
     ?.replace(addressSuffixRegex, "")
     ?.also { geocodeCache[latLon] = it }
 }
+
+/**
+ * Reverse-geocodes [entry]'s coordinates into a dialog title, showing "Locating…" until it resolves
+ * and "No location" if it can't be resolved
+ */
+@Composable
+fun rememberGeocodedTitle(entry: Entry): State<String> =
+  produceState("Locating…", entry) { value = geocodeEntry(entry) ?: "No location" }

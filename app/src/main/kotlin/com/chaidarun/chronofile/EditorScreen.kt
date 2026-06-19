@@ -14,17 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,48 +38,31 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(initialText: String, onSave: (String) -> Unit, onNavigateUp: () -> Unit) {
   var text by remember { mutableStateOf(initialText) }
-  Scaffold(
-    topBar = {
-      TopAppBar(
-        title = { Text("Settings") },
-        navigationIcon = {
-          IconButton(onClick = onNavigateUp) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Up")
-          }
-        },
-        actions = {
-          IconButton(
-            onClick = {
-              onSave(text)
-              Log.i(TAG, "Edited config file")
-              onNavigateUp()
-            }
-          ) {
-            Icon(Icons.Filled.Check, contentDescription = "Save")
-          }
-          IconButton(
-            onClick = {
-              Log.i(TAG, "Canceled config file edit")
-              onNavigateUp()
-            }
-          ) {
-            Icon(Icons.Filled.Close, contentDescription = "Cancel")
-          }
-        },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = ColorPrimary,
-            titleContentColor = Color.White,
-            actionIconContentColor = Color.White,
-            navigationIconContentColor = Color.White,
-          ),
-      )
+  AppScaffold(
+    title = "Settings",
+    onNavigateUp = onNavigateUp,
+    actions = {
+      IconButton(
+        onClick = {
+          onSave(text)
+          Log.i(TAG, "Edited config file")
+          onNavigateUp()
+        }
+      ) {
+        Icon(Icons.Filled.Check, contentDescription = "Save")
+      }
+      IconButton(
+        onClick = {
+          Log.i(TAG, "Canceled config file edit")
+          onNavigateUp()
+        }
+      ) {
+        Icon(Icons.Filled.Close, contentDescription = "Cancel")
+      }
     },
-    containerColor = ColorPrimaryDark,
   ) { padding ->
     Column(
       modifier = Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding).imePadding()
