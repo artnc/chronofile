@@ -51,9 +51,10 @@ private fun formatCorr(r: Double): String {
 }
 
 /**
- * Draws [matrix] as a square grid of cells colored from dark teal (the lowest correlation) through
- * to light green (the highest), each labeled with its value, with activity names down the left edge
- * and the same names rotated 90° clockwise along the top edge
+ * Draws [matrix] as a square grid of cells colored on a diverging scale from light red (the most
+ * negative correlation) through dark teal (zero) to light green (the most positive), each labeled
+ * with its value, with activity names down the left edge and the same names rotated 90° clockwise
+ * along the top edge
  */
 private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface: Typeface) {
   val n = matrix.labels.size
@@ -95,8 +96,9 @@ private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface:
   val labelBaseline = (fm.ascent + fm.descent) / 2
   val canvas = drawContext.canvas.nativeCanvas
 
-  // Scale the colors to the actual off-diagonal correlation range; the diagonal's trivial 1.00
-  // self-correlations are excluded so they don't peg the maximum (they clamp to the greenest cell)
+  // Find the off-diagonal correlation extremes to scale each side of the diverging color ramp; the
+  // diagonal's trivial 1.00 self-correlations are excluded so they don't peg the positive maximum
+  // (they clamp to the greenest cell)
   var minR = Double.POSITIVE_INFINITY
   var maxR = Double.NEGATIVE_INFINITY
   for (i in 0 until n) {
@@ -107,7 +109,12 @@ private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface:
       if (r > maxR) maxR = r
     }
   }
-  val span = maxR - minR
+  // Anchor zero at the dark-teal background; scale positives toward green by the largest positive
+  // and negatives toward red by the largest negative, each side independently filling its full
+  // ramp.
+  // Precompute reciprocals so the per-cell loop multiplies (and skips the zero-guard) instead
+  val invMaxPos = if (maxR > 0.0) (1.0 / maxR) else 0.0
+  val invMaxNeg = if (minR < 0.0) (1.0 / -minR) else 0.0
 
   // Draw cells: fill by correlation, then overlay the value in a contrasting color (NaN = blank)
   for (i in 0 until n) {
@@ -116,10 +123,11 @@ private fun DrawScope.drawCorrelationMatrix(matrix: CorrelationMatrix, typeface:
       if (r.isNaN()) continue
       val left = gridLeft + j * cell
       val top = gridTop + i * cell
-      val fraction = if (span > 0) ((r - minR) / span).coerceIn(0.0, 1.0).toFloat() else 0.5f
-      val color = lerp(ColorPrimaryDark, ColorAccent, fraction)
+      val positive = r >= 0
+      val fraction = (if (positive) r * invMaxPos else -r * invMaxNeg).coerceIn(0.0, 1.0).toFloat()
+      val color = lerp(ColorPrimaryDark, if (positive) ColorAccent else ColorNegative, fraction)
       drawRect(color, topLeft = Offset(left, top), size = Size(cell, cell))
-      // White text on the darker (negative) cells, dark text on the lighter green (positive) ones
+      // White text on the darker teal/red cells, dark text on the lighter green (positive) ones
       valuePaint.color = (if (color.luminance() > 0.4f) ColorPrimaryDark else Color.White).toArgb()
       canvas.drawText(formatCorr(r), left + cell / 2, top + cell / 2 - valueBaseline, valuePaint)
     }

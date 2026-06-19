@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.sp
 val ColorPrimary = Color(0xFF284759)
 val ColorPrimaryDark = Color(0xFF1C3645)
 val ColorAccent = Color(0xFF81C784)
+/** Light red (Material red 300) paired with the green-300 [ColorAccent] for diverging scales */
+val ColorNegative = Color(0xFFE57373)
 val ColorFadedText = Color(0xFF3B5A6B)
 
 /** Dark-theme secondary-text emphasis, matching the old TextAppearance.AppCompat.Medium default */
