@@ -2,8 +2,21 @@
 
 package com.chaidarun.chronofile
 
+import android.content.Context
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
+import android.view.View
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.toColorInt
+import info.appdev.charting.components.Legend
 import kotlin.math.sqrt
 
 /** D3.js schemeTableau10 and schemeDark2 */
@@ -48,22 +61,22 @@ enum class Aggregation {
  * Determines the date range that should be used to render each chart.
  *
  * This takes into account the earliest recorded entry, the last recorded entry, the user-selected
- * start date, the user-selected end date, and the graph metric.
+ * start date, the user-selected end date, and the chart metric.
  */
-fun getChartRange(history: History, graphConfig: GraphConfig): Pair<Long, Long> {
+fun getChartRange(history: History, chartConfig: ChartConfig): Pair<Long, Long> {
   val historyEnd = history.currentActivityStartTime
   val historyStart = history.entries.getOrNull(0)?.startTime ?: historyEnd
-  val pickerStart = graphConfig.startTime ?: 0
+  val pickerStart = chartConfig.startTime ?: 0
   val pickerEnd =
-    if (graphConfig.endTime == null) {
+    if (chartConfig.endTime == null) {
       Long.MAX_VALUE
     } else {
       // Must append a day's worth of seconds to the range to make it inclusive
-      graphConfig.endTime + DAY_SECONDS
+      chartConfig.endTime + DAY_SECONDS
     }
   val rangeEnd = minOf(historyEnd, pickerEnd)
   var rangeStart = maxOf(historyStart, pickerStart)
-  if (graphConfig.metric == Metric.AVERAGE) {
+  if (chartConfig.metric == Metric.AVERAGE) {
     rangeStart = rangeEnd - (rangeEnd - rangeStart) / DAY_SECONDS * DAY_SECONDS
   }
   return Pair(rangeStart, rangeEnd)
@@ -73,12 +86,12 @@ fun getChartRange(history: History, graphConfig: GraphConfig): Pair<Long, Long> 
 fun aggregateEntries(
   config: Config,
   history: History,
-  graphConfig: GraphConfig,
+  chartConfig: ChartConfig,
   rangeStart: Long,
   rangeEnd: Long,
   aggregation: Aggregation,
 ): Pair<Map<Long, Map<String, Long>>, List<Pair<String, Long>>> {
-  val grouped = graphConfig.grouped
+  val grouped = chartConfig.grouped
   var endTime = rangeEnd
   val buckets = mutableMapOf<Long, MutableMap<String, Long>>()
   val sliceMap = mutableMapOf<String, Long>()
@@ -149,8 +162,8 @@ fun aggregateEntries(
 }
 
 /**
- * Counts each activity (or group, when [GraphConfig.grouped]) over entries starting within
- * [rangeStart, rangeEnd), returned as (slice, count) pairs sorted by descending count. Per [GraphConfig.countMetric]
+ * Counts each activity (or group, when [ChartConfig.grouped]) over entries starting within
+ * [rangeStart, rangeEnd), returned as (slice, count) pairs sorted by descending count. Per [ChartConfig.countMetric]
  * the count is either the raw number of recordings ([CountMetric.OCCURRENCES]) or the number of
  * distinct local days on which it was recorded ([CountMetric.UNIQUE_DAYS]). Either way an entry is
  * attributed to the single day it started on.
@@ -158,18 +171,18 @@ fun aggregateEntries(
 fun activityCounts(
   config: Config,
   history: History,
-  graphConfig: GraphConfig,
+  chartConfig: ChartConfig,
   rangeStart: Long,
   rangeEnd: Long,
 ): List<Pair<String, Int>> {
-  val uniqueDays = graphConfig.countMetric == CountMetric.UNIQUE_DAYS
+  val uniqueDays = chartConfig.countMetric == CountMetric.UNIQUE_DAYS
   // Per slice, collect a set of distinct keys then count them: for UNIQUE_DAYS the key is the
   // entry's start-day midnight (so same-day recordings collapse to one), and for OCCURRENCES it's
   // the entry's own start time, which is unique per entry so every recording counts once
   val keySets = mutableMapOf<String, MutableSet<Long>>()
   for (entry in history.entries) {
     if (entry.startTime < rangeStart || entry.startTime >= rangeEnd) continue
-    val slice = if (graphConfig.grouped) config.getActivityGroup(entry.activity) else entry.activity
+    val slice = if (chartConfig.grouped) config.getActivityGroup(entry.activity) else entry.activity
     val key = if (uniqueDays) getPreviousMidnight(entry.startTime) else entry.startTime
     keySets.getOrPut(slice) { mutableSetOf() }.add(key)
   }
@@ -211,12 +224,12 @@ fun pearson(x: List<Double>, y: List<Double>): Double {
 fun buildCorrelationMatrix(
   config: Config,
   history: History,
-  graphConfig: GraphConfig,
+  chartConfig: ChartConfig,
   rangeStart: Long,
   rangeEnd: Long,
 ): CorrelationMatrix {
   val (buckets, sliceList) =
-    aggregateEntries(config, history, graphConfig, rangeStart, rangeEnd, Aggregation.DAY)
+    aggregateEntries(config, history, chartConfig, rangeStart, rangeEnd, Aggregation.DAY)
   val labels = sliceList.map { it.first }.filter { it != OTHER_SLICE_NAME }
   val days = buckets.keys.sorted()
   val series = labels.map { label -> days.map { (buckets[it]?.get(label) ?: 0L).toDouble() } }
@@ -225,4 +238,106 @@ fun buildCorrelationMatrix(
       DoubleArray(labels.size) { j -> if (i == j) 1.0 else pearson(series[i], series[j]) }
     }
   return CorrelationMatrix(labels, values)
+}
+
+// ─── Shared chart UI helpers ──────────────────────────────────────────────────────
+
+@Composable
+fun chartTypeface(): Typeface = remember { ResourcesCompat.getFont(App.ctx, R.font.exo2_regular)!! }
+
+/** Apply the chart legend styling shared by the area and radar charts */
+fun Legend.applyStyle(font: Typeface) {
+  isWordWrapEnabled = true
+  textColor = CHART_LABEL_COLOR
+  textSize = CHART_LABEL_FONT_SIZE
+  typeface = font
+  xEntrySpace = 15f
+}
+
+/**
+ * Toggles activity grouping, warning via toast when grouping is enabled but no groups exist yet so
+ * the user knows why the chart looks unchanged
+ */
+private fun toggleGrouping(viewModel: MainViewModel, config: Config?, grouped: Boolean) {
+  if (grouped && config?.hasGroups != true) {
+    App.toast("You haven't defined any groups yet in Settings!")
+  }
+  viewModel.dispatch(Action.SetChartGrouping(grouped))
+}
+
+/** The "Group activities" checkbox shared by every chart's controls row */
+@Composable
+fun GroupActivitiesCheckbox(
+  viewModel: MainViewModel,
+  config: Config?,
+  chartConfig: ChartConfig,
+  modifier: Modifier = Modifier,
+) {
+  AppCheckbox(
+    checked = chartConfig.grouped,
+    onCheckedChange = { toggleGrouping(viewModel, config, it) },
+    label = "Group activities",
+    modifier = modifier,
+  )
+}
+
+/** Trim [text] with a trailing ellipsis until it fits within [maxW] when measured by [paint] */
+fun fit(paint: Paint, text: String, maxW: Float): String {
+  if (paint.measureText(text) <= maxW) return text
+  var s = text
+  while (s.isNotEmpty() && paint.measureText("$s…") > maxW) s = s.dropLast(1)
+  return "$s…"
+}
+
+/**
+ * Canvas-chart counterpart to [ChartScaffold]: caches [compute]'s result, recomputing only when the
+ * inputs change, and returns null until data is ready (config/history loaded and the range
+ * non-empty)
+ */
+@Composable
+fun <T> rememberChartData(
+  config: Config?,
+  history: History?,
+  chartConfig: ChartConfig,
+  compute: (config: Config, history: History, rangeStart: Long, rangeEnd: Long) -> T,
+): T? =
+  remember(config, history, chartConfig) {
+    if (config == null || history == null) return@remember null
+    val (rangeStart, rangeEnd) = getChartRange(history, chartConfig)
+    if (rangeEnd - rangeStart <= 0) return@remember null
+    compute(config, history, rangeStart, rangeEnd)
+  }
+
+/**
+ * Shared envelope for the AndroidView-based chart tabs (pie, area, radar): hosts the chart
+ * [factory] view above a [controls] row and runs [render] only once data is ready (config/history
+ * loaded and the selected range non-empty), handing it the resolved non-null values plus the range
+ * bounds
+ */
+@Composable
+fun <T : View> ChartScaffold(
+  config: Config?,
+  history: History?,
+  chartConfig: ChartConfig,
+  chartPadding: Modifier,
+  factory: (Context) -> T,
+  controls: @Composable () -> Unit,
+  render: (chart: T, config: Config, history: History, rangeStart: Long, rangeEnd: Long) -> Unit,
+) {
+  Column(modifier = Modifier.fillMaxSize()) {
+    AndroidView(
+      modifier = Modifier.fillMaxWidth().weight(1f).then(chartPadding),
+      factory = factory,
+      update = { chart ->
+        if (config == null || history == null) return@AndroidView
+        val (rangeStart, rangeEnd) = getChartRange(history, chartConfig)
+        if (rangeEnd - rangeStart <= 0) {
+          App.toast("No data to show!")
+          return@AndroidView
+        }
+        render(chart, config, history, rangeStart, rangeEnd)
+      },
+    )
+    controls()
+  }
 }

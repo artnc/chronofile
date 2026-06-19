@@ -33,17 +33,17 @@ sealed class Action {
 
   data class SetConfigFromFile(val config: Config) : Action()
 
-  data class SetGraphCountMetric(val countMetric: CountMetric) : Action()
+  data class SetChartCountMetric(val countMetric: CountMetric) : Action()
 
-  data class SetGraphGrouping(val grouped: Boolean) : Action()
+  data class SetChartGrouping(val grouped: Boolean) : Action()
 
-  data class SetGraphMetric(val metric: Metric) : Action()
+  data class SetChartMetric(val metric: Metric) : Action()
 
-  data class SetGraphRangeEnd(val timestamp: Long) : Action()
+  data class SetChartRangeEnd(val timestamp: Long) : Action()
 
-  data class SetGraphRangeStart(val timestamp: Long) : Action()
+  data class SetChartRangeStart(val timestamp: Long) : Action()
 
-  data class SetGraphStacking(val stacked: Boolean) : Action()
+  data class SetChartStacking(val stacked: Boolean) : Action()
 
   data class SetHistory(val history: History) : Action()
 
@@ -54,7 +54,7 @@ sealed class Action {
 data class State(
   val config: Config? = null,
   val history: History? = null,
-  val graphConfig: GraphConfig = GraphConfig(),
+  val chartConfig: ChartConfig = ChartConfig(),
   val searchQuery: String? = null,
 )
 
@@ -91,27 +91,27 @@ private fun reduce(state: State, action: Action): State =
           this
         }
       is Action.SetConfigFromFile -> copy(config = action.config)
-      is Action.SetGraphCountMetric ->
-        copy(graphConfig = graphConfig.copy(countMetric = action.countMetric))
-      is Action.SetGraphGrouping -> copy(graphConfig = graphConfig.copy(grouped = action.grouped))
-      is Action.SetGraphMetric -> copy(graphConfig = graphConfig.copy(metric = action.metric))
-      is Action.SetGraphRangeEnd -> {
+      is Action.SetChartCountMetric ->
+        copy(chartConfig = chartConfig.copy(countMetric = action.countMetric))
+      is Action.SetChartGrouping -> copy(chartConfig = chartConfig.copy(grouped = action.grouped))
+      is Action.SetChartMetric -> copy(chartConfig = chartConfig.copy(metric = action.metric))
+      is Action.SetChartRangeEnd -> {
         val ts = action.timestamp
-        val clamped = ts < (graphConfig.startTime ?: 0)
+        val clamped = ts < (chartConfig.startTime ?: 0)
         copy(
-          graphConfig =
-            graphConfig.copy(endTime = ts, startTime = if (clamped) ts else graphConfig.startTime)
+          chartConfig =
+            chartConfig.copy(endTime = ts, startTime = if (clamped) ts else chartConfig.startTime)
         )
       }
-      is Action.SetGraphRangeStart -> {
+      is Action.SetChartRangeStart -> {
         val ts = action.timestamp
-        val clamped = ts > (graphConfig.endTime ?: Long.MAX_VALUE)
+        val clamped = ts > (chartConfig.endTime ?: Long.MAX_VALUE)
         copy(
-          graphConfig =
-            graphConfig.copy(startTime = ts, endTime = if (clamped) ts else graphConfig.endTime)
+          chartConfig =
+            chartConfig.copy(startTime = ts, endTime = if (clamped) ts else chartConfig.endTime)
         )
       }
-      is Action.SetGraphStacking -> copy(graphConfig = graphConfig.copy(stacked = action.stacked))
+      is Action.SetChartStacking -> copy(chartConfig = chartConfig.copy(stacked = action.stacked))
       is Action.SetHistory -> copy(history = action.history)
       is Action.SetSearchQuery -> copy(searchQuery = action.query)
     }

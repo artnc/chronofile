@@ -12,7 +12,7 @@ enum class CountMetric {
   UNIQUE_DAYS,
 }
 
-data class GraphConfig(
+data class ChartConfig(
   val countMetric: CountMetric = CountMetric.UNIQUE_DAYS,
   val grouped: Boolean = true,
   val stacked: Boolean = true,

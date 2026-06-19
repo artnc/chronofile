@@ -12,7 +12,7 @@ data class Config(
   /**
    * Map of arbitrary group names to (mutually exclusive) lists of activities.
    *
-   * This is used to create buckets of activities to show in graphs.
+   * This is used to create buckets of activities to show in charts.
    */
   @SerialName("activityGroups")
   private val unnormalizedActivityGroups: Map<String, List<String>>? = null,

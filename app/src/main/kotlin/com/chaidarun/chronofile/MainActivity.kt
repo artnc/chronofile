@@ -27,11 +27,11 @@ import kotlinx.serialization.Serializable
 /**
  * Type-safe navigation destinations; see [androidx.navigation.compose.composable] reified overload
  */
+@Serializable data object Chart
+
 @Serializable data object Earth
 
 @Serializable data object Editor
-
-@Serializable data object Graph
 
 @Serializable data object Timeline
 
@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
               refreshTick = refreshTick,
               onOpenEarth = { navController.navigate(Earth) },
               onOpenSettings = { navController.navigate(Editor) },
-              onOpenStats = { navController.navigate(Graph) },
+              onOpenStats = { navController.navigate(Chart) },
             )
           }
           composable<Earth> {
@@ -80,8 +80,8 @@ class MainActivity : ComponentActivity() {
               onNavigateUp = { navController.popBackStack() },
             )
           }
-          composable<Graph> {
-            GraphScreen(viewModel = viewModel, onNavigateUp = { navController.popBackStack() })
+          composable<Chart> {
+            ChartScreen(viewModel = viewModel, onNavigateUp = { navController.popBackStack() })
           }
         }
         nfcState?.let { nfc ->
