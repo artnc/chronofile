@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 
 private val COUNT_BAR_THICKNESS = 12.dp
 private val COUNT_BAR_GAP = 6.dp
-private val COUNT_CHART_PADDING = 8.dp
 
 @Composable
 fun CountChart(
@@ -46,15 +45,11 @@ fun CountChart(
       val n = counts?.size ?: 0
       val canvasHeight =
         maxOf(
-          COUNT_BAR_THICKNESS * n +
-            COUNT_BAR_GAP * (n - 1).coerceAtLeast(0) +
-            COUNT_CHART_PADDING * 2,
+          COUNT_BAR_THICKNESS * n + COUNT_BAR_GAP * (n - 1).coerceAtLeast(0) + CHART_PADDING * 2,
           maxHeight,
         )
       Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Canvas(
-          modifier = Modifier.fillMaxWidth().height(canvasHeight).padding(COUNT_CHART_PADDING)
-        ) {
+        Canvas(modifier = Modifier.fillMaxWidth().height(canvasHeight).padding(CHART_PADDING)) {
           counts?.let { drawCountChart(it, typeface) }
         }
       }

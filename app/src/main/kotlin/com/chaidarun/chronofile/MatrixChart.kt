@@ -37,7 +37,7 @@ fun MatrixChart(
       buildCorrelationMatrix(c, h, chartConfig, rangeStart, rangeEnd)
     }
   Column(modifier = Modifier.fillMaxSize()) {
-    Canvas(modifier = Modifier.fillMaxWidth().weight(1f).padding(8.dp)) {
+    Canvas(modifier = Modifier.fillMaxWidth().weight(1f).padding(CHART_PADDING)) {
       matrix?.let { drawCorrelationMatrix(it, typeface) }
     }
     GroupActivitiesCheckbox(viewModel, config, chartConfig, Modifier.fillMaxWidth().padding(16.dp))

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.toColorInt
@@ -47,6 +48,12 @@ val CHART_COLORS by lazy {
 const val CHART_LABEL_COLOR = Color.WHITE
 const val CHART_LABEL_FONT_SIZE = 12f
 const val OTHER_SLICE_NAME = "Other"
+
+/**
+ * Edge padding for the custom Canvas-based chart tabs (matrix, count), so they don't run flush to
+ * the viewport. The MPAndroidChart tabs supply their own insets via [ChartScaffold]'s chartPadding
+ */
+val CHART_PADDING = 16.dp
 
 /** Slices smaller than this will get bucketed into "Other" */
 private const val MIN_SLICE_PERCENT = 0.015
