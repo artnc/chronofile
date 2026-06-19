@@ -77,10 +77,13 @@ fun EditorScreen(initialText: String, onSave: (String) -> Unit, onNavigateUp: ()
             append("JSON")
           }
         }
-        append(
-          " config object below. Example:\n\n{\"activityGroups\":{\"Chores\":[\"Cook\"," +
-            "\"Laundry\"],\"Exercise\":[\"Football\",\"Yoga\"]}}"
-        )
+        append(" config object below. Example:\n\n")
+        withStyle(SpanStyle(fontFamily = FontFamily.Monospace)) {
+          append(
+            "{\"activityGroups\":{\"Chores\":[\"Cook\"," +
+              "\"Laundry\"],\"Exercise\":[\"Football\",\"Yoga\"]}}"
+          )
+        }
       }
       Text(
         instructions,
