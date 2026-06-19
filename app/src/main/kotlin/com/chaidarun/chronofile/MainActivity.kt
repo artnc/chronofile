@@ -146,11 +146,7 @@ class MainActivity : ComponentActivity() {
 
   companion object {
     private val NFC_INTENT_ACTIONS =
-      arrayOf(
-        NfcAdapter.ACTION_NDEF_DISCOVERED,
-        NfcAdapter.ACTION_TECH_DISCOVERED,
-        NfcAdapter.ACTION_TAG_DISCOVERED,
-      )
+      arrayOf(NfcAdapter.ACTION_NDEF_DISCOVERED, NfcAdapter.ACTION_TECH_DISCOVERED)
   }
 }
 
