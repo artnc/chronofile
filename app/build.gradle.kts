@@ -41,8 +41,8 @@ android {
     compileSdk = 37
     minSdk = 23
     targetSdk = 37
-    versionCode = 6
-    versionName = "1.1.1"
+    versionCode = 7
+    versionName = "1.2.0"
   }
 
   buildFeatures {
