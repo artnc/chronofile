@@ -62,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -236,7 +237,8 @@ fun TimelineScreen(
   LaunchedEffect(history, query) {
     if (query != null && history != null) {
       App.toast(
-        "${build.matchCount} results, ${formatDuration(build.matchSeconds, showDays = true, showMinutes = false)}"
+        "${build.matchCount} results, " +
+          formatDuration(build.matchSeconds, showDays = true, showMinutes = false)
       )
     }
   }
@@ -538,10 +540,17 @@ private fun InlineTextField(
 private fun Modifier.selectAllOnFocus(
   value: TextFieldValue,
   onValueChange: (TextFieldValue) -> Unit,
-): Modifier = onFocusChanged {
-  if (it.isFocused) {
-    onValueChange(value.copy(selection = TextRange(0, value.text.length)))
+): Modifier = composed {
+  var focused by remember { mutableStateOf(false) }
+  // Re-assert the selection one composition after focus is gained. Setting it synchronously inside
+  // onFocusChanged gets clobbered by the tap's place-cursor handler (and the IME) that run right
+  // after the focus event, so a deferred LaunchedEffect is what makes select-all actually stick
+  LaunchedEffect(focused) {
+    if (focused && value.text.isNotEmpty()) {
+      onValueChange(value.copy(selection = TextRange(0, value.text.length)))
+    }
   }
+  onFocusChanged { focused = it.isFocused }
 }
 
 /**
