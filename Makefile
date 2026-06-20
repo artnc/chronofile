@@ -29,7 +29,20 @@ log:
 
 .PHONY: release
 release:
-	echo '$(V)' | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo 'Usage: make release V=X.Y.Z'; exit 1; }
-	perl -i -pe 's/(versionCode = )(\d+)/$$1.($$2+1)/e; s/(versionName = ").*(")/$${1}$(V)$$2/' app/build.gradle.kts
+	echo '$(V)' | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$$' \
+	  || { echo 'Usage: make release V=X.Y.Z'; exit 1; }
+	perl -i -pe 's/(versionCode = )(\d+)/$$1.($$2+1)/e; \
+	  s/(versionName = ").*(")/$${1}$(V)$$2/' app/build.gradle.kts
 	git commit -am 'Release v$(V)'
 	git tag $(V)
+
+.PHONY: screenshots
+screenshots:
+	dest=fastlane/metadata/android/en-US/images/phoneScreenshots; \
+	rm -f $$dest/*.png; \
+	i=0; \
+	for src in $$(ls /tmp/attachments/*.png | sort); do \
+	  i=$$((i + 1)); \
+	  magick "$$src" -gravity North -chop 0x174 -gravity South -chop 0x126 \
+	    -strip "$$(printf '%s/%02d.png' "$$dest" "$$i")"; \
+	done
